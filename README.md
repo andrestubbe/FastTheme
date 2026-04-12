@@ -10,6 +10,8 @@
 
 FastTheme brings real Windows theming to Java applications: **Dark/Light Mode, Titlebar Styling, Window Opacity, and Display DPI** — all native, without replacing your Look-and-Feel.
 
+![FastTheme Terminal Demo](docs/screenshot.png)
+
 ```java
 // Quick Start — Native Window Styling
 FastThemeTerminal terminal = new FastThemeTerminal();

@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import javax.swing.text.*;
 
 public class FastThemeTerminal extends JFrame {
@@ -22,7 +23,7 @@ public class FastThemeTerminal extends JFrame {
     public native boolean setWindowIcon(long hwnd);
     
     static {
-        System.loadLibrary("titlebar_jni");
+        System.loadLibrary("FastTheme");
     }
     
     private JTextArea logArea;
@@ -53,6 +54,7 @@ public class FastThemeTerminal extends JFrame {
         logArea.setLineWrap(true);
         logArea.setWrapStyleWord(true);
         logArea.setEditable(false);
+        logArea.setFocusable(false);
         logArea.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
         // Dark scroll pane
@@ -68,6 +70,9 @@ public class FastThemeTerminal extends JFrame {
         panel.add(scrollPane, BorderLayout.CENTER);
         
         setContentPane(panel);
+        
+        // Set custom icon (white circle with black dot)
+        setIconImage(createWindowIcon());
         
         // Log initial info
         log("FastTheme Terminal v1.1");
@@ -112,6 +117,32 @@ public class FastThemeTerminal extends JFrame {
             }
         }
         return false;
+    }
+    
+    private BufferedImage createWindowIcon() {
+        int size = 32;
+        int center = size / 2;
+        int radius = 14;
+        int dotRadius = 4;
+        
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = image.createGraphics();
+        
+        // Transparent background
+        g2.setComposite(AlphaComposite.Clear);
+        g2.fillRect(0, 0, size, size);
+        g2.setComposite(AlphaComposite.SrcOver);
+        
+        // White circle
+        g2.setColor(Color.WHITE);
+        g2.fillOval(center - radius, center - radius, radius * 2, radius * 2);
+        
+        // Black dot in center
+        g2.setColor(Color.BLACK);
+        g2.fillOval(center - dotRadius, center - dotRadius, dotRadius * 2, dotRadius * 2);
+        
+        g2.dispose();
+        return image;
     }
     
     private void detectSystemValues() {

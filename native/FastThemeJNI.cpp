@@ -444,54 +444,19 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, 
 }
 
 JNIEXPORT jint JNICALL Java_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
-    DEVMODEA dm;
-    ZeroMemory(&dm, sizeof(dm));
+    // Use DEVMODE (not DEVMODEA) and C++11 {} initialization like FastTheme.cpp
+    DEVMODE dm = {};
     dm.dmSize = sizeof(dm);
     
-    // Get the primary display device name
-    DISPLAY_DEVICEA dd;
-    ZeroMemory(&dd, sizeof(dd));
-    dd.cb = sizeof(dd);
-    
-    // Try to get current settings for the primary monitor
+    // Get current settings for the primary monitor
     // ENUM_CURRENT_SETTINGS = -1 gives current settings, not registry settings
-    if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
         // Check if refresh rate field is valid using dmFields
         if (dm.dmFields & DM_DISPLAYFREQUENCY) {
             if (dm.dmDisplayFrequency > 0 && dm.dmDisplayFrequency < 1000) {
                 return dm.dmDisplayFrequency;
             }
         }
-    }
-    
-    // Fallback: try with device name
-    if (EnumDisplayDevicesA(NULL, 0, &dd, 0)) {
-        ZeroMemory(&dm, sizeof(dm));
-        dm.dmSize = sizeof(dm);
-        if (EnumDisplaySettingsA(dd.DeviceName, ENUM_CURRENT_SETTINGS, &dm)) {
-            if (dm.dmFields & DM_DISPLAYFREQUENCY) {
-                if (dm.dmDisplayFrequency > 0 && dm.dmDisplayFrequency < 1000) {
-                    return dm.dmDisplayFrequency;
-                }
-            }
-        }
-    }
-    
-    // Try all display devices
-    DWORD deviceNum = 0;
-    while (EnumDisplayDevicesA(NULL, deviceNum, &dd, 0)) {
-        if (dd.StateFlags & DISPLAY_DEVICE_ACTIVE) {
-            ZeroMemory(&dm, sizeof(dm));
-            dm.dmSize = sizeof(dm);
-            if (EnumDisplaySettingsA(dd.DeviceName, ENUM_CURRENT_SETTINGS, &dm)) {
-                if (dm.dmFields & DM_DISPLAYFREQUENCY) {
-                    if (dm.dmDisplayFrequency > 0 && dm.dmDisplayFrequency < 1000) {
-                        return dm.dmDisplayFrequency;
-                    }
-                }
-            }
-        }
-        deviceNum++;
     }
     
     return 60; // Default fallback

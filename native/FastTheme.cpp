@@ -1,13 +1,105 @@
-#include <jni.h>
+#include "FastTheme.h"
 #include <windows.h>
+#include <dwmapi.h>
 #include <shellscalingapi.h>
+#include <stdio.h>
 
-#pragma comment(lib, "shcore.lib")
 #pragma comment(lib, "user32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "dwmapi.lib")
+#pragma comment(lib, "shcore.lib")
+#pragma comment(lib, "advapi32.lib")
 
-extern "C" {
-    #include "fasttheme_FastTheme.h"
+// DWM constants for Windows 11 titlebar styling
+#ifndef DWMWA_CAPTION_COLOR
+#define DWMWA_CAPTION_COLOR 35
+#endif
+#ifndef DWMWA_TEXT_COLOR
+#define DWMWA_TEXT_COLOR 36
+#endif
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// Helper function to get HWND from AWT Component
+HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
+    JAWT awt;
+    JAWT_DrawingSurface* ds = NULL;
+    JAWT_DrawingSurfaceInfo* dsi = NULL;
+    HWND hwnd = NULL;
+    
+    awt.version = JAWT_VERSION_9;
+    
+    if (!JAWT_GetAWT(env, &awt)) {
+        return NULL;
+    }
+    
+    if (awt.GetDrawingSurface == NULL) {
+        return NULL;
+    }
+    
+    ds = awt.GetDrawingSurface(env, component);
+    if (ds == NULL) {
+        return NULL;
+    }
+    
+    if (ds->GetDrawingSurfaceInfo == NULL) {
+        awt.FreeDrawingSurface(ds);
+        return NULL;
+    }
+    
+    jint lock = ds->Lock(ds);
+    if ((lock & JAWT_LOCK_ERROR) != 0) {
+        awt.FreeDrawingSurface(ds);
+        return NULL;
+    }
+    
+    dsi = ds->GetDrawingSurfaceInfo(ds);
+    ds->Unlock(ds);
+    
+    if (dsi == NULL) {
+        awt.FreeDrawingSurface(ds);
+        return NULL;
+    }
+    
+    JAWT_Win32DrawingSurfaceInfo* win32Info = (JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo;
+    if (win32Info != NULL) {
+        hwnd = win32Info->hwnd;
+    }
+    
+    ds->FreeDrawingSurfaceInfo(dsi);
+    awt.FreeDrawingSurface(ds);
+    
+    return hwnd;
 }
+
+// Get HWND from Window - walks up to find the real frame window
+HWND GetHwndFromWindow(JNIEnv* env, jobject window) {
+    HWND hwnd = GetHwndFromComponent(env, window);
+    if (hwnd != NULL) {
+        HWND parent = GetParent(hwnd);
+        while (parent != NULL) {
+            char className[256];
+            GetClassNameA(parent, className, sizeof(className));
+            if (strstr(className, "SunAwtFrame") != NULL) {
+                return parent;
+            }
+            parent = GetParent(parent);
+        }
+    }
+    return hwnd;
+}
+
+// ============================================================================
+// FASTTHEME DISPLAY MONITORING API
+// ============================================================================
 
 static JavaVM* g_jvm = nullptr;
 static jobject g_themeObj = nullptr;
@@ -17,233 +109,58 @@ static jmethodID g_notifyInitialStateMethodId = nullptr;
 static HWND g_hwnd = nullptr;
 static DWORD g_threadId = 0;
 
-// Helper to check if Windows is in dark mode
-static bool IsDarkModeEnabled();
+static int lastWidth = 0;
+static int lastHeight = 0;
+static int lastDpi = 96;
+static bool lastTheme = false;
 
 static bool IsDarkModeEnabled() {
     HKEY hKey;
     DWORD value = 0;
-    DWORD size = sizeof(value);
+    DWORD dataSize = sizeof(value);
     
-    LONG openResult = RegOpenKeyExA(HKEY_CURRENT_USER, 
-        "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 
-        0, KEY_READ, &hKey);
-    
-    if (openResult == ERROR_SUCCESS) {
-        LONG queryResult = RegQueryValueExA(hKey, "AppsUseLightTheme", nullptr, nullptr, 
-            (LPBYTE)&value, &size);
+    if (RegOpenKeyExA(HKEY_CURRENT_USER,
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        if (RegQueryValueExA(hKey, "AppsUseLightTheme", NULL, NULL,
+            (LPBYTE)&value, &dataSize) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return (value == 0);
+        }
         RegCloseKey(hKey);
-        
-        if (queryResult == ERROR_SUCCESS) {
-            return value == 0; // 0 = dark mode, 1 = light mode
-        }
     }
-    return false; // Default to light if can't read
+    return false;
 }
 
-// Notify Java of theme change
-void notifyThemeJava() {
-    if (!g_jvm || !g_themeObj || !g_notifyThemeMethodId) return;
-
-    JNIEnv* env;
-    int getEnvStat = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_8);
-    bool didAttach = false;
-
-    if (getEnvStat == JNI_EDETACHED) {
-        if (g_jvm->AttachCurrentThread((void**)&env, nullptr) != 0) {
-            return;
-        }
-        didAttach = true;
-    } else if (getEnvStat == JNI_EVERSION) {
-        return;
-    }
-
-    bool isDark = IsDarkModeEnabled();
-    env->CallVoidMethod(g_themeObj, g_notifyThemeMethodId, isDark ? JNI_TRUE : JNI_FALSE);
-
-    if (didAttach) {
-        g_jvm->DetachCurrentThread();
-    }
-}
-
-// Call the Java listener when resolution or DPI changes
-void notifyJava(HWND hwnd, int overrideDpi = 0) {
-    if (!g_jvm || !g_themeObj || !g_notifyMethodId) return;
-
-    JNIEnv* env;
-    int getEnvStat = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_8);
-    bool didAttach = false;
-
-    if (getEnvStat == JNI_EDETACHED) {
-        if (g_jvm->AttachCurrentThread((void**)&env, nullptr) != 0) {
-            return; // Failed to attach
-        }
-        didAttach = true;
-    } else if (getEnvStat == JNI_EVERSION) {
-        return; // Version not supported
-    }
-
-    // Get actual DPI - use overrideDpi from WM_DPICHANGED if available, otherwise query current
-    int dpi = 96; // default 100%
-    if (overrideDpi > 0) {
-        // WM_DPICHANGED provides the new DPI in wParam - use it!
-        dpi = overrideDpi;
-    } else {
-        // Query current DPI from the monitor (for WM_DISPLAYCHANGE, etc.)
-        HMONITOR hMonitor = MonitorFromWindow(hwnd ? hwnd : GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
-        if (hMonitor) {
-            UINT dpiX = 96, dpiY = 96;
-            if (SUCCEEDED(GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
-                dpi = (int)dpiX;
-            }
-        }
-    }
-    
-    // Get actual resolution from EnumDisplaySettings (not GetSystemMetrics which returns virtual coordinates)
-    int width = 0, height = 0;
-    DEVMODE dm = {};
-    dm.dmSize = sizeof(dm);
-    if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
-        width = dm.dmPelsWidth;
-        height = dm.dmPelsHeight;
-    } else {
-        // Fallback to GetSystemMetrics
-        width = GetSystemMetrics(SM_CXSCREEN);
-        height = GetSystemMetrics(SM_CYSCREEN);
-    }
-
-    // Detect orientation from DEVMODE
-    int orientation = 0; // 0=LANDSCAPE, 1=PORTRAIT, 2=LANDSCAPE_FLIPPED, 3=PORTRAIT_FLIPPED
-    if (dm.dmFields & DM_DISPLAYORIENTATION) {
-        switch (dm.dmDisplayOrientation) {
-            case DMDO_DEFAULT: orientation = 0; break;
-            case DMDO_90: orientation = 1; break;
-            case DMDO_180: orientation = 2; break;
-            case DMDO_270: orientation = 3; break;
-        }
-    } else {
-        // Fallback: detect from width/height
-        orientation = (width > height) ? 0 : 1;
-    }
-
-    // Get refresh rate from DEVMODE
-    int refreshRate = 60; // default
-    if (dm.dmFields & DM_DISPLAYFREQUENCY) {
-        refreshRate = dm.dmDisplayFrequency;
-    }
-
-    env->CallVoidMethod(g_themeObj, g_notifyMethodId, width, height, dpi, orientation, refreshRate);
-
-    if (didAttach) {
-        g_jvm->DetachCurrentThread();
-    }
-}
-
-// Window Procedure for our invisible window
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_DISPLAYCHANGE:
-            notifyJava(hwnd, 0);
-            return 0;
-        case WM_DPICHANGED: {
-            // DPI scale is changing - Windows provides new DPI in HIWORD(wParam)
-            int newDpi = HIWORD(wParam);
-            
-            // REQUIRED: Must call SetWindowPos with the suggested rect from lParam
-            // This tells Windows we're handling the DPI change
-            RECT* const prcNewWindow = (RECT*)lParam;
-            SetWindowPos(hwnd, NULL, 
-                prcNewWindow->left, prcNewWindow->top,
-                prcNewWindow->right - prcNewWindow->left,
-                prcNewWindow->bottom - prcNewWindow->top,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            
-            notifyJava(hwnd, newDpi);
-            return 0;
-        }
-        case WM_SETTINGCHANGE:
-            // Theme change detection disabled - only initial state is reported
-            break;
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
-    }
-    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
-}
-
-// The thread that runs the message loop
-DWORD WINAPI MonitorThread(LPVOID lpParam) {
-    const char CLASS_NAME[] = "FastThemeMonitorClass";
-
-    // Enable per-monitor DPI awareness for this thread BEFORE creating window
-    // Windows 10 1607+
-    HMODULE hUser32 = GetModuleHandleA("user32.dll");
-    typedef DPI_AWARENESS_CONTEXT (WINAPI *SetThreadDpiAwarenessContextProc)(DPI_AWARENESS_CONTEXT);
-    SetThreadDpiAwarenessContextProc SetThreadDpiAwarenessContext = 
-        (SetThreadDpiAwarenessContextProc)GetProcAddress(hUser32, "SetThreadDpiAwarenessContext");
-    if (SetThreadDpiAwarenessContext) {
-        SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-    }
-
-    WNDCLASSA wc = { 0 };
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = GetModuleHandleA(NULL);
-    wc.lpszClassName = CLASS_NAME;
-
-    RegisterClassA(&wc);
-
-    g_hwnd = CreateWindowExA(
-        0,
-        CLASS_NAME,
-        "FastThemeMonitorWindow",
-        WS_OVERLAPPEDWINDOW, // Normal top-level window, but without WS_VISIBLE
-        0, 0, 0, 0,
-        NULL, NULL, GetModuleHandleA(NULL), NULL
-    );
-
-    if (g_hwnd == nullptr) {
-        return 0;
-    }
-
-    MSG msg = { 0 };
-    while (GetMessage(&msg, nullptr, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    return 0;
-}
-
-// Send initial state to Java
 static void sendInitialState() {
-    if (!g_jvm || !g_themeObj || !g_notifyInitialStateMethodId) {
-        return;
-    }
-
+    if (g_jvm == nullptr || g_themeObj == nullptr) return;
+    
     JNIEnv* env;
-    int getEnvStat = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_8);
+    jint attachResult = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
     bool didAttach = false;
-
-    if (getEnvStat == JNI_EDETACHED) {
+    
+    if (attachResult == JNI_EDETACHED) {
         if (g_jvm->AttachCurrentThread((void**)&env, nullptr) != 0) {
             return;
         }
         didAttach = true;
-    } else if (getEnvStat == JNI_EVERSION) {
+    } else if (attachResult != JNI_OK) {
         return;
     }
-
-    // Get current display settings
-    int width = 0, height = 0, dpi = 96, orientation = 0, refreshRate = 60;
     
+    // Get current display settings
     DEVMODE dm = {};
     dm.dmSize = sizeof(dm);
-    if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
-        width = dm.dmPelsWidth;
-        height = dm.dmPelsHeight;
-        if (dm.dmFields & DM_DISPLAYFREQUENCY) {
-            refreshRate = dm.dmDisplayFrequency;
-        }
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+    int refreshRate = 60;
+    int orientation = 0;
+    int dpi = 96;
+    
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
+        if (dm.dmFields & DM_PELSWIDTH) width = dm.dmPelsWidth;
+        if (dm.dmFields & DM_PELSHEIGHT) height = dm.dmPelsHeight;
+        if (dm.dmFields & DM_DISPLAYFREQUENCY) refreshRate = dm.dmDisplayFrequency;
         if (dm.dmFields & DM_DISPLAYORIENTATION) {
             switch (dm.dmDisplayOrientation) {
                 case DMDO_DEFAULT: orientation = 0; break;
@@ -251,34 +168,168 @@ static void sendInitialState() {
                 case DMDO_180: orientation = 2; break;
                 case DMDO_270: orientation = 3; break;
             }
-        } else {
-            orientation = (width > height) ? 0 : 1;
         }
     }
     
     // Get DPI
     HMONITOR hMonitor = MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
     if (hMonitor) {
-        UINT dpiX = 96;
-        UINT dpiY = 96;
+        UINT dpiX = 96, dpiY = 96;
         if (SUCCEEDED(GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
             dpi = (int)dpiX;
         }
     }
     
-    // Get current theme
     bool isDark = IsDarkModeEnabled();
     
-    env->CallVoidMethod(g_themeObj, g_notifyInitialStateMethodId, width, height, dpi, orientation, refreshRate, isDark ? JNI_TRUE : JNI_FALSE);
+    env->CallVoidMethod(g_themeObj, g_notifyInitialStateMethodId, 
+        width, height, dpi, orientation, refreshRate, isDark ? JNI_TRUE : JNI_FALSE);
 
     if (didAttach) {
         g_jvm->DetachCurrentThread();
     }
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(JNIEnv* env, jobject obj) {
+static LRESULT CALLBACK MonitorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_CREATE:
+            return 0;
+            
+        case WM_DISPLAYCHANGE:
+        case WM_DPICHANGED:
+            if (g_jvm && g_themeObj && g_notifyMethodId) {
+                JNIEnv* env;
+                jint attachResult = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+                bool didAttach = false;
+                
+                if (attachResult == JNI_EDETACHED) {
+                    if (g_jvm->AttachCurrentThread((void**)&env, nullptr) == 0) {
+                        didAttach = true;
+                    } else {
+                        break;
+                    }
+                } else if (attachResult != JNI_OK) {
+                    break;
+                }
+                
+                int width = GetSystemMetrics(SM_CXSCREEN);
+                int height = GetSystemMetrics(SM_CYSCREEN);
+                
+                DEVMODE dm = {};
+                dm.dmSize = sizeof(dm);
+                int refreshRate = 60;
+                int orientation = 0;
+                if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
+                    if (dm.dmFields & DM_PELSWIDTH) width = dm.dmPelsWidth;
+                    if (dm.dmFields & DM_PELSHEIGHT) height = dm.dmPelsHeight;
+                    if (dm.dmFields & DM_DISPLAYFREQUENCY) refreshRate = dm.dmDisplayFrequency;
+                    if (dm.dmFields & DM_DISPLAYORIENTATION) {
+                        switch (dm.dmDisplayOrientation) {
+                            case DMDO_DEFAULT: orientation = 0; break;
+                            case DMDO_90: orientation = 1; break;
+                            case DMDO_180: orientation = 2; break;
+                            case DMDO_270: orientation = 3; break;
+                        }
+                    }
+                }
+                
+                int dpi = 96;
+                HMONITOR hMonitor = MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
+                if (hMonitor) {
+                    UINT dpiX = 96, dpiY = 96;
+                    if (SUCCEEDED(GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY))) {
+                        dpi = (int)dpiX;
+                    }
+                }
+                
+                env->CallVoidMethod(g_themeObj, g_notifyMethodId, width, height, dpi, orientation, refreshRate);
+                
+                if (didAttach) {
+                    g_jvm->DetachCurrentThread();
+                }
+            }
+            return 0;
+            
+        case WM_SETTINGCHANGE:
+            if (g_jvm && g_themeObj && g_notifyThemeMethodId) {
+                bool currentTheme = IsDarkModeEnabled();
+                if (currentTheme != lastTheme) {
+                    lastTheme = currentTheme;
+                    
+                    JNIEnv* env;
+                    jint attachResult = g_jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+                    bool didAttach = false;
+                    
+                    if (attachResult == JNI_EDETACHED) {
+                        if (g_jvm->AttachCurrentThread((void**)&env, nullptr) == 0) {
+                            didAttach = true;
+                        } else {
+                            break;
+                        }
+                    } else if (attachResult != JNI_OK) {
+                        break;
+                    }
+                    
+                    env->CallVoidMethod(g_themeObj, g_notifyThemeMethodId, currentTheme ? JNI_TRUE : JNI_FALSE);
+                    
+                    if (didAttach) {
+                        g_jvm->DetachCurrentThread();
+                    }
+                }
+            }
+            return 0;
+            
+        case WM_CLOSE:
+            DestroyWindow(hwnd);
+            return 0;
+            
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
+    }
+    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+}
+
+static DWORD WINAPI MonitorThread(LPVOID lpParam) {
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    
+    WNDCLASSA wc = {};
+    wc.lpfnWndProc = MonitorWindowProc;
+    wc.hInstance = GetModuleHandle(nullptr);
+    wc.lpszClassName = "FastThemeMonitor";
+    
+    if (!RegisterClassA(&wc)) {
+        return 1;
+    }
+    
+    g_hwnd = CreateWindowExA(
+        0,
+        "FastThemeMonitor",
+        "FastTheme Monitor",
+        0, 0, 0, 0, 0,
+        HWND_MESSAGE, nullptr, GetModuleHandle(nullptr), nullptr
+    );
+    
+    if (!g_hwnd) {
+        return 1;
+    }
+    
+    MSG msg;
+    while (GetMessage(&msg, nullptr, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    
+    return 0;
+}
+
+// ============================================================================
+// JNI EXPORTS - FASTTHEME MONITORING
+// ============================================================================
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(JNIEnv* env, jobject obj) {
     if (g_hwnd != nullptr) {
-        return JNI_TRUE; // Already running
+        return JNI_TRUE;
     }
 
     env->GetJavaVM(&g_jvm);
@@ -292,18 +343,14 @@ extern "C" JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(J
          return JNI_FALSE;
     }
 
-    // Note: DPI awareness is set per-thread in MonitorThread before window creation
-
     HANDLE hThread = CreateThread(nullptr, 0, MonitorThread, nullptr, 0, &g_threadId);
     if (hThread) {
         CloseHandle(hThread);
-        // Wait for window to be created (g_hwnd set in MonitorThread)
         int attempts = 0;
         while (g_hwnd == nullptr && attempts < 50) {
             Sleep(10);
             attempts++;
         }
-        // Now send initial state (JNI is fully initialized here)
         if (g_hwnd != nullptr) {
             sendInitialState();
         }
@@ -313,7 +360,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(J
     return JNI_FALSE;
 }
 
-extern "C" JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv* env, jobject obj) {
+JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv* env, jobject obj) {
     if (g_hwnd) {
         PostMessageA(g_hwnd, WM_CLOSE, 0, 0);
         g_hwnd = nullptr;
@@ -324,4 +371,95 @@ extern "C" JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv
         g_themeObj = nullptr;
     }
     g_jvm = nullptr;
+}
+
+// ============================================================================
+// JNI EXPORTS - FASTTHEME TERMINAL (WINDOW STYLING)
+// ============================================================================
+
+JNIEXPORT jlong JNICALL Java_fasttheme_FastThemeTerminal_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
+    return (jlong)GetHwndFromWindow(env, component);
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    if (alpha < 0) alpha = 0;
+    if (alpha > 255) alpha = 255;
+
+    LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+    if (!(exStyle & WS_EX_LAYERED)) {
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+    }
+    BOOL result = SetLayeredWindowAttributes(hwnd, 0, (BYTE)alpha, LWA_ALPHA);
+    RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
+    return result ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    
+    COLORREF color = RGB(r, g, b);
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &color, sizeof(color));
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarTextColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    
+    COLORREF color = RGB(r, g, b);
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, &color, sizeof(color));
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarDarkMode(JNIEnv* env, jobject obj, jlong hwndLong, jboolean enabled) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    
+    BOOL darkMode = enabled ? TRUE : FALSE;
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jstring JNICALL Java_fasttheme_FastThemeTerminal_getSystemResolution(JNIEnv* env, jobject obj) {
+    int width = GetSystemMetrics(SM_CXSCREEN);
+    int height = GetSystemMetrics(SM_CYSCREEN);
+    char buffer[64];
+    sprintf_s(buffer, sizeof(buffer), "%dx%d", width, height);
+    return env->NewStringUTF(buffer);
+}
+
+JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject obj) {
+    HDC hdc = GetDC(NULL);
+    if (hdc) {
+        int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+        ReleaseDC(NULL, hdc);
+        return dpi;
+    }
+    return 96;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, jobject obj) {
+    return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
+    DEVMODE dm = {};
+    dm.dmSize = sizeof(dm);
+    
+    if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
+        if (dm.dmFields & DM_DISPLAYFREQUENCY) {
+            if (dm.dmDisplayFrequency > 0 && dm.dmDisplayFrequency < 1000) {
+                return dm.dmDisplayFrequency;
+            }
+        }
+    }
+    
+    return 60;
 }
