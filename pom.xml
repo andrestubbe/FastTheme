@@ -86,7 +86,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>fasttheme.demo</mainClass>
+                            <mainClass>fasttheme.Demo</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

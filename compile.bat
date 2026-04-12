@@ -96,7 +96,7 @@ copy build\fasttheme.dll src\main\resources\native\fasttheme.dll
 
 :: Create manifest file
 echo Manifest-Version: 1.0 > build\manifest.txt
-echo Main-Class: fasttheme.demo >> build\manifest.txt
+echo Main-Class: fasttheme.Demo >> build\manifest.txt
 
 :: Create fat jar
 echo Creating FastTheme.jar...

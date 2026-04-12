@@ -1,6 +1,6 @@
 package fasttheme;
 
-public class demo {
+public class Demo {
     public static void main(String[] args) throws Exception {
         System.out.println("FastTheme Demo - Resolution/PPI Change Monitor");
         System.out.println("=============================================");
