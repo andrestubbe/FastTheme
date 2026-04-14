@@ -49,6 +49,7 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 
 ## Table of Contents
 
+- [Installation](#installation)
 - [Why FastTheme?](#why-fasttheme)
 - [Key Features](#key-features)
 - [Quick Start](#quick-start)
@@ -59,6 +60,50 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 - [Platform Support](#platform-support)
 - [Roadmap](#roadmap)
 - [License](#license)
+
+---
+
+## Installation
+
+### Maven (JitPack)
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>com.github.andrestubbe</groupId>
+    <artifactId>fasttheme</artifactId>
+    <version>v1.2.0</version>
+</dependency>
+```
+
+FastCore is automatically included as a transitive dependency.
+
+### Gradle (JitPack)
+
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'com.github.andrestubbe:fasttheme:v1.2.0'
+}
+```
+
+### Direct Download (Both JARs Required)
+
+- `fasttheme-1.2.0.jar` — Main library with DLL
+- `fastcore-1.0.0.jar` — [JNI loader](https://github.com/andrestubbe/FastCore/releases)
+
+```bash
+java -cp "fasttheme-1.2.0.jar:fastcore-1.0.0.jar:." YourApp
+```
 
 ---
 

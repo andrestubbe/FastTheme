@@ -7,7 +7,7 @@
 
     <groupId>io.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <name>FastTheme</name>
@@ -43,7 +43,20 @@
         <url>https://github.com/andrestubbe/fasttheme/tree/main</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <!-- FastCore - Unified JNI loader -->
+        <dependency>
+            <groupId>com.github.andrestubbe</groupId>
+            <artifactId>fastcore</artifactId>
+            <version>v1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -53,6 +66,20 @@
     </dependencies>
 
     <build>
+        <resources>
+            <!-- Include native DLL in JAR -->
+            <resource>
+                <directory>build</directory>
+                <includes>
+                    <include>*.dll</include>
+                </includes>
+            </resource>
+            <!-- Standard resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- Maven Compiler Plugin -->
             <plugin>

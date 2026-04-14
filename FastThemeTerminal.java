@@ -1,6 +1,3 @@
-package fasttheme;
-
-import fastcore.FastCore;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -26,7 +23,7 @@ public class FastThemeTerminal extends JFrame {
     public native boolean setWindowIcon(long hwnd);
     
     static {
-        FastCore.loadLibrary("fasttheme");
+        System.loadLibrary("titlebar_jni");
     }
     
     private JTextArea logArea;

@@ -1,8 +1,10 @@
 package fasttheme;
 
+import fastcore.FastCore;
+
 public class FastTheme {
     static {
-        System.loadLibrary("fasttheme");
+        FastCore.loadLibrary("fasttheme");
     }
 
     public enum Orientation {
