@@ -337,7 +337,7 @@ JNIEXPORT jboolean JNICALL Java_TitleBarJNI_setBlueCloseButtonTheme(JNIEnv* env,
 }
 
 // Window transparency via Layered Window (0-255, 255=opaque)
-JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     
@@ -366,15 +366,15 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setWindowTransparency(JNIEnv* 
 
 // Also export for TitleBarJNI class (backward compat)
 JNIEXPORT jboolean JNICALL Java_TitleBarJNI_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
-    return Java_FastThemeTerminal_setWindowTransparency(env, obj, hwndLong, alpha);
+    return Java_fasttheme_FastThemeTerminal_setWindowTransparency(env, obj, hwndLong, alpha);
 }
 
 // FastThemeTerminal exports for all methods
-JNIEXPORT jlong JNICALL Java_FastThemeTerminal_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
+JNIEXPORT jlong JNICALL Java_fasttheme_FastThemeTerminal_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
     return (jlong)GetHwndFromWindow(env, component);
 }
 
-JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     COLORREF color = RGB(r, g, b);
@@ -383,7 +383,7 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarColor(JNIEnv* env, 
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarTextColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarTextColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     COLORREF color = RGB(r, g, b);
@@ -392,7 +392,7 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarTextColor(JNIEnv* e
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarDarkMode(JNIEnv* env, jobject obj, jlong hwndLong, jboolean enabled) {
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarDarkMode(JNIEnv* env, jobject obj, jlong hwndLong, jboolean enabled) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     BOOL darkMode = enabled ? TRUE : FALSE;
@@ -406,7 +406,7 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_setTitleBarDarkMode(JNIEnv* en
 }
 
 // FastTheme System Detection Methods
-JNIEXPORT jstring JNICALL Java_FastThemeTerminal_getSystemResolution(JNIEnv* env, jobject obj) {
+JNIEXPORT jstring JNICALL Java_fasttheme_FastThemeTerminal_getSystemResolution(JNIEnv* env, jobject obj) {
     int width = GetSystemMetrics(SM_CXSCREEN);
     int height = GetSystemMetrics(SM_CYSCREEN);
     char buffer[64];
@@ -414,7 +414,7 @@ JNIEXPORT jstring JNICALL Java_FastThemeTerminal_getSystemResolution(JNIEnv* env
     return env->NewStringUTF(buffer);
 }
 
-JNIEXPORT jint JNICALL Java_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject obj) {
+JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject obj) {
     HDC hdc = GetDC(NULL);
     if (hdc) {
         int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
@@ -424,7 +424,7 @@ JNIEXPORT jint JNICALL Java_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject 
     return 96; // Default
 }
 
-JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, jobject obj) {
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, jobject obj) {
     HKEY hKey;
     DWORD value = 0;
     DWORD dataSize = sizeof(value);
@@ -443,7 +443,7 @@ JNIEXPORT jboolean JNICALL Java_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, 
     return JNI_FALSE; // Default to light
 }
 
-JNIEXPORT jint JNICALL Java_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
+JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
     // Use DEVMODE (not DEVMODEA) and C++11 {} initialization like FastTheme.cpp
     DEVMODE dm = {};
     dm.dmSize = sizeof(dm);

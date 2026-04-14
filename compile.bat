@@ -73,10 +73,11 @@ echo Compiling FastTheme JNI Bridge...
 echo =====================================================
 cl /LD /Fe:build\fasttheme.dll ^
     native\FastTheme.cpp ^
-    user32.lib gdi32.lib shcore.lib advapi32.lib ^
+    user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib ^
     /I"%JAVA_HOME%\include" ^
     /I"%JAVA_HOME%\include\win32" ^
-    /EHsc /std:c++17 /O2 /W3
+    /EHsc /std:c++17 /O2 /W3 ^
+    /link /DEF:native\FastTheme.def
 
 :: Check result
 if %errorlevel% neq 0 (

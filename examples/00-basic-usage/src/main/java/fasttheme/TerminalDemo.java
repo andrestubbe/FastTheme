@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.text.*;
 
-public class FastThemeTerminal extends JFrame {
+public class TerminalDemo extends JFrame {
     
     // Native methods - Window styling
     public native long getWindowHandle(Component component);
@@ -39,7 +39,7 @@ public class FastThemeTerminal extends JFrame {
     private int systemRefresh = 60;
     private String systemResolution = "Unknown";
     
-    public FastThemeTerminal() {
+    public TerminalDemo() {
         // No decorations from Swing - we use native
         setTitle("FastTheme Terminal");
         setSize(960, 500);
@@ -154,20 +154,12 @@ public class FastThemeTerminal extends JFrame {
             systemDPI = getSystemDPI();
             systemTheme = isSystemDarkMode() ? "Dark" : "Light";
             systemRefresh = getSystemRefreshRate();
-            
-            // DEBUG OUTPUT
-            System.out.println("[DEBUG] Resolution: " + systemResolution);
-            System.out.println("[DEBUG] DPI: " + systemDPI);
-            System.out.println("[DEBUG] Theme: " + systemTheme);
-            System.out.println("[DEBUG] Refresh: " + systemRefresh);
         } catch (Exception e) {
             // Fallback values
             systemResolution = "Unknown";
             systemDPI = 96;
             systemTheme = "Unknown";
             systemRefresh = 60;
-            System.out.println("[DEBUG] EXCEPTION: " + e.getMessage());
-            e.printStackTrace();
         }
     }
     
@@ -195,8 +187,7 @@ public class FastThemeTerminal extends JFrame {
                 setTitleBarDarkMode(hwnd, true);
                 
                 // Set custom icon (white circle with black dot)
-                // TODO: Implement setWindowIcon in native code
-                // boolean iconOk = setWindowIcon(hwnd);
+                boolean iconOk = setWindowIcon(hwnd);
                 
                 // Update log with real values
                 logArea.setText(""); // Clear
@@ -218,7 +209,7 @@ public class FastThemeTerminal extends JFrame {
                 log("Ready. JNI + DWM APIs. Pure native.");
                 log("");
                 log("[JNI] Window handle: 0x" + Long.toHexString(hwnd));
-                // log("[JNI] Icon: " + (iconOk ? "white circle + black dot" : "FAILED"));
+                log("[JNI] Icon: " + (iconOk ? "white circle + black dot" : "FAILED"));
                 log("[JNI] DWM attributes applied successfully");
             } else {
                 log("");
@@ -263,7 +254,7 @@ public class FastThemeTerminal extends JFrame {
         }
         
         SwingUtilities.invokeLater(() -> {
-            new FastThemeTerminal().setVisible(true);
+            new TerminalDemo().setVisible(true);
         });
     }
 }

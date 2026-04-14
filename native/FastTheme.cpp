@@ -28,36 +28,78 @@
 // HELPER FUNCTIONS
 // ============================================================================
 
+// Dynamically load JAWT functions (to avoid linking against jawt.lib)
+typedef jboolean (JNICALL *GetAWT_t)(JavaVM*, void**);
+
+JAWT* LoadJAWT(JNIEnv* env) {
+    static JAWT awt;
+    static jboolean loaded = JNI_FALSE;
+    
+    if (loaded) return &awt;
+    
+    // Get JavaVM
+    JavaVM* vm = NULL;
+    if (env->GetJavaVM(&vm) != 0) {
+        printf("[DEBUG C++] Failed to get JavaVM\n");
+        return NULL;
+    }
+    
+    // Load jawt.dll
+    HMODULE hJawt = LoadLibraryA("jawt.dll");
+    if (!hJawt) {
+        printf("[DEBUG C++] Failed to load jawt.dll\n");
+        return NULL;
+    }
+    
+    // Get JAWT_GetAWT function
+    GetAWT_t getAWT = (GetAWT_t)GetProcAddress(hJawt, "JAWT_GetAWT");
+    if (!getAWT) {
+        printf("[DEBUG C++] Failed to get JAWT_GetAWT\n");
+        return NULL;
+    }
+    
+    // Get JAWT
+    awt.version = JAWT_VERSION_9;
+    if (!getAWT(vm, (void**)&awt)) {
+        printf("[DEBUG C++] JAWT_GetAWT failed\n");
+        return NULL;
+    }
+    
+    printf("[DEBUG C++] JAWT loaded successfully\n");
+    loaded = JNI_TRUE;
+    return &awt;
+}
+
 // Helper function to get HWND from AWT Component
 HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
-    JAWT awt;
+    JAWT* awt = LoadJAWT(env);
+    if (!awt) return NULL;
+    
     JAWT_DrawingSurface* ds = NULL;
     JAWT_DrawingSurfaceInfo* dsi = NULL;
     HWND hwnd = NULL;
     
-    awt.version = JAWT_VERSION_9;
-    
-    if (!JAWT_GetAWT(env, &awt)) {
+    if (awt->GetDrawingSurface == NULL) {
+        printf("[DEBUG C++] GetDrawingSurface is NULL\n");
         return NULL;
     }
     
-    if (awt.GetDrawingSurface == NULL) {
-        return NULL;
-    }
-    
-    ds = awt.GetDrawingSurface(env, component);
+    ds = awt->GetDrawingSurface(env, component);
     if (ds == NULL) {
+        printf("[DEBUG C++] GetDrawingSurface returned NULL\n");
         return NULL;
     }
     
     if (ds->GetDrawingSurfaceInfo == NULL) {
-        awt.FreeDrawingSurface(ds);
+        printf("[DEBUG C++] GetDrawingSurfaceInfo is NULL\n");
+        awt->FreeDrawingSurface(ds);
         return NULL;
     }
     
     jint lock = ds->Lock(ds);
     if ((lock & JAWT_LOCK_ERROR) != 0) {
-        awt.FreeDrawingSurface(ds);
+        printf("[DEBUG C++] Lock failed\n");
+        awt->FreeDrawingSurface(ds);
         return NULL;
     }
     
@@ -65,7 +107,8 @@ HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
     ds->Unlock(ds);
     
     if (dsi == NULL) {
-        awt.FreeDrawingSurface(ds);
+        printf("[DEBUG C++] GetDrawingSurfaceInfo returned NULL\n");
+        awt->FreeDrawingSurface(ds);
         return NULL;
     }
     
@@ -75,7 +118,7 @@ HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
     }
     
     ds->FreeDrawingSurfaceInfo(dsi);
-    awt.FreeDrawingSurface(ds);
+    awt->FreeDrawingSurface(ds);
     
     return hwnd;
 }
@@ -327,6 +370,8 @@ static DWORD WINAPI MonitorThread(LPVOID lpParam) {
 // JNI EXPORTS - FASTTHEME MONITORING
 // ============================================================================
 
+extern "C" {
+
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(JNIEnv* env, jobject obj) {
     if (g_hwnd != nullptr) {
         return JNI_TRUE;
@@ -378,10 +423,14 @@ JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv* env, jobj
 // ============================================================================
 
 JNIEXPORT jlong JNICALL Java_fasttheme_FastThemeTerminal_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
-    return (jlong)GetHwndFromWindow(env, component);
+    printf("[DEBUG C++] getWindowHandle called\n");
+    jlong result = (jlong)GetHwndFromWindow(env, component);
+    printf("[DEBUG C++] Window handle: %lld\n", result);
+    return result;
 }
 
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
+    printf("[DEBUG C++] setWindowTransparency called, alpha=%d\n", alpha);
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
 
@@ -428,38 +477,65 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarDarkMode(
 }
 
 JNIEXPORT jstring JNICALL Java_fasttheme_FastThemeTerminal_getSystemResolution(JNIEnv* env, jobject obj) {
+    printf("[DEBUG C++] getSystemResolution called\n");
+    fflush(stdout);
     int width = GetSystemMetrics(SM_CXSCREEN);
     int height = GetSystemMetrics(SM_CYSCREEN);
     char buffer[64];
     sprintf_s(buffer, sizeof(buffer), "%dx%d", width, height);
+    printf("[DEBUG C++] Resolution: %s\n", buffer);
+    fflush(stdout);
     return env->NewStringUTF(buffer);
 }
 
 JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject obj) {
+    printf("[DEBUG C++] getSystemDPI called\n");
+    fflush(stdout);
     HDC hdc = GetDC(NULL);
     if (hdc) {
         int dpi = GetDeviceCaps(hdc, LOGPIXELSX);
         ReleaseDC(NULL, hdc);
+        printf("[DEBUG C++] DPI: %d\n", dpi);
+        fflush(stdout);
         return dpi;
     }
+    printf("[DEBUG C++] DPI fallback: 96\n");
+    fflush(stdout);
     return 96;
 }
 
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, jobject obj) {
-    return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
+    printf("[DEBUG C++] isSystemDarkMode called\n");
+    fflush(stdout);
+    jboolean result = IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
+    printf("[DEBUG C++] Dark mode: %s\n", result ? "true" : "false");
+    fflush(stdout);
+    return result;
 }
 
 JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
+    printf("[DEBUG C++] getSystemRefreshRate called\n");
+    fflush(stdout);
+    // Use EXACT same code as working Monitor Thread from Demo.java
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    
     DEVMODE dm = {};
     dm.dmSize = sizeof(dm);
+    int refreshRate = 60;
     
+    // Get current display settings - ENUM_CURRENT_SETTINGS = -1
     if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm)) {
         if (dm.dmFields & DM_DISPLAYFREQUENCY) {
-            if (dm.dmDisplayFrequency > 0 && dm.dmDisplayFrequency < 1000) {
-                return dm.dmDisplayFrequency;
+            int freq = dm.dmDisplayFrequency;
+            if (freq > 0 && freq < 1000) {
+                refreshRate = freq;
             }
         }
     }
     
-    return 60;
+    printf("[DEBUG C++] Refresh rate: %d\n", refreshRate);
+    fflush(stdout);
+    return refreshRate;
 }
+
+} // extern "C"
