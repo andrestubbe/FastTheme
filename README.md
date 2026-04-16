@@ -404,8 +404,8 @@ FastTheme/
 ├── examples/
 │   └── 00-basic-usage/
 │       └── src/main/java/fasttheme/
-│           ├── WindowStylingDemo.java  # Window styling demo
-│           └── ConsoleDemo.java        # Display monitoring demo
+│           ├── WindowDemo.java    # Window styling demo
+│           └── ConsoleDemo.java   # Display monitoring demo
 ├── compile.bat                      # Windows build script
 ├── pom.xml                          # Maven configuration
 └── README.md                        # This file

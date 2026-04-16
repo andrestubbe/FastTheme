@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.text.*;
 
 /**
- * WindowStylingDemo - Window Styling Example using FastTheme v1.3.0 API.
+ * WindowDemo - Window Styling Example using FastTheme v1.3.0 API.
  * 
  * <p>This demo showcases the generic window styling capabilities of FastTheme:
  * <ul>
@@ -39,7 +39,7 @@ import javax.swing.text.*;
  * @see FastTheme#setWindowTransparency(long, int)
  * @version 1.3.0
  */
-public class WindowStylingDemo extends JFrame {
+public class WindowDemo extends JFrame {
     
     private JTextArea logArea;
     private StyleContext styleContext;
@@ -51,9 +51,9 @@ public class WindowStylingDemo extends JFrame {
     private int systemRefresh = 60;
     private String systemResolution = "Unknown";
     
-    public TerminalDemo() {
+    public WindowDemo() {
         // No decorations from Swing - we use native
-        setTitle("FastTheme Terminal");
+        setTitle("FastTheme Window Demo");
         setSize(960, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -266,7 +266,7 @@ public class WindowStylingDemo extends JFrame {
         }
         
         SwingUtilities.invokeLater(() -> {
-            new WindowStylingDemo().setVisible(true);
+            new WindowDemo().setVisible(true);
         });
     }
 }

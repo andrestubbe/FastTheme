@@ -48,7 +48,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>fasttheme.WindowStylingDemo</mainClass>
+                    <mainClass>fasttheme.WindowDemo</mainClass>
                 </configuration>
             </plugin>
         </plugins>
