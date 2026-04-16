@@ -1,4 +1,4 @@
-# FastTheme — Native Windows Theme, Titlebar Styling & Display API for Java
+# FastTheme — Native Windows Theme, Titlebar Styling & Display API for Java [ALPHA]
 
 **Lightweight alternative to FlatLAF when you only need real OS theme events, titlebar styling, opacity, and display metrics.**
 
