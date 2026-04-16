@@ -1,7 +1,7 @@
 package fasttheme;
 
 /**
- * ThemeDemo - Display Monitoring Example using FastTheme v1.3.0 API.
+ * ConsoleDemo - Display Monitoring Example using FastTheme v1.3.0 API.
  * 
  * <p>This demo showcases the display monitoring capabilities of FastTheme:
  * <ul>
@@ -36,7 +36,7 @@ package fasttheme;
  * @see FastTheme.ThemeListener
  * @version 1.3.0
  */
-public class ThemeDemo {
+public class ConsoleDemo {
     public static void main(String[] args) {
         System.out.println("=== FastTheme Demo ===\n");
         

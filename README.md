@@ -404,8 +404,8 @@ FastTheme/
 ├── examples/
 │   └── 00-basic-usage/
 │       └── src/main/java/fasttheme/
-│           ├── TerminalDemo.java    # Window styling demo
-│           └── ThemeDemo.java       # Display monitoring demo
+│           ├── WindowStylingDemo.java  # Window styling demo
+│           └── ConsoleDemo.java        # Display monitoring demo
 ├── compile.bat                      # Windows build script
 ├── pom.xml                          # Maven configuration
 └── README.md                        # This file
@@ -416,7 +416,7 @@ FastTheme/
 ## Changelog
 
 ### v1.3.0 — Generic Window Styling API
-- ✨ **Generic JNI API** — Renamed `TerminalDemo_*` to `FastTheme_*`
+- ✨ **Generic JNI API** — Renamed JNI methods to `FastTheme_*`
 - ✨ **Static Native Methods** — All window styling via `FastTheme.*` static methods
 - ✨ **Doxygen Documentation** — Complete C++ API documentation
 - ✨ **Java Documentation** — Comprehensive Javadoc for all classes
