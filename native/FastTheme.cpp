@@ -31,6 +31,19 @@
 // Dynamically load JAWT functions (to avoid linking against jawt.lib)
 typedef jboolean (JNICALL *GetAWT_t)(JavaVM*, void**);
 
+/**
+ * @brief Dynamically loads JAWT (Java AWT Native Interface)
+ * 
+ * Loads jawt.dll and JAWT_GetAWT function at runtime. Using dynamic
+ * loading avoids requiring jawt.lib at link time, making the DLL
+ * work with any JRE without build-time dependencies.
+ * 
+ * @param env JNI environment pointer
+ * @return Pointer to initialized JAWT structure, or NULL on failure
+ * 
+ * @note Caches result - subsequent calls return cached JAWT*
+ * @warning Must be called before any GetHwndFromComponent calls
+ */
 JAWT* LoadJAWT(JNIEnv* env) {
     static JAWT awt;
     static jboolean loaded = JNI_FALSE;
@@ -70,7 +83,20 @@ JAWT* LoadJAWT(JNIEnv* env) {
     return &awt;
 }
 
-// Helper function to get HWND from AWT Component
+/**
+ * @brief Extracts native Windows HWND from Java AWT Component
+ * 
+ * Uses JAWT to lock the drawing surface and extract the platform-specific
+ * window handle. Walks up parent chain to find the actual frame window.
+ * 
+ * @param env JNI environment pointer
+ * @param component Java AWT Component (e.g., JFrame)
+ * @return Native HWND handle, or NULL if extraction failed
+ * 
+ * @note Component must be displayable (addNotify() called)
+ * @note Caller must NOT free or destroy the returned HWND
+ * @see LoadJAWT, GetHwndFromWindow
+ */
 HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
     JAWT* awt = LoadJAWT(env);
     if (!awt) return NULL;
@@ -123,7 +149,19 @@ HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
     return hwnd;
 }
 
-// Get HWND from Window - walks up to find the real frame window
+/**
+ * @brief Finds the top-level frame window HWND from any component
+ * 
+ * Walks up the window parent chain looking for "SunAwtFrame" class,
+ * which is the native window class for Java Swing JFrame windows.
+ * 
+ * @param env JNI environment pointer
+ * @param window Java Window (typically JFrame)
+ * @return HWND of the actual frame window, or component's HWND if no frame found
+ * 
+ * @note This finds the root window suitable for DWM API calls
+ * @see GetHwndFromComponent
+ */
 HWND GetHwndFromWindow(JNIEnv* env, jobject window) {
     HWND hwnd = GetHwndFromComponent(env, window);
     if (hwnd != NULL) {
@@ -157,6 +195,17 @@ static int lastHeight = 0;
 static int lastDpi = 96;
 static bool lastTheme = false;
 
+/**
+ * @brief Checks if Windows is currently using dark mode for apps
+ * 
+ * Reads the registry value AppsUseLightTheme from the Personalize key.
+ * Value 0 = Dark mode enabled, 1 = Light mode enabled.
+ * 
+ * @return true if dark mode is active, false for light mode or on error
+ * 
+ * @note Registry path: HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
+ * @note Falls back to false (light mode) if registry access fails
+ */
 static bool IsDarkModeEnabled() {
     HKEY hKey;
     DWORD value = 0;
@@ -372,6 +421,24 @@ static DWORD WINAPI MonitorThread(LPVOID lpParam) {
 
 extern "C" {
 
+/**
+ * @brief Starts monitoring system display and theme changes
+ * 
+ * Creates a hidden message-only window and background thread that listens for:
+ * - WM_DISPLAYCHANGE (resolution changes)
+ * - WM_DPICHANGED (DPI scaling changes)  
+ * - WM_SETTINGCHANGE (theme changes, including dark mode toggle)
+ * 
+ * Calls back into Java via notifyResolutionChanged, notifyThemeChanged,
+ * and notifyInitialState methods on the FastTheme instance.
+ * 
+ * @param env JNI environment pointer
+ * @param obj FastTheme instance (this) - stored as global reference
+ * @return JNI_TRUE if monitoring started successfully, JNI_FALSE on error
+ * 
+ * @note Safe to call multiple times - returns JNI_TRUE if already running
+ * @see Java_fasttheme_FastTheme_stopMonitoring
+ */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(JNIEnv* env, jobject obj) {
     if (g_hwnd != nullptr) {
         return JNI_TRUE;
@@ -405,6 +472,19 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startMonitoring(JNIEnv* env,
     return JNI_FALSE;
 }
 
+/**
+ * @brief Stops monitoring and cleans up resources
+ * 
+ * Sends WM_CLOSE to the monitor window, which causes the background thread
+ * to exit. Releases the global reference to the Java FastTheme object.
+ * 
+ * @param env JNI environment pointer
+ * @param obj FastTheme instance (this) - ignored, uses stored global ref
+ * 
+ * @note Safe to call multiple times - no-op if already stopped
+ * @note Thread will exit gracefully within ~100ms
+ * @see Java_fasttheme_FastTheme_startMonitoring
+ */
 JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv* env, jobject obj) {
     if (g_hwnd) {
         PostMessageA(g_hwnd, WM_CLOSE, 0, 0);
