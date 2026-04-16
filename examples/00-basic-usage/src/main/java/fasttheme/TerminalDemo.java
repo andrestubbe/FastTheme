@@ -1,33 +1,22 @@
 package fasttheme;
 
-import fastcore.FastCore;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.text.*;
 
-public class FastThemeTerminal extends JFrame {
-    
-    // Native methods - Window styling
-    public native long getWindowHandle(Component component);
-    public native boolean setWindowTransparency(long hwnd, int alpha);
-    public native boolean setTitleBarColor(long hwnd, int r, int g, int b);
-    public native boolean setTitleBarTextColor(long hwnd, int r, int g, int b);
-    public native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
-    
-    // Native methods - System detection (from FastTheme)
-    public native String getSystemResolution();
-    public native int getSystemDPI();
-    public native boolean isSystemDarkMode();
-    public native int getSystemRefreshRate();
-    
-    // Native method - Custom window icon
-    public native boolean setWindowIcon(long hwnd);
-    
-    static {
-        FastCore.loadLibrary("fasttheme");
-    }
+/**
+ * TerminalDemo - Example demonstrating FastTheme window styling API.
+ * 
+ * This demo uses the static methods from FastTheme class:
+ * - FastTheme.getWindowHandle()
+ * - FastTheme.setWindowTransparency()
+ * - FastTheme.setTitleBarColor()
+ * - FastTheme.setTitleBarDarkMode()
+ * etc.
+ */
+public class TerminalDemo extends JFrame {
     
     private JTextArea logArea;
     private StyleContext styleContext;
@@ -78,7 +67,7 @@ public class FastThemeTerminal extends JFrame {
         setIconImage(createWindowIcon());
         
         // Log initial info
-        log("FastTheme Terminal v1.1");
+        log("FastTheme Terminal v1.3");
         log("======================");
         log("");
         log("OS Detection:");
@@ -150,10 +139,10 @@ public class FastThemeTerminal extends JFrame {
     
     private void detectSystemValues() {
         try {
-            systemResolution = getSystemResolution();
-            systemDPI = getSystemDPI();
-            systemTheme = isSystemDarkMode() ? "Dark" : "Light";
-            systemRefresh = getSystemRefreshRate();
+            systemResolution = FastTheme.getSystemResolution();
+            systemDPI = FastTheme.getSystemDPI();
+            systemTheme = FastTheme.isSystemDarkMode() ? "Dark" : "Light";
+            systemRefresh = FastTheme.getSystemRefreshRate();
         } catch (Exception e) {
             // Fallback values
             systemResolution = "Unknown";
@@ -168,30 +157,30 @@ public class FastThemeTerminal extends JFrame {
         if (visible && !isVisible()) {
             super.setVisible(true);
             
-            // IMMEDIATELY apply native styling
-            long hwnd = getWindowHandle(this);
+            // IMMEDIATELY apply native styling using FastTheme API
+            long hwnd = FastTheme.getWindowHandle(this);
             if (hwnd != 0) {
                 // Detect real system values first
                 detectSystemValues();
                 
                 // 80% transparency (204/255)
-                setWindowTransparency(hwnd, 204);
+                FastTheme.setWindowTransparency(hwnd, 204);
                 
                 // Titlebar same color as content (RGB 12, 12, 12)
-                setTitleBarColor(hwnd, 12, 12, 12);
+                FastTheme.setTitleBarColor(hwnd, 12, 12, 12);
                 
                 // White text
-                setTitleBarTextColor(hwnd, 255, 255, 255);
+                FastTheme.setTitleBarTextColor(hwnd, 255, 255, 255);
                 
                 // Dark mode
-                setTitleBarDarkMode(hwnd, true);
+                FastTheme.setTitleBarDarkMode(hwnd, true);
                 
                 // Set custom icon (white circle with black dot)
-                boolean iconOk = setWindowIcon(hwnd);
+                boolean iconOk = false; // setWindowIcon not in FastTheme API yet
                 
                 // Update log with real values
                 logArea.setText(""); // Clear
-                log("FastTheme Terminal v1.1");
+                log("FastTheme Terminal v1.3");
                 log("======================");
                 log("");
                 log("OS Detection:");
@@ -254,7 +243,7 @@ public class FastThemeTerminal extends JFrame {
         }
         
         SwingUtilities.invokeLater(() -> {
-            new FastThemeTerminal().setVisible(true);
+            new TerminalDemo().setVisible(true);
         });
     }
 }

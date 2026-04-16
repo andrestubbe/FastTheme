@@ -419,17 +419,45 @@ JNIEXPORT void JNICALL Java_fasttheme_FastTheme_stopMonitoring(JNIEnv* env, jobj
 }
 
 // ============================================================================
-// JNI EXPORTS - FASTTHEME TERMINAL (WINDOW STYLING)
+// JNI EXPORTS - WINDOW STYLING API (Generic, usable by any demo/app)
 // ============================================================================
 
-JNIEXPORT jlong JNICALL Java_fasttheme_FastThemeTerminal_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
+/**
+ * @brief Gets the native Windows HWND handle from a Java AWT Component
+ * 
+ * Uses JAWT (Java AWT Native Interface) to extract the native window handle
+ * from a Swing/AWT component. Required for all subsequent window styling calls.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @param component The Java AWT/Swing Component (usually JFrame)
+ * @return jlong containing HWND handle, or 0 if extraction failed
+ * 
+ * @note The caller must ensure the window is visible before calling this method
+ * @see setWindowTransparency, setTitleBarColor, setTitleBarDarkMode
+ */
+JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jobject obj, jobject component) {
     printf("[DEBUG C++] getWindowHandle called\n");
     jlong result = (jlong)GetHwndFromWindow(env, component);
     printf("[DEBUG C++] Window handle: %lld\n", result);
     return result;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
+/**
+ * @brief Sets window transparency/opacity using layered window attributes
+ * 
+ * Makes the entire window (including titlebar) semi-transparent.
+ * Automatically adds WS_EX_LAYERED style if not present.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @param hwndLong Native window handle (HWND) from getWindowHandle()
+ * @param alpha Transparency level (0-255, where 255 = fully opaque, 0 = invisible)
+ * @return JNI_TRUE on success, JNI_FALSE if window handle invalid
+ * 
+ * @warning Values outside 0-255 will be clamped to valid range
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv* env, jobject obj, jlong hwndLong, jint alpha) {
     printf("[DEBUG C++] setWindowTransparency called, alpha=%d\n", alpha);
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
@@ -446,7 +474,23 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setWindowTransparenc
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+/**
+ * @brief Sets the title bar (caption) background color
+ * 
+ * Uses Windows 11 DWM API (DWMWA_CAPTION_COLOR) to customize the title bar.
+ * Falls back gracefully on older Windows versions.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @param hwndLong Native window handle (HWND) from getWindowHandle()
+ * @param r Red component (0-255)
+ * @param g Green component (0-255)
+ * @param b Blue component (0-255)
+ * @return JNI_TRUE on success, JNI_FALSE if window invalid or API unavailable
+ * 
+ * @note Forces window frame redraw to apply changes immediately
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     
@@ -456,7 +500,21 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarColor(JNI
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarTextColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
+/**
+ * @brief Sets the title bar text color
+ * 
+ * Uses Windows 11 DWM API (DWMWA_TEXT_COLOR) for caption text color.
+ * Requires Windows 11 Build 22000 or later for full support.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @param hwndLong Native window handle (HWND) from getWindowHandle()
+ * @param r Red component (0-255)
+ * @param g Green component (0-255)
+ * @param b Blue component (0-255)
+ * @return JNI_TRUE on success, JNI_FALSE if window invalid or API unavailable
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     
@@ -466,7 +524,21 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarTextColor
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarDarkMode(JNIEnv* env, jobject obj, jlong hwndLong, jboolean enabled) {
+/**
+ * @brief Enables/disables dark mode for the window title bar
+ * 
+ * Uses Windows 10/11 DWM API (DWMWA_USE_IMMERSIVE_DARK_MODE).
+ * This affects the title bar, borders, and system menu appearance.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @param hwndLong Native window handle (HWND) from getWindowHandle()
+ * @param enabled JNI_TRUE for dark mode, JNI_FALSE for light mode
+ * @return JNI_TRUE on success, JNI_FALSE if window invalid
+ * 
+ * @note This is the system dark mode, not the app content theme
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarDarkMode(JNIEnv* env, jobject obj, jlong hwndLong, jboolean enabled) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     
@@ -476,7 +548,17 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_setTitleBarDarkMode(
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jstring JNICALL Java_fasttheme_FastThemeTerminal_getSystemResolution(JNIEnv* env, jobject obj) {
+/**
+ * @brief Gets the primary display resolution
+ * 
+ * Returns the current screen resolution as "WIDTHxHEIGHT" string.
+ * Uses GetSystemMetrics which respects DPI scaling.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @return jstring in format "1920x1080", or "Unknown" on error
+ */
+JNIEXPORT jstring JNICALL Java_fasttheme_FastTheme_getSystemResolution(JNIEnv* env, jobject obj) {
     printf("[DEBUG C++] getSystemResolution called\n");
     fflush(stdout);
     int width = GetSystemMetrics(SM_CXSCREEN);
@@ -488,7 +570,17 @@ JNIEXPORT jstring JNICALL Java_fasttheme_FastThemeTerminal_getSystemResolution(J
     return env->NewStringUTF(buffer);
 }
 
-JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemDPI(JNIEnv* env, jobject obj) {
+/**
+ * @brief Gets the system DPI scaling value
+ * 
+ * Returns the DPI of the primary monitor. Standard is 96 DPI (100% scaling).
+ * 144 DPI = 150% scaling, 192 DPI = 200% scaling, etc.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @return jint DPI value, or 96 as fallback
+ */
+JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getSystemDPI(JNIEnv* env, jobject obj) {
     printf("[DEBUG C++] getSystemDPI called\n");
     fflush(stdout);
     HDC hdc = GetDC(NULL);
@@ -504,7 +596,19 @@ JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemDPI(JNIEnv* env
     return 96;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_isSystemDarkMode(JNIEnv* env, jobject obj) {
+/**
+ * @brief Detects if Windows is in dark mode
+ * 
+ * Reads the registry key AppsUseLightTheme from Personalize settings.
+ * This reflects the user's system-wide app theme preference.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @return JNI_TRUE if dark mode is enabled, JNI_FALSE for light mode
+ * 
+ * @note Checks HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jobject obj) {
     printf("[DEBUG C++] isSystemDarkMode called\n");
     fflush(stdout);
     jboolean result = IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
@@ -513,7 +617,17 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastThemeTerminal_isSystemDarkMode(JNI
     return result;
 }
 
-JNIEXPORT jint JNICALL Java_fasttheme_FastThemeTerminal_getSystemRefreshRate(JNIEnv* env, jobject obj) {
+/**
+ * @brief Gets the primary display refresh rate
+ * 
+ * Queries the current display settings for refresh rate in Hz.
+ * Common values: 60, 75, 120, 144, 165, 240 Hz.
+ * 
+ * @param env JNI environment pointer
+ * @param obj JNI object reference (this, ignored for static)
+ * @return jint refresh rate in Hz, or 60 as fallback
+ */
+JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getSystemRefreshRate(JNIEnv* env, jobject obj) {
     printf("[DEBUG C++] getSystemRefreshRate called\n");
     fflush(stdout);
     // Use EXACT same code as working Monitor Thread from Demo.java
