@@ -13,9 +13,26 @@ FastTheme brings real Windows theming to Java applications: **Dark/Light Mode, T
 ![FastTheme Terminal Demo](docs/screenshot.png)
 
 ```java
-// Quick Start — Native Window Styling
-FastThemeTerminal terminal = new FastThemeTerminal();
-terminal.setVisible(true);
+// Quick Start — Window Styling with FastTheme API
+import fasttheme.FastTheme;
+import javax.swing.*;
+
+public class StyledWindow {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("FastTheme Window");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true); // Must be visible first!
+        
+        // Apply native styling
+        long hwnd = FastTheme.getWindowHandle(frame);
+        if (hwnd != 0) {
+            FastTheme.setTitleBarColor(hwnd, 12, 12, 12);    // Dark gray
+            FastTheme.setTitleBarDarkMode(hwnd, true);       // Dark mode
+            FastTheme.setWindowTransparency(hwnd, 230);      // 90% opacity
+        }
+    }
+}
 
 // Or: Monitor display changes
 FastTheme theme = new FastTheme();
@@ -30,6 +47,14 @@ theme.setListener(new FastTheme.ThemeListener() {
     @Override
     public void onResolutionChanged(int width, int height, int dpi, int refreshRate) {
         System.out.println("Resolution changed: " + width + "x" + height);
+    }
+    
+    @Override
+    public void onOrientationChanged(FastTheme.Orientation o) {}
+    
+    @Override
+    public void onThemeChanged(boolean dark) {
+        System.out.println("Theme: " + (dark ? "DARK" : "LIGHT"));
     }
 });
 theme.startMonitoring();
@@ -78,7 +103,7 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 <dependency>
     <groupId>io.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>v1.2.0</version>
+    <version>v1.3.0</version>
 </dependency>
 ```
 
@@ -92,17 +117,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.andrestubbe:fasttheme:v1.2.0'
+    implementation 'io.github.andrestubbe:fasttheme:v1.3.0'
 }
 ```
 
 ### Direct Download (Both JARs Required)
 
-- `fasttheme-1.2.0.jar` — Main library with DLL
+- `fasttheme-1.3.0.jar` — Main library with DLL
 - `fastcore-1.0.0.jar` — [JNI loader](https://github.com/andrestubbe/FastCore/releases)
 
 ```bash
-java -cp "fasttheme-1.2.0.jar:fastcore-1.0.0.jar:." YourApp
+java -cp "fasttheme-1.3.0.jar:fastcore-1.0.0.jar:." YourApp
 ```
 
 ---
@@ -212,64 +237,115 @@ public class Main {
 
 ---
 
-## Window Styling Demo
+## Window Styling API
 
-FastTheme now includes **native window styling** capabilities via JNI, allowing you to create seamless, transparent windows that blend with Windows 11's design language.
+FastTheme v1.3.0 provides a **generic window styling API** via static native methods. Works with any Swing/AWT window.
+
+### Basic Window Styling
 
 ```java
-import fasttheme.FastThemeTerminal;
+import fasttheme.FastTheme;
+import javax.swing.*;
+import java.awt.*;
 
 public class StyledWindow {
     public static void main(String[] args) {
-        // Create a terminal-like window with:
-        // - Seamless titlebar (matches content color)
-        // - 80% transparency
-        // - Native dark mode
-        // - Real-time system detection
-        new FastThemeTerminal().setVisible(true);
+        JFrame frame = new JFrame("Styled Window");
+        frame.setSize(800, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        // Content color (dark gray)
+        JPanel content = new JPanel();
+        content.setBackground(new Color(12, 12, 12));
+        frame.setContentPane(content);
+        
+        frame.setVisible(true); // Must be visible first!
+        
+        // Apply native styling
+        long hwnd = FastTheme.getWindowHandle(frame);
+        if (hwnd != 0) {
+            FastTheme.setTitleBarColor(hwnd, 12, 12, 12);      // Match content
+            FastTheme.setTitleBarTextColor(hwnd, 255, 255, 255); // White text
+            FastTheme.setTitleBarDarkMode(hwnd, true);         // Dark mode
+            FastTheme.setWindowTransparency(hwnd, 204);        // 80% opacity
+        }
     }
 }
 ```
 
-**Features:**
-- 🎨 **Titlebar Color** — Set any RGB color for the window titlebar
-- 🔲 **Transparency** — 0-100% opacity control via `SetLayeredWindowAttributes`
-- 🌙 **Dark Mode** — Native Windows dark/light mode support
-- 📊 **System Detection** — Real-time resolution, DPI, refresh rate, theme
-- 🎯 **Custom Icon** — Programmatic window icon generation
+### System Information
+
+```java
+// Get real system values
+String resolution = FastTheme.getSystemResolution();  // "1920x1080"
+int dpi = FastTheme.getSystemDPI();                   // 96, 120, 144...
+int refresh = FastTheme.getSystemRefreshRate();       // 60, 120, 144...
+boolean dark = FastTheme.isSystemDarkMode();          // true/false
+```
+
+**Window Styling Features:**
+- 🎨 **Titlebar Color** — RGB background color for seamless design
+- ✏️ **Titlebar Text** — RGB text color for the window title
+- 🌙 **Dark Mode** — Native Windows dark/light titlebar
+- 🔲 **Transparency** — 0-100% window opacity
+
+**System Detection Features:**
+- 📊 **Resolution** — Current screen resolution
+- 🔍 **DPI Scaling** — System DPI value (96 = 100%)
+- 🔄 **Refresh Rate** — Display refresh rate in Hz
+- � **Theme Detection** — Windows dark/light mode
 
 **Native APIs Used:**
 - `DwmSetWindowAttribute` (DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR, DWMWA_USE_IMMERSIVE_DARK_MODE)
 - `SetLayeredWindowAttributes` (WS_EX_LAYERED)
-- `EnumDisplaySettings` (Resolution, DPI, Refresh Rate)
+- `GetDeviceCaps` / `EnumDisplaySettings` (DPI, Resolution, Refresh Rate)
+- `RegQueryValueEx` (Theme detection)
 
 ---
 
 ## API Reference
 
-### FastTheme Class
+### Display Monitoring
 
 | Method | Description |
 |--------|-------------|
-| `void setListener(ThemeListener listener)` | Set the event listener |
-| `boolean startMonitoring()` | Start monitoring (returns true on success) |
-| `void stopMonitoring()` | Stop monitoring |
+| `void setListener(ThemeListener listener)` | Set the event listener for display/theme changes |
+| `boolean startMonitoring()` | Start monitoring (creates background thread) |
+| `void stopMonitoring()` | Stop monitoring and release resources |
+
+### Window Styling (Static Methods)
+
+All window styling methods are `public static native` and can be called from any thread:
+
+| Method | Parameters | Returns | Description |
+|--------|-----------|---------|-------------|
+| `getWindowHandle` | `Component component` | `long` | Extract native HWND from Swing window |
+| `setWindowTransparency` | `long hwnd, int alpha` | `boolean` | Set window opacity (0-255) |
+| `setTitleBarColor` | `long hwnd, int r, int g, int b` | `boolean` | Set titlebar background color |
+| `setTitleBarTextColor` | `long hwnd, int r, int g, int b` | `boolean` | Set titlebar text color |
+| `setTitleBarDarkMode` | `long hwnd, boolean enabled` | `boolean` | Enable/disable dark mode |
+| `getSystemResolution` | — | `String` | Current resolution (e.g., "1920x1080") |
+| `getSystemDPI` | — | `int` | System DPI (96 = 100% scaling) |
+| `getSystemRefreshRate` | — | `int` | Display refresh rate in Hz |
+| `isSystemDarkMode` | — | `boolean` | Windows dark mode status |
 
 ### ThemeListener Interface
 
 | Method | Description |
 |--------|-------------|
-| `void onInitialState(...)` | Called once on startup with current state |
-| `void onResolutionChanged(...)` | Called when resolution or DPI changes |
-| `void onOrientationChanged(...)` | Called when display orientation changes |
-| `void onThemeChanged(boolean)` | Called when Windows theme changes (TODO) |
+| `void onInitialState(int w, int h, int dpi, int refresh, Orientation o, boolean dark)` | Called once on startup |
+| `void onResolutionChanged(int w, int h, int dpi, int refresh)` | Resolution or DPI changed |
+| `void onOrientationChanged(Orientation o)` | Display orientation changed |
+| `void onThemeChanged(boolean dark)` | Windows theme changed |
 
 ### Orientation Enum
 
-- `LANDSCAPE` — Normal landscape orientation
-- `PORTRAIT` — Portrait (90° rotated)
-- `LANDSCAPE_FLIPPED` — Landscape flipped 180°
-- `PORTRAIT_FLIPPED` — Portrait flipped 180°
+| Value | Description |
+|-------|-------------|
+| `LANDSCAPE` | Normal landscape (0°) |
+| `PORTRAIT` | Portrait (90° clockwise) |
+| `LANDSCAPE_FLIPPED` | Flipped landscape (180°) |
+| `PORTRAIT_FLIPPED` | Flipped portrait (270°) |
 
 ---
 
@@ -316,36 +392,53 @@ mvn clean package
 
 ```
 FastTheme/
-├── src/
-│   └── main/
-│       ├── java/fasttheme/       # Java sources
-│       │   ├── FastTheme.java    # Main class
-│       │   ├── FastThemeTerminal.java  # 🆕 Window styling demo
-│       │   └── Demo.java         # Demo application
-│       └── resources/            # Native DLL
+├── src/main/
+│   ├── java/fasttheme/
+│   │   ├── FastTheme.java           # Main API class
+│   │   └── Demo.java                # Display monitoring demo
+│   └── resources/native/
+│       └── fasttheme.dll            # Native JNI library
 ├── native/
-│   ├── FastTheme.cpp             # JNI implementation
-│   ├── FastThemeJNI.cpp          # 🆕 Window styling JNI
-│   └── fasttheme_FastTheme.h     # JNI header
-├── lib/                          # 🆕 DLL output
-├── build/                        # Build output
-├── compile.bat                   # Windows build script
-├── pom.xml                       # Maven configuration
-└── README.md                     # This file
+│   ├── FastTheme.cpp                # JNI implementation
+│   ├── FastTheme.h                  # JNI header
+│   └── FastTheme.def                # DLL exports
+├── examples/
+│   └── 00-basic-usage/
+│       └── src/main/java/fasttheme/
+│           └── TerminalDemo.java    # Window styling demo
+├── compile.bat                      # Windows build script
+├── pom.xml                          # Maven configuration
+└── README.md                        # This file
 ```
 
 ---
 
-## TODO
+## Changelog
 
-- [ ] **Real-time Theme Change Events** — Currently only initial theme is detected. Runtime theme change detection (dark/light mode switching) is being investigated. Windows sends `WM_SETTINGCHANGE` before registry updates, making this challenging.
-- [x] **TitleBar Color Control** — ✅ Done v1.1 — Set custom titlebar colors via DWM
-- [x] **Window Transparency** — ✅ Done v1.1 — Layered window with alpha blending
+### v1.3.0 — Generic Window Styling API
+- ✨ **Generic JNI API** — Renamed `TerminalDemo_*` to `FastTheme_*`
+- ✨ **Static Native Methods** — All window styling via `FastTheme.*` static methods
+- ✨ **Doxygen Documentation** — Complete C++ API documentation
+- ✨ **Java Documentation** — Comprehensive Javadoc for all classes
+
+### v1.2.0 — Initial Window Styling
+- ✨ **TitleBar Color** — Custom RGB titlebar colors
+- ✨ **TitleBar Text** — Custom titlebar text color
+- ✨ **Dark Mode** — Native Windows dark/light mode toggle
+- ✨ **Transparency** — Window opacity control
+- ✨ **System Detection** — Resolution, DPI, refresh rate, theme detection
+
+### v1.0.0 — Display Monitoring
+- ✨ **Display Monitoring** — Real-time resolution, DPI, orientation changes
+- ✨ **Theme Detection** — Windows dark/light mode detection
+
+## Roadmap
+
+- [ ] **Real-time Theme Change Events** — Runtime dark/light mode switching detection
 - [ ] **Button Colors** — Control Windows caption button colors
-- [ ] **Button Existence** — Detect if Windows has specific buttons (close, minimize, maximize)
-- [ ] **Linux Support** — Add X11/Wayland display monitoring
-- [ ] **macOS Support** — Add macOS display configuration monitoring
-- [ ] **Multi-Monitor Support** — Detect per-display settings
+- [ ] **Multi-Monitor Support** — Per-display settings detection
+- [ ] **Linux Support** — X11/Wayland display monitoring
+- [ ] **macOS Support** — macOS display configuration monitoring
 
 ---
 
