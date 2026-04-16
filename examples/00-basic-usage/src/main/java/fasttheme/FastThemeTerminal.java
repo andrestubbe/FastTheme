@@ -1,3 +1,6 @@
+package fasttheme;
+
+import fastcore.FastCore;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -23,7 +26,7 @@ public class FastThemeTerminal extends JFrame {
     public native boolean setWindowIcon(long hwnd);
     
     static {
-        System.loadLibrary("titlebar_jni");
+        FastCore.loadLibrary("fasttheme");
     }
     
     private JTextArea logArea;
@@ -36,7 +39,7 @@ public class FastThemeTerminal extends JFrame {
     private int systemRefresh = 60;
     private String systemResolution = "Unknown";
     
-    public FastThemeTerminal() {
+    public TerminalDemo() {
         // No decorations from Swing - we use native
         setTitle("FastTheme Terminal");
         setSize(960, 500);
