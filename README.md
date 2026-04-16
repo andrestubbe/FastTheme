@@ -76,7 +76,7 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 </repositories>
 
 <dependency>
-    <groupId>com.github.andrestubbe</groupId>
+    <groupId>io.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
     <version>v1.2.0</version>
 </dependency>
@@ -92,7 +92,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasttheme:v1.2.0'
+    implementation 'io.github.andrestubbe:fasttheme:v1.2.0'
 }
 ```
 
