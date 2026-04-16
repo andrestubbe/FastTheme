@@ -7,14 +7,37 @@ import java.awt.image.BufferedImage;
 import javax.swing.text.*;
 
 /**
- * TerminalDemo - Example demonstrating FastTheme window styling API.
+ * TerminalDemo - Window Styling Example using FastTheme v1.3.0 API.
  * 
- * This demo uses the static methods from FastTheme class:
- * - FastTheme.getWindowHandle()
- * - FastTheme.setWindowTransparency()
- * - FastTheme.setTitleBarColor()
- * - FastTheme.setTitleBarDarkMode()
- * etc.
+ * <p>This demo showcases the generic window styling capabilities of FastTheme:
+ * <ul>
+ *   <li>Custom titlebar colors matching content</li>
+ *   <li>Window transparency (80% opacity)</li>
+ *   <li>Native dark mode integration</li>
+ *   <li>Real-time system information (DPI, resolution, refresh rate)</li>
+ *   <li>Custom window icon generation</li>
+ * </ul>
+ * 
+ * <p><b>Key Concept:</b> FastTheme extracts the native Windows HWND from any Swing
+ * window and applies DWM (Desktop Window Manager) attributes directly.</p>
+ * 
+ * <p><b>Usage:</b></p>
+ * <pre>
+ * // 1. Make window visible first (required for HWND extraction)
+ * frame.setVisible(true);
+ * 
+ * // 2. Get native handle
+ * long hwnd = FastTheme.getWindowHandle(frame);
+ * 
+ * // 3. Apply styling
+ * FastTheme.setTitleBarColor(hwnd, 12, 12, 12);  // Dark gray
+ * FastTheme.setWindowTransparency(hwnd, 204);   // 80% opacity
+ * </pre>
+ * 
+ * @see FastTheme#getWindowHandle(java.awt.Component)
+ * @see FastTheme#setTitleBarColor(long, int, int, int)
+ * @see FastTheme#setWindowTransparency(long, int)
+ * @version 1.3.0
  */
 public class TerminalDemo extends JFrame {
     

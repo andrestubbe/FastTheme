@@ -1,7 +1,40 @@
 package fasttheme;
 
 /**
- * Basic FastTheme Demo - Monitor theme and display changes
+ * ThemeDemo - Display Monitoring Example using FastTheme v1.3.0 API.
+ * 
+ * <p>This demo showcases the display monitoring capabilities of FastTheme:
+ * <ul>
+ *   <li>Real-time resolution change detection</li>
+ *   <li>DPI scaling change events</li>
+ *   <li>Display orientation monitoring</li>
+ *   <li>Windows theme (dark/light mode) detection</li>
+ *   <li>Refresh rate information</li>
+ * </ul>
+ * 
+ * <p><b>How it works:</b> FastTheme creates a hidden message-only window and
+ * background thread that listens for Windows system events:
+ * <ul>
+ *   <li>WM_DISPLAYCHANGE - Resolution/DPI changes</li>
+ *   <li>WM_SETTINGCHANGE - Theme changes</li>
+ * </ul>
+ * 
+ * <p><b>Usage:</b> Run and try changing display settings or Windows theme.</p>
+ * 
+ * <p><b>Events received:</b></p>
+ * <pre>
+ * Initial State:
+ *   Display: 1920x1080 @ 96DPI
+ *   Refresh: 144Hz
+ *   Theme: DARK
+ * 
+ * Resolution changed: 2560x1440 @ 96DPI
+ * Theme changed: LIGHT MODE
+ * </pre>
+ * 
+ * @see FastTheme#startMonitoring()
+ * @see FastTheme.ThemeListener
+ * @version 1.3.0
  */
 public class ThemeDemo {
     public static void main(String[] args) {
