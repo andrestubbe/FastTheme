@@ -393,9 +393,8 @@ mvn clean package
 ```
 FastTheme/
 ├── src/main/
-│   ├── java/fasttheme/
-│   │   ├── FastTheme.java           # Main API class
-│   │   └── Demo.java                # Display monitoring demo
+│   └── java/fasttheme/
+│       └── FastTheme.java           # Main API class
 │   └── resources/native/
 │       └── fasttheme.dll            # Native JNI library
 ├── native/
@@ -405,7 +404,8 @@ FastTheme/
 ├── examples/
 │   └── 00-basic-usage/
 │       └── src/main/java/fasttheme/
-│           └── TerminalDemo.java    # Window styling demo
+│           ├── TerminalDemo.java    # Window styling demo
+│           └── ThemeDemo.java       # Display monitoring demo
 ├── compile.bat                      # Windows build script
 ├── pom.xml                          # Maven configuration
 └── README.md                        # This file
