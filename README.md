@@ -101,13 +101,18 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 </repositories>
 
 <dependency>
-    <groupId>com.github.andrestubbe</groupId>
+    <groupId>io.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>v1.3.1</version>
+    <version>v1.3.9</version>
+</dependency>
+<dependency>
+    <groupId>io.github.andrestubbe</groupId>
+    <artifactId>fastcore</artifactId>
+    <version>v1.0.0</version>
 </dependency>
 ```
 
-FastCore is automatically included as a transitive dependency.
+> **Note:** FastCore handles native library loading from the JAR automatically. Both dependencies are required.
 
 ### Gradle (JitPack)
 
@@ -117,7 +122,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasttheme:v1.3.1'
+    implementation 'io.github.andrestubbe:fasttheme:v1.3.9'
+    implementation 'io.github.andrestubbe:fastcore:v1.0.0'
 }
 ```
 
@@ -126,7 +132,7 @@ dependencies {
 Download JAR from [Releases](https://github.com/andrestubbe/FastTheme/releases)
 
 **Required:** FastCore is automatically included via Maven. For direct download, get both:
-- `fasttheme-1.3.1.jar` — Main library
+- `fasttheme-1.3.9.jar` — Main library
 - `fastcore-1.0.0.jar` — [JNI loader](https://github.com/andrestubbe/FastCore/releases)
 
 ---
