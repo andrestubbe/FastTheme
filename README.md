@@ -383,6 +383,11 @@ See [COMPILE.md](COMPILE.md) for detailed build instructions.
 
 ## Changelog
 
+### v1.3.9 — FatJar Distribution with Native DLL
+- ✨ **FatJar Distribution** — Native DLL bundled inside JAR, automatic extraction
+- ✨ **FastCore Integration** — Cross-platform native library loading
+- ✨ **JitPack Ready** — Simple Maven dependency, no manual setup
+
 ### v1.3.0 — Generic Window Styling API
 - ✨ **Generic JNI API** — Renamed JNI methods to `FastTheme_*`
 - ✨ **Static Native Methods** — All window styling via `FastTheme.*` static methods

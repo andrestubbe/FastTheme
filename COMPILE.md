@@ -38,9 +38,14 @@ mvn compile exec:java
 
 <dependencies>
     <dependency>
-        <groupId>com.github.andrestubbe</groupId>
+        <groupId>io.github.andrestubbe</groupId>
         <artifactId>fasttheme</artifactId>
-        <version>v1.3.1</version>
+        <version>v1.3.9</version>
+    </dependency>
+    <dependency>
+        <groupId>io.github.andrestubbe</groupId>
+        <artifactId>fastcore</artifactId>
+        <version>v1.0.0</version>
     </dependency>
 </dependencies>
 ```
@@ -53,7 +58,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasttheme:v1.3.1'
+    implementation 'io.github.andrestubbe:fasttheme:v1.3.9'
+    implementation 'io.github.andrestubbe:fastcore:v1.0.0'
 }
 ```
 
