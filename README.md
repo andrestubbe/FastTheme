@@ -101,9 +101,9 @@ Unlike Swing Look & Feels that replace rendering, FastTheme controls the **nativ
 </repositories>
 
 <dependency>
-    <groupId>io.github.andrestubbe</groupId>
+    <groupId>com.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>v1.3.0</version>
+    <version>v1.3.1</version>
 </dependency>
 ```
 
@@ -117,18 +117,17 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.andrestubbe:fasttheme:v1.3.0'
+    implementation 'com.github.andrestubbe:fasttheme:v1.3.1'
 }
 ```
 
-### Direct Download (Both JARs Required)
+### Direct Download
 
-- `fasttheme-1.3.0.jar` — Main library with DLL
+Download JAR from [Releases](https://github.com/andrestubbe/FastTheme/releases)
+
+**Required:** FastCore is automatically included via Maven. For direct download, get both:
+- `fasttheme-1.3.1.jar` — Main library
 - `fastcore-1.0.0.jar` — [JNI loader](https://github.com/andrestubbe/FastCore/releases)
-
-```bash
-java -cp "fasttheme-1.3.0.jar:fastcore-1.0.0.jar:." YourApp
-```
 
 ---
 
@@ -372,44 +371,7 @@ All window styling methods are `public static native` and can be called from any
 
 ## Build from Source
 
-### Prerequisites
-
-- Java 17+ JDK
-- Visual Studio 2022 (or Build Tools)
-- Maven 3.8+
-
-### Windows Build
-
-```bash
-# Using the provided batch file (compiles Java + native DLL)
-compile.bat
-
-# Or with Maven
-mvn clean package
-```
-
-### Project Structure
-
-```
-FastTheme/
-├── src/main/
-│   └── java/fasttheme/
-│       └── FastTheme.java           # Main API class
-│   └── resources/native/
-│       └── fasttheme.dll            # Native JNI library
-├── native/
-│   ├── FastTheme.cpp                # JNI implementation
-│   ├── FastTheme.h                  # JNI header
-│   └── FastTheme.def                # DLL exports
-├── examples/
-│   └── 00-basic-usage/
-│       └── src/main/java/fasttheme/
-│           ├── WindowDemo.java    # Window styling demo
-│           └── ConsoleDemo.java   # Display monitoring demo
-├── compile.bat                      # Windows build script
-├── pom.xml                          # Maven configuration
-└── README.md                        # This file
-```
+See [COMPILE.md](COMPILE.md) for detailed build instructions.
 
 ---
 
