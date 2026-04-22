@@ -1,4 +1,4 @@
-# FastTheme — Native Windows Theme & Window Styling API for Java
+# FastTheme — Native Windows Theme & Window Styling API for Java [ALPHA]
 
 **Lightweight native Windows window styling for Java applications.**
 
