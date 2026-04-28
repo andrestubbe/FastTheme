@@ -18,7 +18,6 @@
 - [Running the Demo](#running-the-demo)
 - [Build Requirements](#build-requirements)
 - [Project Structure](#project-structure)
-- [Release Checklist](#release-checklist)
 - [License](#license)
 
 ## Features
@@ -135,14 +134,6 @@ fasttheme/
 ├── LICENSE                 # MIT License
 └── README.md               # You are here
 ```
-
-## Release Checklist
-- [ ] Version updated in `pom.xml`
-- [ ] `CHANGELOG.md` updated
-- [ ] Native DLLs built: `.\compile.bat`
-- [ ] Comparison Demo certified: `.\run-demo.bat`
-- [ ] Git tag created (e.g., `v0.1.0`)
-- [ ] GitHub Release created with FatJar asset
 
 ---
 
