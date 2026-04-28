@@ -23,6 +23,7 @@
 - **🎨 Native Window Styling**: Apply glass/acrylic effects and custom titlebars.
 - **🌓 Theme Detection**: Check if the system is currently in Dark or Light mode.
 - **⚡ Zero Overhead**: Direct DWM attribute manipulation with no performance cost.
+- **🔧 C++ JNI Bridge**: Native C++ implementation for Windows DWM API integration.
 
 ## Quick Start
 
