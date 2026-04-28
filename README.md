@@ -16,8 +16,8 @@
 - [Quick Start](#quick-start)
 - [Installation](#installation)
 - [Running the Demo](#running-the-demo)
-- [Build Requirements](#build-requirements)
-- [Project Structure](#project-structure)
+- [Build from Source](#build-from-source)
+- [Release Checklist](#release-checklist)
 - [License](#license)
 
 ## Features
@@ -115,29 +115,11 @@ We've included a sleek terminal-style demo to showcase the styling capabilities.
 
 ---
 
-## Build Requirements
+## Build from Source
 - **JDK 17+**
 - **Windows 10/11** (DWM API required)
 - **Visual Studio 2022/2019** (if building from source)
 
-## Project Structure
-
-```text
-fasttheme/
-├── examples/               # ⭐ Side-by-side comparison demo
-├── native/                 # C++ JNI source (DWM styling engine)
-├── src/
-│   └── main/java/          # Java API and JNI bridge
-├── compile.bat             # Native build & install script
-├── run-demo.bat            # One-click demo launcher
-├── pom.xml                 # Maven configuration
-├── LICENSE                 # MIT License
-└── README.md               # You are here
-```
-
----
-
-## 🛠️ Build from Source
 See [COMPILE.md](COMPILE.md) for detailed instructions on building the JNI bridge and Java library from source.
 
 ## 📄 License
