@@ -21,13 +21,13 @@
 - [Release Checklist](#release-checklist)
 - [License](#license)
 
-## ✨ Features
+## Features
 - **🎨 Native Window Styling**: Apply glass/acrylic effects and custom titlebars.
 - **🌓 Theme Detection**: Check if the system is currently in Dark or Light mode.
 - **⚡ Zero Overhead**: Direct DWM attribute manipulation with no performance cost.
 - **📦 Ecosystem Ready**: Built for the FastJava Blueprint architecture.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone the repository
@@ -41,7 +41,7 @@ cd fasttheme
 .\run-demo.bat
 ```
 
-## 📦 Installation
+## Installation
 
 ### Maven (via JitPack)
 Add the JitPack repository and the dependencies to your `pom.xml`:
@@ -109,19 +109,19 @@ if (hwnd != 0) {
 }
 ```
 
-## 🎮 Running the Demo
+## Running the Demo
 We've included a sleek terminal-style demo to showcase the styling capabilities. To run it:
 1. Run `compile.bat` to build the native library.
 2. Run `run-demo.bat` to launch the example window.
 
 ---
 
-## 🛠️ Build Requirements
+## Build Requirements
 - **JDK 17+**
 - **Windows 10/11** (DWM API required)
 - **Visual Studio 2022/2019** (if building from source)
 
-## 📦 Project Structure
+## Project Structure
 
 ```text
 fasttheme/
@@ -136,7 +136,7 @@ fasttheme/
 └── README.md               # You are here
 ```
 
-## ✅ Release Checklist
+## Release Checklist
 - [ ] Version updated in `pom.xml`
 - [ ] `CHANGELOG.md` updated
 - [ ] Native DLLs built: `.\compile.bat`
