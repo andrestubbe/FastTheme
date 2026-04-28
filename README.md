@@ -84,10 +84,12 @@ dependencies {
 ```
 
 ### Direct Download (No Build Tool)
-If you aren't using a build tool, download the **FatJar** from [Releases](https://github.com/andrestubbe/fasttheme/releases):
-- `fasttheme-0.1.0-fat.jar` — Includes everything (Library + FastCore + DLLs).
+Download these JARs from [Releases](https://github.com/andrestubbe/fasttheme/releases):
 
-Just add this single file to your project's classpath and you're ready to go.
+1. **`fasttheme-0.1.0.jar`** — Main Styling Library (includes native DLLs)
+2. **`fastcore-v1.0.0.jar`** — [Native JNI Loader](https://github.com/andrestubbe/FastCore/releases) (Required)
+
+Just add both files to your project's classpath and you're ready to go.
 
 ### Basic Usage
 ```java
