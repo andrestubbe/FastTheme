@@ -120,7 +120,8 @@ echo - Native Window Styling (Transparency, Colors)
 echo - Windows 11 Immersive Dark Mode support
 echo - Native HWND extraction via JAWT
 echo.
-echo JAR: target/fasttheme-0.1.0.jar
-echo DLL: src/main/resources/native/fasttheme.dll
+echo Standard JAR: target/fasttheme-0.1.0.jar
+echo Fat JAR     : target/fasttheme-0.1.0-fat.jar
+echo Native DLL  : src/main/resources/native/fasttheme.dll
 echo.
 pause

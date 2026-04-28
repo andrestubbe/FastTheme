@@ -3,7 +3,7 @@
 **FastTheme** is a lightweight, native Java library for styling Windows windows (titlebars, transparency, dark mode) using JNI and the Windows DWM (Desktop Window Manager) API.
 
 > [!IMPORTANT]
-> **v2.0.0 is a major refactor.** Display monitoring (Resolution/DPI) has been moved to the **FastDisplay** module. FastTheme now focuses exclusively on high-performance window styling and theme detection.
+> **v0.1.0 is a major refactor.** Display monitoring (Resolution/DPI) has been moved to the **FastDisplay** module. FastTheme now focuses exclusively on high-performance window styling and theme detection.
 
 ## ✨ Features
 - **Native Transparency**: Apply glass/acrylic effects to any Swing window.
@@ -21,9 +21,15 @@ Add this to your `pom.xml`:
 <dependency>
     <groupId>io.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>2.0.0-alpha</version>
+    <version>0.1.0</version>
 </dependency>
 ```
+
+### Direct Download (No Build Tool)
+If you aren't using Maven or Gradle, download the **FatJar** from [Releases](https://github.com/andrestubbe/fasttheme/releases):
+- `fasttheme-0.1.0-fat.jar` — Includes everything (Library + FastCore + DLLs).
+
+Just add this single file to your project's classpath and you're ready to go.
 
 ### Basic Usage
 ```java
