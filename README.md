@@ -1,14 +1,21 @@
-# FastTheme v0.1.0 🎨
+# FastTheme — Native Windows Theme & Titlebar Styling for Java [v0.1.0]
 
-**FastTheme** is a lightweight, native Java library for styling Windows windows (titlebars, transparency, dark mode) using JNI and the Windows DWM (Desktop Window Manager) API.
+**Lightweight alternative to FlatLAF when you only need real OS titlebar styling, window opacity, and theme detection.**
 
+[![Status](https://img.shields.io/badge/status-v0.1.0--alpha-orange.svg)]()
+[![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+**FastTheme** brings real Windows theming to Java applications: **Dark/Light Mode, Titlebar Styling, and Window Opacity** — all native, without replacing your Look-and-Feel.
 
 ## ✨ Features
-- **Native Transparency**: Apply glass/acrylic effects to any Swing window.
-- **Custom Titlebars**: Set RGB colors for the titlebar background and text (Windows 11+).
-- **Immersive Dark Mode**: Toggle native dark mode for window borders and system menus.
-- **Theme Detection**: Check if the system is currently in Dark or Light mode.
-- **Zero Overhead**: Direct DWM attribute manipulation with no performance cost.
+- **🎨 Native Window Styling**: Apply glass/acrylic effects and custom titlebars.
+- **🌓 Theme Detection**: Check if the system is currently in Dark or Light mode.
+- **⚡ Zero Overhead**: Direct DWM attribute manipulation with no performance cost.
+- **📦 Ecosystem Ready**: Built for the FastJava Blueprint architecture.
 
 ## 🚀 Quick Start
 
