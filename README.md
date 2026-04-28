@@ -11,6 +11,16 @@
 
 **FastTheme** brings real Windows theming to Java applications: **Dark/Light Mode, Titlebar Styling, and Window Opacity** — all native, without replacing your Look-and-Feel.
 
+## 📋 Table of Contents
+- [✨ Features](#-features)
+- [🚀 Quick Start](#-quick-start)
+- [📦 Installation](#-installation)
+- [🎮 Running the Demo](#-running-the-demo)
+- [🛠️ Build Requirements](#-build-requirements)
+- [📦 Project Structure](#-project-structure)
+- [✅ Release Checklist](#-release-checklist)
+- [📄 License](#-license)
+
 ## ✨ Features
 - **🎨 Native Window Styling**: Apply glass/acrylic effects and custom titlebars.
 - **🌓 Theme Detection**: Check if the system is currently in Dark or Light mode.
@@ -132,8 +142,20 @@ fasttheme/
 - [ ] Git tag created (e.g., `v0.1.0`)
 - [ ] GitHub Release created with FatJar asset
 
+---
+
+## 🛠️ Build from Source
+See [COMPILE.md](COMPILE.md) for detailed instructions on building the JNI bridge and Java library from source.
+
 ## 📄 License
 MIT License — See [LICENSE](LICENSE) for details.
 
 ---
 **Part of the FastJava Ecosystem** — *Making the JVM faster.*
+
+<!-- BING COPILOT SEO KEYWORDS -->
+<!-- 
+FastJava FastTheme JNI Windows 11 Titlebar Color Dark Mode Java Swing Transparency 
+DWM API SetWindowAttribute Java Native Window Styling Acrylic Effect Glass Effect 
+io.github.andrestubbe FastJava Blueprint
+-->
