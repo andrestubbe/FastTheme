@@ -1,9 +1,14 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+:: Change to script directory
+cd /d "%~dp0"
+
 echo ===========================================
 echo FastTheme JNI Bridge Build Script
 echo ===========================================
+echo.
+echo Running in: %CD%
 echo.
 
 :: Check for Java
@@ -58,67 +63,64 @@ if errorlevel 1 (
 if not exist build mkdir build
 if not exist build\classes mkdir build\classes
 
-:: Compile Java classes first
+:: Compile JNI DLL
 echo.
-echo Compiling Java classes...
-"%JAVA_HOME%\bin\javac" -d build\classes src\main\java\fasttheme\*.java
-
-:: Generate JNI header
-echo Generating JNI header...
-"%JAVA_HOME%\bin\javac" -h native -d build\classes src\main\java\fasttheme\FastTheme.java
-
-:: Compile
-echo.
-echo Compiling FastTheme JNI Bridge...
+echo Compiling FastTheme JNI Bridge (C++)...
 echo =====================================================
-cl /LD /Fe:build\fasttheme.dll ^
+cl /LD /Fe:build\fasttheme.dll /Fo:build\ ^
     native\FastTheme.cpp ^
-    user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib ^
+    user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib jawt.lib ^
     /I"%JAVA_HOME%\include" ^
     /I"%JAVA_HOME%\include\win32" ^
     /EHsc /std:c++17 /O2 /W3 ^
-    /link /DEF:native\FastTheme.def
+    /link /LIBPATH:"%JAVA_HOME%\lib" /DEF:native\FastTheme.def
 
-:: Check result
 if %errorlevel% neq 0 (
     echo.
     echo =====================================================
-    echo COMPILATION FAILED
+    echo C++ COMPILATION FAILED
     echo =====================================================
-    echo Check errors above
     pause
     exit /b 1
 )
 
-:: Copy to resources
+:: Copy DLL to resources (so Maven can bundle it)
 echo.
 echo Copying DLL to resources...
-copy build\fasttheme.dll src\main\resources\native\fasttheme.dll
+if not exist src\main\resources\native mkdir src\main\resources\native
+copy /Y build\fasttheme.dll src\main\resources\native\fasttheme.dll
 
-:: Create manifest file
-echo Manifest-Version: 1.0 > build\manifest.txt
-echo Main-Class: fasttheme.Demo >> build\manifest.txt
+:: Cleanup temporary native artifacts
+del /Q build\*.obj
+del /Q build\*.exp
+del /Q build\*.lib
 
-:: Create fat jar
-echo Creating FastTheme.jar...
-cd build\classes
-"%JAVA_HOME%\bin\jar" cfm ..\FastTheme.jar ..\manifest.txt fasttheme\*.class
-cd ..\..
-
-:: Copy DLL to same directory as jar for easy testing
-copy build\fasttheme.dll FastTheme.dll
+:: Compile Java and Install to Local Maven Repo
+echo.
+echo Compiling Java and Installing to Local Maven Repo...
+call mvn install -DskipTests
+if %errorlevel% neq 0 (
+    echo.
+    echo =====================================================
+    echo MAVEN BUILD FAILED
+    echo =====================================================
+    echo Ensure Maven is installed and FastCore is accessible.
+    pause
+    exit /b 1
+)
 
 :: Success
 echo.
 echo =====================================================
-echo BUILD SUCCESSFUL!
+echo BUILD SUCCESSFUL! (v0.1.0)
 echo =====================================================
 echo.
 echo FastTheme JNI Bridge created with:
-echo - Resolution change detection (WM_DISPLAYCHANGE)
-echo - DPI scale change detection (WM_DPICHANGED)
-echo - Windows display settings monitoring
+echo - Native Window Styling (Transparency, Colors)
+echo - Windows 11 Immersive Dark Mode support
+echo - Native HWND extraction via JAWT
 echo.
-echo Run demo with: java -jar FastTheme.jar
+echo JAR: target/fasttheme-0.1.0.jar
+echo DLL: src/main/resources/native/fasttheme.dll
 echo.
 pause
