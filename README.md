@@ -12,14 +12,14 @@
 **FastTheme** brings real Windows theming to Java applications: **Dark/Light Mode, Titlebar Styling, and Window Opacity** — all native, without replacing your Look-and-Feel.
 
 ## 📋 Table of Contents
-- [✨ Features](#-features)
-- [🚀 Quick Start](#-quick-start)
-- [📦 Installation](#-installation)
-- [🎮 Running the Demo](#-running-the-demo)
-- [🛠️ Build Requirements](#-build-requirements)
-- [📦 Project Structure](#-project-structure)
-- [✅ Release Checklist](#-release-checklist)
-- [📄 License](#-license)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Running the Demo](#running-the-demo)
+- [Build Requirements](#build-requirements)
+- [Project Structure](#project-structure)
+- [Release Checklist](#release-checklist)
+- [License](#license)
 
 ## ✨ Features
 - **🎨 Native Window Styling**: Apply glass/acrylic effects and custom titlebars.
