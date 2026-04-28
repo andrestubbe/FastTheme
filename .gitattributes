@@ -2,9 +2,10 @@
 *.java linguist-detectable=true
 *.java linguist-language=Java
 
-# Exclude C++ files from language stats completely
+# Exclude everything else from language stats
 *.cpp linguist-detectable=false
 *.h linguist-detectable=false
+*.bat linguist-detectable=false
 native/* linguist-detectable=false
 
 # Exclude binary and build files
@@ -13,6 +14,7 @@ native/* linguist-detectable=false
 *.lib linguist-detectable=false
 *.exp linguist-detectable=false
 build/* linguist-detectable=false
+target/* linguist-detectable=false
 
 # Documentation
 *.md linguist-documentation
