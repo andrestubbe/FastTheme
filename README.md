@@ -17,7 +17,6 @@
 - [Installation](#installation)
 - [Running the Demo](#running-the-demo)
 - [Build from Source](#build-from-source)
-- [Release Checklist](#release-checklist)
 - [License](#license)
 
 ## Features
