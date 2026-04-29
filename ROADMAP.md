@@ -2,19 +2,17 @@
 
 ## Upcoming Features
 
-### Native System Theme Detection (Windows 10/11)
+### Real-time Runtime Theme Detection
 **Status:** Planning / Implementation
 
-Implement a robust, registry-based method to detect the system's Dark/Light mode preference. This ensures instant detection at startup and provides a reliable source of truth.
+While startup detection is already implemented, FastTheme needs a way to react to theme changes **at runtime** (e.g., when the user switches Windows modes while the app is running).
 
 **Implementation Details:**
-- **Registry Key:** `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
-- **Logic:** 
-  - `AppsUseLightTheme` (Value `0` = Dark, `1` = Light)
-  - `SystemUsesLightTheme` (Value `0` = Dark, `1` = Light)
+- **Mechanism:** Listen for `WM_SETTINGCHANGE` native events via a hidden message window or JNI hook.
+- **Source of Truth:** Monitor the registry key `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`.
 
 **Goal:**
-- [ ] Implement `isDarkMode()` and `isLightMode()` methods using these registry keys.
-- [ ] **Bonus:** Add a Native Event Listener to detect theme changes in real-time without polling (using `WM_SETTINGCHANGE`).
+- [ ] Implement a `ThemeChangeListener` interface.
+- [ ] Add native logic to trigger events when `AppsUseLightTheme` changes.
 
-**Priority:** High - Essential for "Immersive Dark Mode" features.
+**Priority:** High - Crucial for apps that stay open for long periods.
