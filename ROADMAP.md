@@ -2,21 +2,19 @@
 
 ## Upcoming Features
 
-### System Theme Detection at Startup
-**Status:** Research Phase
+### Native System Theme Detection (Windows 10/11)
+**Status:** Planning / Implementation
 
-Currently, FastTheme detects the system theme (Dark/Light mode) via JNI calls. However, a more robust approach would be to read the Windows registry key that stores this preference.
+Implement a robust, registry-based method to detect the system's Dark/Light mode preference. This ensures instant detection at startup and provides a reliable source of truth.
 
-**Goal:** Find and implement a reliable registry-based method to detect if the system is in Dark or Light mode immediately at application startup, without relying on real-time JNI polling.
+**Implementation Details:**
+- **Registry Key:** `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
+- **Logic:** 
+  - `AppsUseLightTheme` (Value `0` = Dark, `1` = Light)
+  - `SystemUsesLightTheme` (Value `0` = Dark, `1` = Light)
 
-**Registry Target (Research):**
-- Investigate `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
-- Key: `AppsUseLightTheme` or `SystemUsesLightTheme`
-- Value: `0` = Dark Mode, `1` = Light Mode
+**Goal:**
+- [ ] Implement `isDarkMode()` and `isLightMode()` methods using these registry keys.
+- [ ] **Bonus:** Add a Native Event Listener to detect theme changes in real-time without polling (using `WM_SETTINGCHANGE`).
 
-**Challenges:**
-- Need error-free real-time detection
-- Must handle registry access permissions gracefully
-- Should fallback to current JNI method if registry read fails
-
-**Priority:** High - This would make theme detection instant and more reliable.
+**Priority:** High - Essential for "Immersive Dark Mode" features.
