@@ -1,148 +1,164 @@
+/**
+ * @file FastTheme.cpp
+ * @brief Native Windows Theme & Styling Engine for Java (FastTheme).
+ * 
+ * This module utilizes the Windows Desktop Window Manager (DWM) API and 
+ * the Win32 Layered Window API to apply modern visual styles to Java windows.
+ * 
+ * Key responsibilities:
+ * - Toggling Immersive Dark Mode.
+ * - Applying Windows 11 materials (Mica).
+ * - Configuring Window Corner Styles.
+ * - Managing window-wide transparency.
+ * 
+ * @author FastJava Team
+ * @version 0.1.0
+ */
+
 #include <jni.h>
 #include <windows.h>
 #include <dwmapi.h>
-#include <stdio.h>
-#include <jawt.h>
 #include <jawt_md.h>
 
-#pragma comment(lib, "user32.lib")
 #pragma comment(lib, "dwmapi.lib")
-#pragma comment(lib, "advapi32.lib")
+#pragma comment(lib, "jawt.lib")
 
-// DWM constants for Windows 11 titlebar styling
-#ifndef DWMWA_CAPTION_COLOR
-#define DWMWA_CAPTION_COLOR 35
-#endif
-#ifndef DWMWA_TEXT_COLOR
-#define DWMWA_TEXT_COLOR 36
-#endif
+/**
+ * @brief DWM Attribute constants for Windows 11 features.
+ */
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
+#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
+#define DWMWA_WINDOW_CORNER_PREFERENCE 33
+#endif
+
+#ifndef DWMWA_MICA_EFFECT
+#define DWMWA_MICA_EFFECT 38
+#endif
 
 /**
- * @brief Extracts native Windows HWND from Java AWT Component
+ * @brief Helper to check system dark mode via the Windows Registry.
+ * 
+ * @return true if 'AppsUseLightTheme' is set to 0.
  */
-HWND GetHwndFromComponent(JNIEnv* env, jobject component) {
+bool IsDarkModeEnabled() {
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD value;
+        DWORD size = sizeof(value);
+        if (RegQueryValueExA(hKey, "AppsUseLightTheme", NULL, NULL, (LPBYTE)&value, &size) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return value == 0;
+        }
+        RegCloseKey(hKey);
+    }
+    return false;
+}
+
+extern "C" {
+
+/**
+ * @brief Native implementation of HWND extraction.
+ * 
+ * Walks up the component hierarchy to find the top-level AWT Frame.
+ */
+JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jclass clazz, jobject component) {
     JAWT awt;
-    awt.version = JAWT_VERSION_9;
-    if (!JAWT_GetAWT(env, &awt)) return NULL;
+    awt.version = JAWT_VERSION_1_7;
+    if (JAWT_GetAWT(env, &awt) == JNI_FALSE) return 0;
 
     JAWT_DrawingSurface* ds = awt.GetDrawingSurface(env, component);
-    if (ds == NULL) return NULL;
-
-    jint lock = ds->Lock(ds);
-    if ((lock & JAWT_LOCK_ERROR) != 0) {
-        awt.FreeDrawingSurface(ds);
-        return NULL;
-    }
-
+    if (!ds) return 0;
+    ds->Lock(ds);
     JAWT_DrawingSurfaceInfo* dsi = ds->GetDrawingSurfaceInfo(ds);
-    if (dsi == NULL) {
-        ds->Unlock(ds);
-        awt.FreeDrawingSurface(ds);
-        return NULL;
-    }
-
-    JAWT_Win32DrawingSurfaceInfo* win32Info = (JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo;
-    HWND hwnd = (win32Info != NULL) ? win32Info->hwnd : NULL;
-
+    HWND hwnd = ((JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo)->hwnd;
     ds->FreeDrawingSurfaceInfo(dsi);
     ds->Unlock(ds);
     awt.FreeDrawingSurface(ds);
 
-    // Walk up to find the actual frame window
+    // Walk up to find the actual top-level frame window
     if (hwnd != NULL) {
         HWND parent = GetParent(hwnd);
         while (parent != NULL) {
             char className[256];
             GetClassNameA(parent, className, sizeof(className));
-            if (strstr(className, "SunAwtFrame") != NULL) return parent;
+            if (strstr(className, "SunAwtFrame") != NULL) return (jlong)parent;
             parent = GetParent(parent);
         }
     }
-    return hwnd;
+    return (jlong)hwnd;
 }
 
 /**
- * @brief Checks if Windows is currently using dark mode for apps
+ * @brief Sets window transparency using SetLayeredWindowAttributes.
  */
-static bool IsDarkModeEnabled() {
-    HKEY hKey;
-    DWORD value = 1; // Default to Light
-    DWORD dataSize = sizeof(value);
-    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        RegQueryValueExA(hKey, "AppsUseLightTheme", NULL, NULL, (LPBYTE)&value, &dataSize);
-        RegCloseKey(hKey);
-    }
-    return (value == 0);
-}
-
-// ============================================================================
-// JNI EXPORTS
-// ============================================================================
-
-extern "C" {
-
-JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jclass clazz, jobject component) {
-    return (jlong)GetHwndFromComponent(env, component);
-}
-
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv* env, jclass clazz, jlong hwndLong, jint alpha) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
-    if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
     LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-    if (!(exStyle & WS_EX_LAYERED)) SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
     return SetLayeredWindowAttributes(hwnd, 0, (BYTE)alpha, LWA_ALPHA) ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
-    HWND hwnd = (HWND)hwndLong;
-    if (!IsWindow(hwnd)) return JNI_FALSE;
-    COLORREF color = RGB(r, g, b);
-    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &color, sizeof(color));
-    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
-}
-
-JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
-    HWND hwnd = (HWND)hwndLong;
-    if (!IsWindow(hwnd)) return JNI_FALSE;
-    COLORREF color = RGB(r, g, b);
-    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, &color, sizeof(color));
-    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
-}
-
+/**
+ * @brief Toggles Immersive Dark Mode via DwmSetWindowAttribute.
+ */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarDarkMode(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     BOOL darkMode = enabled ? TRUE : FALSE;
     HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
-    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief Sets the title bar color using DWMWA_CAPTION_COLOR (Windows 11+).
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    COLORREF color = RGB(r, g, b);
+    HRESULT hr = DwmSetWindowAttribute(hwnd, 35, &color, sizeof(color));
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+/**
+ * @brief Sets the title bar text color using DWMWA_TEXT_COLOR (Windows 11+).
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    COLORREF color = RGB(r, g, b);
+    HRESULT hr = DwmSetWindowAttribute(hwnd, 36, &color, sizeof(color));
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+/**
+ * @brief Enables the Mica material effect (Windows 11+).
+ */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_enableMica(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
-    int backdrop = enabled ? 2 : 0; // 2 = Mica, 0 = None
-    HRESULT hr = DwmSetWindowAttribute(hwnd, 38, &backdrop, sizeof(backdrop));
+    int backdrop = enabled ? 2 : 0; // 2 = Mica Backdrop
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &backdrop, sizeof(backdrop));
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief Sets the window corner style preference (Windows 11+).
+ */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setCornerStyle(JNIEnv* env, jclass clazz, jlong hwndLong, jint style) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
-    HRESULT hr = DwmSetWindowAttribute(hwnd, 33, &style, sizeof(style));
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &style, sizeof(style));
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief Checks if the system is in dark mode.
+ */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jclass clazz) {
     return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
 }
