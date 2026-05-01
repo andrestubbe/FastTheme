@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.andrestubbe</groupId>
-    <artifactId>fasttheme-window-demo</artifactId>
+    <groupId>fasttheme.examples</groupId>
+    <artifactId>examples</artifactId>
     <version>0.1.0</version>
-    <packaging>jar</packaging>
-
-    <name>FastTheme Comparison Demo</name>
-    <description>Side-by-side comparison: Standard Swing vs FastTheme</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -20,17 +15,15 @@
     </properties>
 
     <dependencies>
-        <!-- FastTheme (From local Maven Repo after mvn install) -->
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
             <artifactId>fasttheme</artifactId>
             <version>0.1.0</version>
         </dependency>
-        <!-- FastCore required for native library loading -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastcore</artifactId>
-            <version>1.0.0</version>
+            <version>v1.0.0</version>
         </dependency>
     </dependencies>
 
@@ -41,13 +34,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>fasttheme.ComparisonDemo</mainClass>
-                    <systemProperties>
-                        <systemProperty>
-                            <key>java.library.path</key>
-                            <value>${project.basedir}/../../src/main/resources/native</value>
-                        </systemProperty>
-                    </systemProperties>
+                    <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
             </plugin>
         </plugins>

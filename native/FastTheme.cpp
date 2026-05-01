@@ -128,6 +128,21 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarDarkMode(JNIEnv* 
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_enableMica(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    int backdrop = enabled ? 2 : 0; // 2 = Mica, 0 = None
+    HRESULT hr = DwmSetWindowAttribute(hwnd, 38, &backdrop, sizeof(backdrop));
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setCornerStyle(JNIEnv* env, jclass clazz, jlong hwndLong, jint style) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    HRESULT hr = DwmSetWindowAttribute(hwnd, 33, &style, sizeof(style));
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jclass clazz) {
     return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
 }

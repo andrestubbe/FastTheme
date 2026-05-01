@@ -5,4 +5,6 @@ EXPORTS
     Java_fasttheme_FastTheme_setTitleBarColor
     Java_fasttheme_FastTheme_setTitleBarTextColor
     Java_fasttheme_FastTheme_setTitleBarDarkMode
+    Java_fasttheme_FastTheme_enableMica
+    Java_fasttheme_FastTheme_setCornerStyle
     Java_fasttheme_FastTheme_isSystemDarkMode

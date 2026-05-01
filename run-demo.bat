@@ -3,18 +3,16 @@ setlocal
 cd /d "%~dp0"
 
 echo ===========================================
-echo FastTheme Comparison Demo (v0.1.0)
+echo FastTheme Demo (v0.1.0)
 echo ===========================================
 echo.
-echo Launching Side-by-Side:
-echo [1] Standard Swing Window
-echo [2] FastTheme Styled Window
+echo Launching: Standard Swing vs. FastTheme Native
 echo.
 
 :: Run the demo from the example folder using Maven
-cd examples\01-window-demo
-echo Compiling and Launching Comparison Demo...
-call mvn compile exec:java
+cd examples
+echo Compiling and Launching Demo...
+call mvn compile exec:java -Dexec.mainClass="fasttheme.Demo"
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Demo failed to launch. 
@@ -22,4 +20,4 @@ if %errorlevel% neq 0 (
     pause
 )
 
-cd ..\..
+cd ..

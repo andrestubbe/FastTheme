@@ -78,6 +78,22 @@ public class FastTheme {
     public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
 
     /**
+     * Enables or disables the Windows 11 Mica material effect.
+     * @param hwnd Window handle
+     * @param enabled true to enable Mica
+     * @return true on success
+     */
+    public static native boolean enableMica(long hwnd, boolean enabled);
+
+    /**
+     * Sets the Windows 11 corner style for the window.
+     * @param hwnd Window handle
+     * @param style 0=Default, 1=None, 2=Rounded, 3=Small Rounded
+     * @return true on success
+     */
+    public static native boolean setCornerStyle(long hwnd, int style);
+
+    /**
      * Checks if Windows is currently using dark mode for applications.
      * @return true if dark mode is enabled in Windows settings
      */

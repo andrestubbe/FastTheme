@@ -17,6 +17,7 @@
 - [Installation](#installation)
 - [Running the Demo](#running-the-demo)
 - [Build from Source](#build-from-source)
+- [Roadmap](#roadmap)
 - [License](#license)
 
 ## Features
@@ -108,10 +109,14 @@ if (hwnd != 0) {
 }
 ```
 
-## Running the Demo
-We've included a sleek terminal-style demo to showcase the styling capabilities. To run it:
+## Running the Demos
+We've included two demos to showcase the styling capabilities:
+1. `run-demo.bat`: Side-by-side comparison of Standard Swing vs. FastTheme.
+2. `run-demo2.bat`: The **"Wake Up"** demo — watch a window transition to native styling at runtime by pressing **Enter**.
+
+To run them:
 1. Run `compile.bat` to build the native library.
-2. Run `run-demo.bat` to launch the example window.
+2. Run either `.bat` file to launch the example.
 
 ---
 
@@ -121,6 +126,14 @@ We've included a sleek terminal-style demo to showcase the styling capabilities.
 - **Visual Studio 2022/2019** (if building from source)
 
 See [COMPILE.md](COMPILE.md) for detailed instructions on building the JNI bridge and Java library from source.
+
+## Roadmap
+FastTheme is actively developed. Current priorities include:
+- [ ] **Real-time Runtime Theme Detection**: Automatically react when Windows switches between Dark and Light modes without restarting the app.
+- [ ] **Mica & Acrylic Support**: Enhanced support for Windows 11-specific material effects.
+- [ ] **Titlebar Icon Styling**: Native control over the system menu icon and titlebar text alignment.
+
+See [ROADMAP.md](ROADMAP.md) for detailed implementation plans.
 
 ## License
 MIT License — See [LICENSE](LICENSE) for details.
