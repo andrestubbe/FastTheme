@@ -1,8 +1,8 @@
-# FastTheme — Native Windows Theme & Titlebar Styling for Java [v0.1.0]
+# FastTheme — Native Windows Theme & Titlebar Styling for Java [v0.2.0]
 
 **Lightweight alternative to FlatLAF when you only need real OS titlebar styling, window opacity, and modern Windows 11 materials.**
 
-[![Status](https://img.shields.io/badge/status-v0.1.0--stable-green.svg)]()
+[![Status](https://img.shields.io/badge/status-v0.2.0--stable-green.svg)]()
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -63,7 +63,7 @@ Add the JitPack repository and the dependencies to your `pom.xml`:
     <dependency>
         <groupId>io.github.andrestubbe</groupId>
         <artifactId>fasttheme</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -80,7 +80,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.andrestubbe:fasttheme:0.1.0'
+    implementation 'io.github.andrestubbe:fasttheme:0.2.0'
     implementation 'com.github.andrestubbe:fastcore:v1.0.0'
 }
 ```
@@ -88,7 +88,7 @@ dependencies {
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1.  📦 **[fasttheme-v0.1.0.jar](https://github.com/andrestubbe/fasttheme/releases)**
+1.  📦 **[fasttheme-v0.2.0.jar](https://github.com/andrestubbe/fasttheme/releases)**
 2.  ⚙️ **[fastcore-v1.0.0.jar](https://github.com/andrestubbe/FastCore/releases)**
 
 ---

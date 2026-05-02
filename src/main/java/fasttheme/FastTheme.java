@@ -16,7 +16,7 @@ import fastcore.FastCore;
  * </pre>
  * 
  * @author FastJava Team
- * @version 0.1.0
+ * @version 0.2.0
  * @see <a href="https://github.com/andrestubbe/FastTheme">FastTheme GitHub</a>
  */
 public class FastTheme {

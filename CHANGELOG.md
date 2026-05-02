@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - 2026-05-02
+## [0.2.0] - 2026-05-02
 ### Added
 - **Native Mica Support**: Added `enableMica(long hwnd, boolean enabled)` for Windows 11 material effects.
 - **Corner Styling**: Added `setCornerStyle(long hwnd, int style)` (Rounded, Small Rounded, Square).

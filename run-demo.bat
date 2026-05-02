@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo ===========================================
-echo FastTheme Demo (v0.1.0)
+echo FastTheme Demo (v0.2.0)
 echo ===========================================
 echo.
 echo Launching: Standard Swing vs. FastTheme Native
