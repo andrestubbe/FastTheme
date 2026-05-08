@@ -10,33 +10,15 @@
 
 FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the DWM (Desktop Window Manager) API.
 
-![FastTheme Demo](docs/screenshot.png)
-
-## 📺 Video Demonstration
-[Watch the FastTheme Performance & Transitions Showcase](https://www.youtube.com/watch?v=6FVXiFB1itw)
-
-```java
-// Quick Start — Enabling Dark Mode
-import fasttheme.FastTheme;
-import javax.swing.JFrame;
-
-public class Demo {
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("FastTheme Demo");
-        frame.setSize(800, 600);
-        frame.setVisible(true);
-        
-        // Apply native dark mode to the title bar
-        FastTheme.setDarkMode(frame, true);
-    }
-}
-```
+[![Watch the FastTheme Performance & Transitions Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=6FVXiFB1itw)
 
 ---
 
 ## Table of Contents
 - [Key Features](#key-features)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
+- [Try the Demo](#try-the-demo)
 - [API Reference](#api-reference)
 - [Platform Support](#platform-support)
 - [License](#license)
@@ -49,10 +31,34 @@ public class Demo {
 - **🌙 Native Dark Mode** — Proper title bar and border coloring.
 - **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
 - **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
+- **🎨 State-Driven** — Seamlessly integrates with FastAnimation for fluid theme transitions.
+
+---
+
+## Quick Start
+
+```java
+// Quick Start — Enabling Native Dark Mode
+import fasttheme.FastTheme;
+import javax.swing.JFrame;
+
+public class Demo {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("FastTheme Demo");
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+        
+        // Apply native dark mode to the title bar with zero overhead
+        FastTheme.setDarkMode(frame, true);
+    }
+}
+```
 
 ---
 
 ## Installation
+
+FastJava modules require **two** dependencies: the module itself, and `FastCore` (which handles the native library extraction).
 
 ### Maven (JitPack)
 ```xml
@@ -91,12 +97,24 @@ dependencies {
 
 ---
 
+## Try the Demo
+
+Want to see the high-performance transition engine in action?
+
+1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
+2. Run the automated showcase: `.\run-demo.bat`
+
+*Note: The demo showcases 300+ FPS theme transitions using FastAnimation.*
+
+---
+
 ## API Reference
 
 | Method | Description |
 |--------|-------------|
 | `void setDarkMode(Window w, boolean enable)` | Toggles the native system dark mode for the window. |
-| `void setMicaEffect(Window w, boolean enable)` | Enables the Windows 11 Mica backdrop effect. |
+| `void setWindowTransparency(Window w, int alpha)` | Sets native window transparency (0-255). |
+| `void setTitleBarColor(Window w, int r, int g, int b)` | Sets a custom native title bar background color. |
 
 ---
 
@@ -116,12 +134,12 @@ MIT License — See [LICENSE](LICENSE) file for details.
 
 ## Related Projects
 - [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader
-- [FastUI](https://github.com/andrestubbe/FastUI) — High-performance UI framework
-- [FastThumb](https://github.com/andrestubbe/FastThumb) — Native Shell Image Engine
+- [FastAnimation](https://github.com/andrestubbe/FastAnimation) — High-precision animation engine
+- [FastTween](https://github.com/andrestubbe/FastTween) — SIMD-optimized interpolation
 
 ---
 **Made with ⚡ by Andre Stubbe**
 
 <!-- 
-SEO Keywords: java, jni, dark mode, mica, acrylic, dwm, windows 11
+SEO Keywords: java, jni, dark mode, mica, acrylic, dwm, windows 11, fastjava
 -->
