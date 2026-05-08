@@ -94,6 +94,15 @@ dependencies {
 }
 ```
 
+### Option 3: Direct Download (No Build Tool)
+Download the latest JARs directly to add them to your classpath:
+
+1. 📦 **[fasttheme-v0.2.0.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
+2. ⚙️ **[fastcore-v0.2.0.jar](https://github.com/andrestubbe/FastCore/releases)** (The Mandatory Native Loader)
+
+> [!IMPORTANT]
+> Both JARs must be in your classpath for the native JNI calls to function correctly.
+
 ---
 
 ## Try the Demo
