@@ -31,7 +31,6 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 - **🌙 Native Dark Mode** — Proper title bar and border coloring.
 - **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
 - **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
-- **🎨 State-Driven** — Seamlessly integrates with FastAnimation for fluid theme transitions.
 
 ---
 
