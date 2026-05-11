@@ -12,7 +12,7 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 
 [![Premium Overlay Showcase](docs/screenshot.png)
 ![Premium Overlay Animation](docs/screenshot2.png)
-](https://www.youtube.com/watch?v=zjAQSCb8rVo)
+](https://www.youtube.com/watch?v=gFqN9WA4B7U)
 
 ---
 
