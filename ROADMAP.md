@@ -18,10 +18,17 @@ While startup detection is already implemented, FastTheme needs a way to react t
 **Priority:** High - Crucial for apps that stay open for long periods.
 
 ### Mica & Acrylic Material Support
-**Status:** Researching
-Windows 11 introduced Mica and Mica Alt materials. We aim to support these natively.
-- [ ] Implement `DWM_SYSTEMBACKDROP_TYPE` enumerations.
-- [ ] Add support for `DWMSBT_MAINWINDOW` (Mica) and `DWMSBT_TRANSIENTWINDOW` (Acrylic).
+**Status:** Released (v0.3.0)
+Windows 11 introduced Mica and Mica Alt materials. We now support these natively.
+- [x] Implement `DWM_SYSTEMBACKDROP_TYPE` enumerations.
+- [x] Add support for `DWMSBT_MAINWINDOW` (Mica) and `DWMSBT_TRANSIENTWINDOW` (Acrylic).
+
+### Premium Borderless Overlays
+**Status:** Released (v0.3.0)
+Native shadows and drag zones for borderless windows.
+- [x] Implement `WM_NCCALCSIZE` removal.
+- [x] Add `WM_NCHITTEST` drag zone logic.
+- [x] Lock resizing for fixed overlays.
 
 ### Titlebar Customization & Icons
 **Status:** Backlog

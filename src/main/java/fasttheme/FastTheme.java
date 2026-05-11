@@ -23,5 +23,9 @@ public class FastTheme {
 
     public static native boolean setCornerStyle(long hwnd, int style);
 
+    public static native boolean setBorderlessShadow(long hwnd, boolean enabled);
+
+    public static native boolean setOverlayDragHeight(long hwnd, int height);
+
     public static native boolean isSystemDarkMode();
 }

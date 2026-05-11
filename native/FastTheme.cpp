@@ -157,6 +157,125 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setCornerStyle(JNIEnv* env, 
 }
 
 /**
+ * @brief Subclass procedure to handle premium overlay behavior.
+ */
+LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_OldProc");
+    if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
+
+    switch (msg) {
+        case WM_NCCALCSIZE:
+            // Returning 0 removes the standard window chrome (title bar) 
+            // and the 12px top margin while keeping the frame for the shadow.
+            return 0;
+
+        case WM_NCACTIVATE:
+            // Prevents Windows from drawing the active/inactive title bar background
+            return TRUE;
+
+        case WM_NCPAINT:
+            // Prevents Windows from painting the non-client area (borders)
+            return 0;
+
+        case WM_ERASEBKGND:
+            // Prevents the "black/white flash" before Swing's first paint
+            return 1;
+
+        case WM_NCHITTEST: {
+            // Get the custom drag height (default to 6 if not set)
+            int dragHeight = (int)(INT_PTR)GetPropW(hwnd, L"FastTheme_DragHeight");
+            if (dragHeight == 0) dragHeight = 6; 
+
+            POINT pt = { (short)LOWORD(lParam), (short)HIWORD(lParam) };
+            ScreenToClient(hwnd, &pt);
+
+            // Drag Zone: Adjustable height
+            if (pt.y >= 0 && pt.y < dragHeight) return HTCAPTION;
+
+            // Prevent all resizing by treating borders as client area
+            LRESULT hit = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+            if (hit >= HTLEFT && hit <= HTBOTTOMRIGHT) return HTCLIENT;
+            
+            return hit;
+        }
+
+        case WM_NCDESTROY:
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
+            RemovePropW(hwnd, L"FastTheme_OldProc");
+            RemovePropW(hwnd, L"FastTheme_DragHeight");
+            break;
+    }
+    return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+}
+
+/**
+ * @brief Enables a borderless window that retains its native system shadow.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    if (enabled) {
+        // 0. Apply Dark Mode FIRST to ensure DWM knows it's a dark window from Frame #0
+        BOOL darkMode = TRUE;
+        DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
+
+        // 1. Remove all Chrome but keep Thick Frame for shadow
+        // Also add WS_EX_TOOLWINDOW to hide from taskbar and prevent flickering
+        LONG style = GetWindowLong(hwnd, GWL_STYLE);
+        style &= ~(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+        style |= WS_THICKFRAME;
+        SetWindowLong(hwnd, GWL_STYLE, style);
+
+        LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        exStyle |= WS_EX_TOOLWINDOW; 
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
+
+        // 2. Neutralize the Window Class Brush to prevent the white flash
+        // Using BLACK_BRUSH ensures that if there's a flicker, it's dark
+        SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
+
+        // 3. Install Subclass for NCCALCSIZE, NCACTIVATE, NCPAINT, ERASEBKGND and NCHITTEST
+        if (!GetPropW(hwnd, L"FastTheme_OldProc")) {
+            WNDPROC oldProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OverlaySubclassProc);
+            SetPropW(hwnd, L"FastTheme_OldProc", (HANDLE)oldProc);
+        }
+
+        // 3. Extend frame for shadow (-1 = full window glass/shadow)
+        MARGINS margins = { -1, -1, -1, -1 };
+        DwmExtendFrameIntoClientArea(hwnd, &margins);
+    } else {
+        WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_OldProc");
+        if (oldProc) {
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
+            RemovePropW(hwnd, L"FastTheme_OldProc");
+        }
+        LONG style = GetWindowLong(hwnd, GWL_STYLE);
+        style |= WS_CAPTION | WS_SYSMENU;
+        SetWindowLong(hwnd, GWL_STYLE, style);
+
+        LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+        exStyle &= ~WS_EX_TOOLWINDOW;
+        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
+    }
+
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, 
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+    return JNI_TRUE;
+}
+
+/**
+ * @brief Sets the height of the invisible drag zone at the top of the window.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setOverlayDragHeight(JNIEnv* env, jclass clazz, jlong hwndLong, jint height) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    SetPropW(hwnd, L"FastTheme_DragHeight", (HANDLE)(INT_PTR)height);
+    return JNI_TRUE;
+}
+
+/**
  * @brief Checks if the system is in dark mode.
  */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jclass clazz) {

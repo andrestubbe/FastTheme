@@ -1,4 +1,4 @@
-# FastTheme — High-Performance Native Window Styling for Java
+# FastTheme v0.3.0 — High-Performance Native Window Styling for Java
 
 **Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
@@ -10,7 +10,9 @@
 
 FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the DWM (Desktop Window Manager) API.
 
-[![Watch the FastTheme Performance & Transitions Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=6FVXiFB1itw)
+[![Premium Overlay Showcase](docs/screenshot.png)
+![Premium Overlay Animation](docs/screenshot2.png)
+](https://www.youtube.com/watch?v=zjAQSCb8rVo)
 
 ---
 
@@ -30,6 +32,7 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 
 - **🌙 Native Dark Mode** — Proper title bar and border coloring.
 - **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
+- **🪟 Premium Overlays** — Borderless windows with native shadows and custom drag zones.
 - **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
 
 ---
@@ -37,18 +40,21 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 ## Quick Start
 
 ```java
-// Quick Start — Enabling Native Dark Mode
+// Quick Start — Enabling Premium Overlay Mode
 import fasttheme.FastTheme;
 import javax.swing.JFrame;
 
 public class Demo {
     public static void main(String[] args) {
-        JFrame frame = new JFrame("FastTheme Demo");
-        frame.setSize(800, 600);
-        frame.setVisible(true);
+        JFrame frame = new JFrame();
+        frame.setSize(600, 400);
         
-        // Apply native dark mode to the title bar with zero overhead
-        FastTheme.setDarkMode(frame, true);
+        // Apply Premium Overlay Styling
+        long hwnd = FastTheme.getWindowHandle(frame);
+        FastTheme.setBorderlessShadow(hwnd, true);
+        FastTheme.setOverlayDragHeight(hwnd, 6); // 6px drag zone
+        
+        frame.setVisible(true);
     }
 }
 ```
@@ -72,12 +78,12 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fasttheme</artifactId>
-        <version>0.2.0</version>
+        <version>0.3.0</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastcore</artifactId>
-        <version>0.2.0</version>
+        <version>0.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -110,9 +116,9 @@ Download the latest JARs directly to add them to your classpath:
 Want to see the high-performance transition engine in action?
 
 1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
-2. Run the automated showcase: `.\run-demo.bat`
+2. Run the premium showcase: `.\run-demo2.bat`
 
-*Note: The demo showcases 300+ FPS theme transitions using FastAnimation.*
+*Note: The demo showcases the v0.3.0 Borderless Shadow and Drag-Zone logic.*
 
 ---
 
@@ -120,9 +126,11 @@ Want to see the high-performance transition engine in action?
 
 | Method | Description |
 |--------|-------------|
-| `void setDarkMode(Window w, boolean enable)` | Toggles the native system dark mode for the window. |
-| `void setWindowTransparency(Window w, int alpha)` | Sets native window transparency (0-255). |
-| `void setTitleBarColor(Window w, int r, int g, int b)` | Sets a custom native title bar background color. |
+| `void setBorderlessShadow(long hwnd, boolean enable)` | Enables borderless mode with native shadows (Raycast-style). |
+| `void setOverlayDragHeight(long hwnd, int pixels)` | Sets the height of the invisible drag zone. |
+| `void setTitleBarDarkMode(long hwnd, boolean enable)` | Toggles the native system dark mode for the title bar. |
+| `void setWindowTransparency(long hwnd, int alpha)` | Sets native window transparency (0-255). |
+| `void setTitleBarColor(long hwnd, int r, int g, int b)` | Sets a custom native title bar background color. |
 
 ---
 

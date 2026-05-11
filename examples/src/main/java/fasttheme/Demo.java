@@ -3,6 +3,7 @@ package fasttheme;
 import fastanimation.FastAnimation;
 import fasttween.Ease;
 import fasttween.FastTween;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,13 +12,10 @@ public class Demo {
 
     private enum ThemeState {
         NORMAL(Color.WHITE, new Color(40, 40, 40), 255, false, Color.WHITE, new Color(40, 40, 40)),
-        LIGHT(new Color(230, 250, 245), new Color(80, 130, 118), 230, false, new Color(230, 250, 245),
-                new Color(80, 130, 118)),
-        DARK(new Color(44, 50, 46), new Color(223, 145, 70), 230, true, new Color(44, 50, 46),
-                new Color(125, 138, 118)),
+        LIGHT(new Color(230, 250, 245), new Color(80, 130, 118), 230, false, new Color(230, 250, 245), new Color(80, 130, 118)),
+        DARK(new Color(44, 50, 46), new Color(223, 145, 70), 230, true, new Color(44, 50, 46), new Color(125, 138, 118)),
         MONO(Color.BLACK, Color.WHITE, 230, true, Color.BLACK, Color.WHITE),
-        ANTIGRAVITY(new Color(20, 20, 35), new Color(0, 255, 200), 230, true, new Color(30, 30, 50),
-                new Color(255, 100, 255));
+        ANTIGRAVITY(new Color(20, 20, 35), new Color(0, 255, 200), 230, true, new Color(30, 30, 50), new Color(255, 100, 255));
 
         final Color bg, text, titleBarBg, titleBarFg;
         final int transparency;
@@ -123,20 +121,15 @@ public class Demo {
     }
 
     private static void startAutoCycle(JFrame frame, JPanel panel) {
-        FastAnimation.parallel(
-                FastTween.to(0.0f, 1.0f, AUTO_CYCLE_MS)
-                        .ease(Ease.LINEAR)
-                        .onUpdate(v -> {
-                            currentCycleProgress = v;
-                            smoothProgressBar.repaint();
-                            updateConsoleText();
-                        })
-                        .onComplete(() -> {
-                            if (!isAnimating) {
-                                triggerNextState(frame, panel);
-                            }
-                        }))
-                .start();
+        FastAnimation.parallel(FastTween.to(0.0f, 1.0f, AUTO_CYCLE_MS).ease(Ease.LINEAR).onUpdate(v -> {
+            currentCycleProgress = v;
+            smoothProgressBar.repaint();
+            updateConsoleText();
+        }).onComplete(() -> {
+            if (!isAnimating) {
+                triggerNextState(frame, panel);
+            }
+        })).start();
     }
 
     private static void triggerNextState(JFrame frame, JPanel panel) {
@@ -179,43 +172,33 @@ public class Demo {
 
     private static void transitionTo(JFrame frame, JPanel panel, ThemeState target, Runnable onDone) {
         long hwnd = FastTheme.getWindowHandle(frame);
-        if (hwnd == 0)
-            return;
+        if (hwnd == 0) return;
 
         ThemeState start = currentState;
         currentState = target;
 
         FastTheme.setTitleBarDarkMode(hwnd, target.darkMode);
 
-        FastAnimation.parallel(
-                FastTween.to(0.0f, 1.0f, TRANSITION_MS)
-                        .ease(Ease.EXPO_OUT)
-                        .onUpdate(progress -> {
-                            Color currentBg = lerpColor(start.bg, target.bg, progress);
-                            Color currentText = lerpColor(start.text, target.text, progress);
-                            Color currentTB_Bg = lerpColor(start.titleBarBg, target.titleBarBg, progress);
-                            Color currentTB_Fg = lerpColor(start.titleBarFg, target.titleBarFg, progress);
-                            int currentTrans = (int) (start.transparency
-                                    + progress * (target.transparency - start.transparency));
+        FastAnimation.parallel(FastTween.to(0.0f, 1.0f, TRANSITION_MS).ease(Ease.EXPO_OUT).onUpdate(progress -> {
+            Color currentBg = lerpColor(start.bg, target.bg, progress);
+            Color currentText = lerpColor(start.text, target.text, progress);
+            Color currentTB_Bg = lerpColor(start.titleBarBg, target.titleBarBg, progress);
+            Color currentTB_Fg = lerpColor(start.titleBarFg, target.titleBarFg, progress);
+            int currentTrans = (int) (start.transparency + progress * (target.transparency - start.transparency));
 
-                            panel.setBackground(currentBg);
-                            console.setForeground(currentText);
-                            updateWindowIcon(frame, currentText);
-                            updateConsoleText();
+            panel.setBackground(currentBg);
+            console.setForeground(currentText);
+            updateWindowIcon(frame, currentText);
+            updateConsoleText();
 
-                            FastTheme.setWindowTransparency(hwnd, currentTrans);
-                            FastTheme.setTitleBarColor(hwnd, currentTB_Bg.getRed(), currentTB_Bg.getGreen(),
-                                    currentTB_Bg.getBlue());
-                            FastTheme.setTitleBarTextColor(hwnd, currentTB_Fg.getRed(), currentTB_Fg.getGreen(),
-                                    currentTB_Fg.getBlue());
+            FastTheme.setWindowTransparency(hwnd, currentTrans);
+            FastTheme.setTitleBarColor(hwnd, currentTB_Bg.getRed(), currentTB_Bg.getGreen(), currentTB_Bg.getBlue());
+            FastTheme.setTitleBarTextColor(hwnd, currentTB_Fg.getRed(), currentTB_Fg.getGreen(), currentTB_Fg.getBlue());
 
-                            panel.repaint();
-                        })
-                        .onComplete(() -> {
-                            if (onDone != null)
-                                onDone.run();
-                        }))
-                .start();
+            panel.repaint();
+        }).onComplete(() -> {
+            if (onDone != null) onDone.run();
+        })).start();
     }
 
     private static Color lerpColor(Color start, Color end, float t) {

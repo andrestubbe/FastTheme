@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-05-11
+### Added
+- **Premium Borderless Mode**: Added `setBorderlessShadow(long hwnd, boolean enabled)` for Raycast-style overlays.
+- **Adjustable Drag Zone**: Added `setOverlayDragHeight(long hwnd, int pixels)` for invisible grab areas.
+- **Native Resizing Control**: Borderless mode now automatically suppresses resize cursors via `WM_NCHITTEST`.
+- **Ecosystem Integration**: Added dependencies for `FastAnimation` and `FastTween` in the demo modules.
+- **Focus Stability**: Added `WM_NCACTIVATE` and `WM_NCPAINT` overrides to prevent flicker and margins on focus change.
+
 ## [0.2.0] - 2026-05-02
 ### Added
 - **Native Mica Support**: Added `enableMica(long hwnd, boolean enabled)` for Windows 11 material effects.

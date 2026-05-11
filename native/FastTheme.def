@@ -7,4 +7,6 @@ EXPORTS
     Java_fasttheme_FastTheme_setTitleBarDarkMode
     Java_fasttheme_FastTheme_enableMica
     Java_fasttheme_FastTheme_setCornerStyle
+    Java_fasttheme_FastTheme_setBorderlessShadow
+    Java_fasttheme_FastTheme_setOverlayDragHeight
     Java_fasttheme_FastTheme_isSystemDarkMode
