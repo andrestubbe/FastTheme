@@ -59,14 +59,14 @@
         
         <!-- FastAnimation - Animation Engine -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastanimation</artifactId>
             <version>0.1.0</version>
         </dependency>
         
         <!-- FastTween - Tweening Engine -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fasttween</artifactId>
             <version>0.1.0</version>
         </dependency>
