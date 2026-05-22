@@ -220,11 +220,10 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* 
         BOOL darkMode = TRUE;
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
 
-        // 1. Remove all Chrome but keep Thick Frame for shadow
-        // Also add WS_EX_TOOLWINDOW to hide from taskbar and prevent flickering
+        // 1. Force Borderless: Remove ALL overlapped window chrome
         LONG style = GetWindowLong(hwnd, GWL_STYLE);
-        style &= ~(WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
-        style |= WS_THICKFRAME;
+        style &= ~WS_OVERLAPPEDWINDOW; // Removes Caption, Menu, Border, Thickframe, etc.
+        style |= WS_POPUP | WS_THICKFRAME; // Restore only Popup and Thickframe (for shadow)
         SetWindowLong(hwnd, GWL_STYLE, style);
 
         LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);

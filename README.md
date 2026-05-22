@@ -48,13 +48,18 @@ public class Demo {
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         frame.setSize(600, 400);
-        
-        // Apply Premium Overlay Styling
+        frame.setUndecorated(true); // wichtig für Overlay
+        frame.setVisible(true); // HWND existiert erst ab hier
+
         long hwnd = FastTheme.getWindowHandle(frame);
-        FastTheme.setBorderlessShadow(hwnd, true);
-        FastTheme.setOverlayDragHeight(hwnd, 6); // 6px drag zone
-        
-        frame.setVisible(true);
+        System.out.println("HWND = " + hwnd);
+
+        if (hwnd != 0) {
+            FastTheme.setBorderlessShadow(hwnd, true);
+            FastTheme.setOverlayDragHeight(hwnd, 6);
+        } else {
+            System.err.println("❌ HWND ist 0 – Fensterhandle nicht gefunden!");
+        }
     }
 }
 ```
