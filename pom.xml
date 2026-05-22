@@ -61,14 +61,14 @@
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastanimation</artifactId>
-            <version>v0.1.2</version>
+            <version>v0.1.3</version>
         </dependency>
         
         <!-- FastTween - Tweening Engine -->
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
             <artifactId>fasttween</artifactId>
-            <version>v0.1.2</version>
+            <version>v0.1.3</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
