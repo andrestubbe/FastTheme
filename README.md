@@ -46,20 +46,40 @@ import javax.swing.JFrame;
 
 public class Demo {
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setSize(600, 400);
-        frame.setUndecorated(true); // wichtig für Overlay
-        frame.setVisible(true); // HWND existiert erst ab hier
+         JFrame frame = new JFrame();
+        frame.setSize(600, 96);
+
+        // Remove all Java window decorations (title bar, borders)
+        // Required for creating a true overlay-style window
+        frame.setUndecorated(true);
+
+        // Center the window on the screen
+        frame.setLocationRelativeTo(null);
+
+        // Set the window background to pure black
+        // Since the title bar is removed, the content area becomes the visible body
+        frame.getContentPane().setBackground(new Color(0, 0, 0));
+
+        // The native HWND is created only after the window becomes visible
+        frame.setVisible(true);
 
         long hwnd = FastTheme.getWindowHandle(frame);
-        System.out.println("HWND = " + hwnd);
-
         if (hwnd != 0) {
+
+            // Enables the Windows 11 shadow (DWM + WS_THICKFRAME)
             FastTheme.setBorderlessShadow(hwnd, true);
+
+            // Defines the height of the invisible drag zone at the top
+            // Allows the window to be dragged like Raycast/Spotlight
             FastTheme.setOverlayDragHeight(hwnd, 6);
+
+            // Applies semi-transparency to the entire window (0–255)
+            FastTheme.setWindowTransparency(hwnd, 230);
+
         } else {
-            System.err.println("❌ HWND ist 0 – Fensterhandle nicht gefunden!");
+            System.err.println("❌ HWND is 0 – native window handle not found!");
         }
+
     }
 }
 ```
