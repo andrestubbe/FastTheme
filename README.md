@@ -1,4 +1,4 @@
-﻿# FastTheme â€” High-Performance Native Window Styling for Java [v0.3.0]
+﻿# FastTheme — High-Performance Native Window Styling for Java [v0.3.0]
 
 **Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
@@ -30,17 +30,17 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 
 ## Key Features
 
-- **ðŸŒ™ Native Dark Mode** â€” Proper title bar and border coloring.
-- **âœ¨ Glass Effects** â€” Support for Mica and Acrylic effects (Win 11).
-- **ðŸªŸ Premium Overlays** â€” Borderless windows with native shadows and custom drag zones.
-- **ðŸš€ Zero Lag** â€” Direct DWM attribute manipulation via native calls.
+- **🌙 Native Dark Mode** — Proper title bar and border coloring.
+- **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
+- **🪟 Premium Overlays** — Borderless windows with native shadows and custom drag zones.
+- **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
 
 ---
 
 ## Quick Start
 
 ```java
-// Quick Start â€” Enabling Premium Overlay Mode
+// Quick Start — Enabling Premium Overlay Mode
 import fasttheme.FastTheme;
 import javax.swing.JFrame;
 
@@ -73,11 +73,11 @@ public class Demo {
             // Allows the window to be dragged like Raycast/Spotlight
             FastTheme.setOverlayDragHeight(hwnd, 6);
 
-            // Applies semi-transparency to the entire window (0â€“255)
+            // Applies semi-transparency to the entire window (0–255)
             FastTheme.setWindowTransparency(hwnd, 230);
 
         } else {
-            System.err.println("âŒ HWND is 0 â€“ native window handle not found!");
+            System.err.println("❌ HWND is 0 – native window handle not found!");
         }
 
     }
@@ -165,23 +165,23 @@ Want to see the high-performance transition engine in action?
 
 | Platform | Status |
 |----------|--------|
-| Windows 10 (1903+) | âœ… Dark Mode |
-| Windows 11 | âœ… Dark Mode, Mica, Acrylic |
+| Windows 10 (1903+) | ✅ Dark Mode |
+| Windows 11 | ✅ Dark Mode, Mica, Acrylic |
 
 ---
 
 ## License
-MIT License â€” See [LICENSE](LICENSE) file for details.
+MIT License — See [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) â€” Native Library Loader
-- [FastAnimation](https://github.com/andrestubbe/FastAnimation) â€” High-precision animation engine
-- [FastTween](https://github.com/andrestubbe/FastTween) â€” SIMD-optimized interpolation
+- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader
+- [FastAnimation](https://github.com/andrestubbe/FastAnimation) — High-precision animation engine
+- [FastTween](https://github.com/andrestubbe/FastTween) — SIMD-optimized interpolation
 
 ---
-**Made with âš¡ by Andre Stubbe**
+**Made with ⚡ by Andre Stubbe**
 
 <!-- 
 SEO Keywords: java, jni, dark mode, mica, acrylic, dwm, windows 11, fastjava
