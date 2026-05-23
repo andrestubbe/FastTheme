@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastanimation</artifactId>
-            <version>v0.1.3</version>
+            <version>v0.1.4</version>
         </dependency>
         
         <!-- FastTween - Tweening Engine -->
