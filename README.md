@@ -30,6 +30,35 @@ custom window decorations by bridging Java with the DWM (Desktop Window Manager)
 
 ---
 
+## Quick Start
+
+```java
+import fasttheme.FastTheme;
+
+import javax.swing.JFrame;
+
+public class Demo {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame();
+        frame.setSize(600, 96);
+        frame.setUndecorated(true); // Required for creating a true overlay-style window
+        frame.setLocationRelativeTo(null);
+        frame.getContentPane().setBackground(new Color(0, 0, 0));
+        frame.setVisible(true);  // The native HWND is created only after the window becomes visible
+
+        long hwnd = FastTheme.getWindowHandle(frame);
+        if (hwnd != 0) {
+            FastTheme.setBorderlessShadow(hwnd, true); // Enables the Windows 11 shadow (DWM + WS_THICKFRAME)
+            FastTheme.setOverlayDragHeight(hwnd, 6);// Defines the height of the invisible drag zone at the top, Allows the window to be dragged like Raycast/Spotlight
+            FastTheme.setWindowTransparency(hwnd, 230); // Applies semi-transparency to the entire window (0–255)
+        } else {
+            System.err.println("❌ HWND is 0 – native window handle not found!");
+        }
+    }
+}
+```
+
+---
 ## Key Features
 
 - **🌙 Native Dark Mode** — Proper title bar and border coloring.
@@ -39,56 +68,6 @@ custom window decorations by bridging Java with the DWM (Desktop Window Manager)
 
 ---
 
-## Quick Start
-
-```java
-// Quick Start — Enabling Premium Overlay Mode
-
-import fasttheme.FastTheme;
-
-import javax.swing.JFrame;
-
-public class Demo {
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setSize(600, 96);
-
-        // Remove all Java window decorations (title bar, borders)
-        // Required for creating a true overlay-style window
-        frame.setUndecorated(true);
-
-        // Center the window on the screen
-        frame.setLocationRelativeTo(null);
-
-        // Set the window background to pure black
-        // Since the title bar is removed, the content area becomes the visible body
-        frame.getContentPane().setBackground(new Color(0, 0, 0));
-
-        // The native HWND is created only after the window becomes visible
-        frame.setVisible(true);
-
-        long hwnd = FastTheme.getWindowHandle(frame);
-        if (hwnd != 0) {
-
-            // Enables the Windows 11 shadow (DWM + WS_THICKFRAME)
-            FastTheme.setBorderlessShadow(hwnd, true);
-
-            // Defines the height of the invisible drag zone at the top
-            // Allows the window to be dragged like Raycast/Spotlight
-            FastTheme.setOverlayDragHeight(hwnd, 6);
-
-            // Applies semi-transparency to the entire window (0–255)
-            FastTheme.setWindowTransparency(hwnd, 230);
-
-        } else {
-            System.err.println("❌ HWND is 0 – native window handle not found!");
-        }
-
-    }
-}
-```
-
----
 
 ## Installation
 
