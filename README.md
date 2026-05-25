@@ -59,6 +59,7 @@ public class Demo {
 ```
 
 ---
+
 ## Key Features
 
 - **🌙 Native Dark Mode** — Proper title bar and border coloring.
@@ -67,7 +68,6 @@ public class Demo {
 - **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
 
 ---
-
 
 ## Installation
 
@@ -123,8 +123,7 @@ Download the latest JARs directly to add them to your classpath:
 2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar)** (
    The Mandatory Native Loader)
 
-> [!IMPORTANT]
-> All JARs must be in your classpath for the native JNI calls to function correctly.
+---
 
 ## Try the Demo
 
