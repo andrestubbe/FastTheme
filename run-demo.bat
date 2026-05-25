@@ -12,7 +12,7 @@ echo.
 :: Run the demo from the example folder using Maven
 cd examples
 echo Compiling and Launching Demo...
-call mvn compile exec:java -Dexec.mainClass="fasttheme.Demo"
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.Demo"
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Demo failed to launch. 
