@@ -6,14 +6,17 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe)
 
+---
+
 **⚡ Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
 FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mode title bars, Mica/Acrylic effects, and
 custom window decorations by bridging Java with the DWM (Desktop Window Manager) API.
 
+---
+
 [![Premium Overlay Showcase](docs/screenshot.png)
 ](https://www.youtube.com/watch?v=00bgKmWOEk8)
-
 
 ---
 
