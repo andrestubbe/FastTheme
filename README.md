@@ -1,4 +1,4 @@
-﻿# FastTheme v0.1.0 [ALPHA] — High-Performance Native Window Styling for Java
+# FastTheme v0.1.0 [ALPHA] — High-Performance Native Window Styling for Java
 
 [![Status](https://img.shields.io/badge/status-v0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/v0.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -135,7 +135,7 @@ Want to see the high-performance transition engine in action?
 1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
 2. Run the premium showcase: `.\run-demo2.bat`
 
-*Note: The demo showcases the v0.3.0 Borderless Shadow and Drag-Zone logic.*
+*Note: The demo showcases the v0.1.0 Borderless Shadow and Drag-Zone logic.*
 
 ---
 
