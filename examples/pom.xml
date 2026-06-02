@@ -29,13 +29,13 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastanimation</artifactId>
             <version>v0.1.0</version>
         </dependency>
 
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fasttween</artifactId>
             <version>v0.1.0</version>
         </dependency>
