@@ -67,14 +67,7 @@
 
     <build>
         <resources>
-            <!-- Include native DLL in JAR -->
-            <resource>
-                <directory>build</directory>
-                <includes>
-                    <include>*.dll</include>
-                </includes>
-            </resource>
-            <!-- Standard resources -->
+            <!-- Standard resources (includes native/fasttheme.dll) -->
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
@@ -150,32 +143,6 @@
             </plugin>
 
 
-            <!-- Native Library Resource Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-native-libs</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/native</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>build</directory>
-                                    <includes>
-                                        <include>fasttheme.dll</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
