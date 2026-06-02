@@ -1,21 +1,25 @@
 @echo off
 setlocal
+chcp 65001 >nul
+
+cd /d "%~dp0"
+
 echo ==========================================
 echo   FastTheme v0.1.0 - Premium Demo 2
 echo ==========================================
 echo.
-
-:: 1. Build native DLL
-echo [+] Compiling Native Bridge...
-call compile.bat
-
-echo.
-echo [+] Running Demo 2 from examples...
+echo Dependencies resolved from JitPack
 echo.
 
-:: We run the example project which depends on the main FastTheme
 cd examples
-mvn compile exec:java -Dexec.mainClass="fasttheme.Demo2" -Djava.library.path="..\build"
+echo [+] Running Demo 2...
+echo.
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.Demo2"
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Demo 2 failed to launch.
+    pause
+)
 
 echo.
 echo === Demo 2 Complete ===
