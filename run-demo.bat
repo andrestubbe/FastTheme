@@ -5,11 +5,16 @@ setlocal
 cd /d "%~dp0"
 
 echo ===========================================
-echo FastTheme Demo (v0.2.0)
+echo FastTheme Demo (v0.1.0)
 echo ===========================================
 echo.
 echo Launching: Standard Swing vs. FastTheme Native
 echo.
+
+:: Build and install FastTheme to local Maven repo first
+echo Building and installing FastTheme...
+call compile.bat
+if %errorlevel% neq 0 ( pause & exit /b )
 
 :: Run the demo from the example folder using Maven
 cd examples

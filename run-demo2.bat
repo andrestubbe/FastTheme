@@ -1,7 +1,7 @@
 @echo off
 setlocal
 echo ==========================================
-echo   FastTheme v0.3.0 - Premium Demo 2
+echo   FastTheme v0.1.0 - Premium Demo 2
 echo ==========================================
 echo.
 

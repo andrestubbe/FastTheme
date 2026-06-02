@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Premium Borderless Mode**: Added `setBorderlessShadow(long hwnd, boolean enabled)` for Raycast-style overlays.
 - **Adjustable Drag Zone**: Added `setOverlayDragHeight(long hwnd, int pixels)` for invisible grab areas.
 - **Native Resizing Control**: Borderless mode now automatically suppresses resize cursors via `WM_NCHITTEST`.
-- **Ecosystem Integration**: Added dependencies for `FastAnimation` and `FastTween` in the demo modules.
+- **Ecosystem Integration**: Core dependency for FastUI, FastWindow, FastThumb and other FastJava modules.
 - **Focus Stability**: Added `WM_NCACTIVATE` and `WM_NCPAINT` overrides to prevent flicker and margins on focus change.
 - **Native Mica Support**: Added `enableMica(long hwnd, boolean enabled)` for Windows 11 material effects.
 - **Corner Styling**: Added `setCornerStyle(long hwnd, int style)` (Rounded, Small Rounded, Square).
