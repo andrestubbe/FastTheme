@@ -1,22 +1,15 @@
 @echo off
+chcp 65001 >nul
+cd /d "%~dp0"
 
-setlocal
+echo ⚡ Building Project...
+call mvn clean package -DskipTests -q
+if %ERRORLEVEL% NEQ 0 ( echo ❌ Benchmark failed. & pause & exit /b %ERRORLEVEL% )
 
-echo ===========================================
-echo FastTheme Demo (v0.1.0)
-echo ===========================================
-echo.
-echo Launching: Standard Swing vs. FastTheme Native
-echo Dependencies resolved from JitPack
-echo.
 
+echo 🚀 Running Demo...
 cd examples
-echo Compiling and Launching Demo...
-call mvn compile exec:java -Dexec.mainClass="fasttheme.Demo"
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Demo failed to launch.
-    pause
-)
+call mvn compile exec:java -Dexec.mainClass="fasttheme.Demo" -q
+if %ERRORLEVEL% NEQ 0 ( echo ❌ Benchmark failed. & pause & exit /b %ERRORLEVEL% )
 
 cd ..
