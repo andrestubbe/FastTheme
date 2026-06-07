@@ -41,17 +41,6 @@ public class Demo2 {
     
     private static final Font FONT_MAIN        = new Font("Inter", Font.PLAIN, 14);
 
-    static {
-        // Force loading the local build for development/demo
-        java.io.File local = new java.io.File("build/fasttheme.dll");
-        java.io.File parent = new java.io.File("../build/fasttheme.dll");
-        java.io.File actualFile = local.exists() ? local : parent;
-        
-        System.out.println("[Debug] Searching for DLL in: " + local.getAbsolutePath() + " (exists: " + local.exists() + ")");
-        System.out.println("[Debug] Searching for DLL in: " + parent.getAbsolutePath() + " (exists: " + parent.exists() + ")");
-        
-        System.load(actualFile.getAbsolutePath());
-    }
 
     public static void main(String[] args) {
         try {
