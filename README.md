@@ -202,8 +202,11 @@ MIT License — See [LICENSE](LICENSE) file for details.
 ## Related Projects
 
 - [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
-
+- [FastUI](https://github.com/andrestubbe/FastUI) — High-performance modern Swing component framework
+- [FastGrid](https://github.com/andrestubbe/FastGrid) — Ultra-fast layout grid engine for Java
+- [FastProportion](https://github.com/andrestubbe/FastProportion) — Resolution-independent layout and scaling utility
+- [FastDisplay](https://github.com/andrestubbe/FastDisplay) — Native display and monitor querying library
+- [FastWindow](https://github.com/andrestubbe/FastWindow) — Native window management and geometry control
 
 ---
 **Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀📋*
