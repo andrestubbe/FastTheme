@@ -35,31 +35,64 @@ custom window decorations by bridging Java with the DWM (Desktop Window Manager)
 
 ## Quick Start
 
+### 1. Decorated Window with Matching Title Bar & Body Color
+
 ```java
 import fasttheme.FastTheme;
-
 import javax.swing.JFrame;
+import java.awt.Color;
 
 public class Demo {
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setSize(600, 96);
-        frame.setUndecorated(true); // Required for creating a true overlay-style window
+        JFrame frame = new JFrame("Styled Window");
+        frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
-        frame.getContentPane().setBackground(new Color(0, 0, 0));
-        frame.setVisible(true);  // The native HWND is created only after the window becomes visible
+        
+        Color darkBg = new Color(30, 30, 30);
+        frame.getContentPane().setBackground(darkBg);
+        frame.setVisible(true); // Native HWND is created after becoming visible
 
         long hwnd = FastTheme.getWindowHandle(frame);
         if (hwnd != 0) {
-            FastTheme.setBorderlessShadow(hwnd, true); // Enables the Windows 11 shadow (DWM + WS_THICKFRAME)
-            FastTheme.setOverlayDragHeight(hwnd, 6);// Defines the height of the invisible drag zone at the top, Allows the window to be dragged like Raycast/Spotlight
-            FastTheme.setWindowTransparency(hwnd, 230); // Applies semi-transparency to the entire window (0–255)
-        } else {
-            System.err.println("❌ HWND is 0 – native window handle not found!");
+            // Set dark mode and match title bar color with window body color
+            FastTheme.setTitleBarDarkMode(hwnd, true);
+            FastTheme.setTitleBarColor(hwnd, darkBg.getRed(), darkBg.getGreen(), darkBg.getBlue());
+            // Color the native client area body to completely eliminate the white window creation flash
+            FastTheme.setWindowBackgroundColor(hwnd, darkBg.getRed(), darkBg.getGreen(), darkBg.getBlue());
         }
     }
 }
 ```
+
+### 2. Premium Borderless Overlay (Raycast-Style)
+
+```java
+import fasttheme.FastTheme;
+import javax.swing.JFrame;
+import java.awt.Color;
+
+public class OverlayDemo {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame();
+        frame.setSize(600, 96);
+        frame.setUndecorated(true); // Required for borderless overlays
+        frame.setLocationRelativeTo(null);
+        
+        Color blackBg = new Color(0, 0, 0);
+        frame.getContentPane().setBackground(blackBg);
+        frame.setVisible(true);
+
+        long hwnd = FastTheme.getWindowHandle(frame);
+        if (hwnd != 0) {
+            FastTheme.setBorderlessShadow(hwnd, true); // Enables the native Win11 shadow
+            FastTheme.setOverlayDragHeight(hwnd, 6);   // Adjustable drag zone at the top
+            FastTheme.setWindowTransparency(hwnd, 230); // Sets window-wide semi-transparency
+            FastTheme.setWindowBackgroundColor(hwnd, 0, 0, 0); // Colors native client area
+        }
+    }
+}
+```
+
 
 ---
 
