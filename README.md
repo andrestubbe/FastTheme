@@ -202,8 +202,8 @@ MIT License — See [LICENSE](LICENSE) file for details.
 ## Related Projects
 
 - [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — High-performance RawInput engine
 - [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
+
 
 ---
 **Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀📋*
