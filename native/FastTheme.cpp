@@ -156,6 +156,8 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setCornerStyle(JNIEnv* env, 
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+void EnsureSubclassed(HWND hwnd);
+
 /**
  * @brief Subclass procedure to handle premium overlay behavior.
  */
@@ -163,49 +165,76 @@ LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
     WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_OldProc");
     if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
 
+    BOOL borderless = (BOOL)(INT_PTR)GetPropW(hwnd, L"FastTheme_Borderless");
+
     switch (msg) {
         case WM_NCCALCSIZE:
-            // Returning 0 removes the standard window chrome (title bar) 
-            // and the 12px top margin while keeping the frame for the shadow.
-            return 0;
+            if (borderless) return 0;
+            break;
 
         case WM_NCACTIVATE:
-            // Prevents Windows from drawing the active/inactive title bar background
-            return TRUE;
+            if (borderless) return TRUE;
+            break;
 
         case WM_NCPAINT:
-            // Prevents Windows from painting the non-client area (borders)
-            return 0;
+            if (borderless) return 0;
+            break;
 
-        case WM_ERASEBKGND:
-            // Prevents the "black/white flash" before Swing's first paint
-            return 1;
-
-        case WM_NCHITTEST: {
-            // Get the custom drag height (default to 6 if not set)
-            int dragHeight = (int)(INT_PTR)GetPropW(hwnd, L"FastTheme_DragHeight");
-            if (dragHeight == 0) dragHeight = 6; 
-
-            POINT pt = { (short)LOWORD(lParam), (short)HIWORD(lParam) };
-            ScreenToClient(hwnd, &pt);
-
-            // Drag Zone: Adjustable height
-            if (pt.y >= 0 && pt.y < dragHeight) return HTCAPTION;
-
-            // Prevent all resizing by treating borders as client area
-            LRESULT hit = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
-            if (hit >= HTLEFT && hit <= HTBOTTOMRIGHT) return HTCLIENT;
-            
-            return hit;
+        case WM_ERASEBKGND: {
+            HBRUSH hbr = (HBRUSH)GetPropW(hwnd, L"FastTheme_BgBrush");
+            if (hbr) {
+                HDC hdc = (HDC)wParam;
+                RECT rect;
+                GetClientRect(hwnd, &rect);
+                FillRect(hdc, &rect, hbr);
+                return 1;
+            }
+            if (borderless) return 1;
+            break;
         }
 
-        case WM_NCDESTROY:
+        case WM_NCHITTEST: {
+            if (borderless) {
+                // Get the custom drag height (default to 6 if not set)
+                int dragHeight = (int)(INT_PTR)GetPropW(hwnd, L"FastTheme_DragHeight");
+                if (dragHeight == 0) dragHeight = 6; 
+
+                POINT pt = { (short)LOWORD(lParam), (short)HIWORD(lParam) };
+                ScreenToClient(hwnd, &pt);
+
+                // Drag Zone: Adjustable height
+                if (pt.y >= 0 && pt.y < dragHeight) return HTCAPTION;
+
+                // Prevent all resizing by treating borders as client area
+                LRESULT hit = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+                if (hit >= HTLEFT && hit <= HTBOTTOMRIGHT) return HTCLIENT;
+                
+                return hit;
+            }
+            break;
+        }
+
+        case WM_NCDESTROY: {
             SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
             RemovePropW(hwnd, L"FastTheme_OldProc");
             RemovePropW(hwnd, L"FastTheme_DragHeight");
+            RemovePropW(hwnd, L"FastTheme_Borderless");
+            HBRUSH hbr = (HBRUSH)GetPropW(hwnd, L"FastTheme_BgBrush");
+            if (hbr) {
+                DeleteObject(hbr);
+                RemovePropW(hwnd, L"FastTheme_BgBrush");
+            }
             break;
+        }
     }
     return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+}
+
+void EnsureSubclassed(HWND hwnd) {
+    if (!GetPropW(hwnd, L"FastTheme_OldProc")) {
+        WNDPROC oldProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OverlaySubclassProc);
+        SetPropW(hwnd, L"FastTheme_OldProc", (HANDLE)oldProc);
+    }
 }
 
 /**
@@ -235,19 +264,20 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* 
         SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
 
         // 3. Install Subclass for NCCALCSIZE, NCACTIVATE, NCPAINT, ERASEBKGND and NCHITTEST
-        if (!GetPropW(hwnd, L"FastTheme_OldProc")) {
-            WNDPROC oldProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)OverlaySubclassProc);
-            SetPropW(hwnd, L"FastTheme_OldProc", (HANDLE)oldProc);
-        }
+        SetPropW(hwnd, L"FastTheme_Borderless", (HANDLE)TRUE);
+        EnsureSubclassed(hwnd);
 
         // 3. Extend frame for shadow (-1 = full window glass/shadow)
         MARGINS margins = { -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
     } else {
-        WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_OldProc");
-        if (oldProc) {
-            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
-            RemovePropW(hwnd, L"FastTheme_OldProc");
+        RemovePropW(hwnd, L"FastTheme_Borderless");
+        if (!GetPropW(hwnd, L"FastTheme_BgBrush")) {
+            WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_OldProc");
+            if (oldProc) {
+                SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
+                RemovePropW(hwnd, L"FastTheme_OldProc");
+            }
         }
         LONG style = GetWindowLong(hwnd, GWL_STYLE);
         style |= WS_CAPTION | WS_SYSMENU;
@@ -281,4 +311,31 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env
     return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief Sets a solid background color for the client area and window class.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowBackgroundColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    EnsureSubclassed(hwnd);
+
+    HBRUSH oldBrush = (HBRUSH)GetPropW(hwnd, L"FastTheme_BgBrush");
+    if (oldBrush) {
+        DeleteObject(oldBrush);
+    }
+
+    HBRUSH newBrush = CreateSolidBrush(RGB(r, g, b));
+    SetPropW(hwnd, L"FastTheme_BgBrush", (HANDLE)newBrush);
+
+    // Also neutralize the window class background brush to avoid flicker of class default (white)
+    SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)newBrush);
+
+    // Force repaint
+    InvalidateRect(hwnd, NULL, TRUE);
+
+    return JNI_TRUE;
+}
+
 } // extern "C"
+

@@ -1,6 +1,6 @@
-# FastTheme 0.1.0 [ALPHA] — High-Performance Native Window Styling for Java
+# FastTheme 0.1.1 [ALPHA] — High-Performance Native Window Styling for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.0)
+[![Status](https://img.shields.io/badge/status-0.1.1-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
@@ -92,7 +92,7 @@ Add the JitPack repository and the dependencies to your `pom.xml`:
 <dependency>
     <groupId>com.github.andrestubbe</groupId>
     <artifactId>fasttheme</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 
 <!-- FastCore (Required Native Loader) -->
@@ -112,7 +112,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasttheme:0.1.0'
+    implementation 'com.github.andrestubbe:fasttheme:0.1.1'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
@@ -121,10 +121,11 @@ dependencies {
 
 Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[fasttheme-0.1.0.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.0/fasttheme-0.1.0.jar)
+1. 📦 **[fasttheme-0.1.1.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.1/fasttheme-0.1.1.jar)
    ** (The Core Library)
 2. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (
    The Mandatory Native Loader)
+
 
 ---
 
@@ -135,19 +136,21 @@ Want to see the high-performance transition engine in action?
 1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
 2. Run the premium showcase: `.\run-demo2.bat`
 
-*Note: The demo showcases the 0.1.0 Borderless Shadow and Drag-Zone logic.*
+*Note: The demo showcases the 0.1.1 Borderless Shadow and Drag-Zone logic.*
 
 ---
 
 ## API Reference
 
-| Method                                                  | Description                                                  |
-|---------------------------------------------------------|--------------------------------------------------------------|
-| `void setBorderlessShadow(long hwnd, boolean enable)`   | Enables borderless mode with native shadows (Raycast-style). |
-| `void setOverlayDragHeight(long hwnd, int pixels)`      | Sets the height of the invisible drag zone.                  |
-| `void setTitleBarDarkMode(long hwnd, boolean enable)`   | Toggles the native system dark mode for the title bar.       |
-| `void setWindowTransparency(long hwnd, int alpha)`      | Sets native window transparency (0-255).                     |
-| `void setTitleBarColor(long hwnd, int r, int g, int b)` | Sets a custom native title bar background color.             |
+| Method                                                                  | Description                                                  |
+|-------------------------------------------------------------------------|--------------------------------------------------------------|
+| `void setBorderlessShadow(long hwnd, boolean enable)`                   | Enables borderless mode with native shadows (Raycast-style). |
+| `void setOverlayDragHeight(long hwnd, int pixels)`                      | Sets the height of the invisible drag zone.                  |
+| `void setTitleBarDarkMode(long hwnd, boolean enable)`                   | Toggles the native system dark mode for the title bar.       |
+| `void setWindowTransparency(long hwnd, int alpha)`                      | Sets native window transparency (0-255).                     |
+| `void setTitleBarColor(long hwnd, int r, int g, int b)`                 | Sets a custom native title bar background color.             |
+| `boolean setWindowBackgroundColor(long hwnd, int r, int g, int b)`     | Sets a custom native client area (window body) color.        |
+
 
 ---
 

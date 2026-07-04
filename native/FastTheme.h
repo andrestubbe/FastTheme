@@ -29,7 +29,9 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarDarkMode(JNIEnv* 
 JNIEXPORT jstring JNICALL Java_fasttheme_FastTheme_getSystemResolution(JNIEnv* env, jobject obj);
 JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getSystemDPI(JNIEnv* env, jobject obj);
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jobject obj);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowBackgroundColor(JNIEnv* env, jobject obj, jlong hwndLong, jint r, jint g, jint b);
 JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getSystemRefreshRate(JNIEnv* env, jobject obj);
+
 
 #ifdef __cplusplus
 }

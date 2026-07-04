@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-07-04
+### Added
+- **Window Body/Client Area Coloring**: Added `setWindowBackgroundColor(long hwnd, int r, int g, int b)` to eliminate the default white frame/background flash during JFrame creation/display.
+
 ## [0.1.0] - 2026-05-11
 ### Added
 - **First public release of FastTheme via JitPack.**

@@ -10,3 +10,4 @@ EXPORTS
     Java_fasttheme_FastTheme_setBorderlessShadow
     Java_fasttheme_FastTheme_setOverlayDragHeight
     Java_fasttheme_FastTheme_isSystemDarkMode
+    Java_fasttheme_FastTheme_setWindowBackgroundColor

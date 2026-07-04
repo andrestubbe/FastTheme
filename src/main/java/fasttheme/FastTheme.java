@@ -28,4 +28,7 @@ public class FastTheme {
     public static native boolean setOverlayDragHeight(long hwnd, int height);
 
     public static native boolean isSystemDarkMode();
+
+    public static native boolean setWindowBackgroundColor(long hwnd, int r, int g, int b);
 }
+

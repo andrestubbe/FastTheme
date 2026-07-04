@@ -13,7 +13,7 @@ echo.
 
 :: Check for Java
 if not defined JAVA_HOME (
-    set "JAVA_HOME=C:\Program Files\Java\jdk-25"
+    set "JAVA_HOME=C:\Program Files\Java\jdk-25.0.3"
 )
 
 if not exist "%JAVA_HOME%\include\jni.h" (
@@ -112,7 +112,7 @@ if %errorlevel% neq 0 (
 :: Success
 echo.
 echo =====================================================
-echo BUILD SUCCESSFUL! (v0.1.0)
+echo BUILD SUCCESSFUL! (v0.1.1)
 echo =====================================================
 echo.
 echo FastTheme JNI Bridge created with:
@@ -120,7 +120,8 @@ echo - Native Window Styling (Transparency, Colors)
 echo - Windows 11 Immersive Dark Mode support
 echo - Native HWND extraction via JAWT
 echo.
-echo Standard JAR: target/fasttheme-0.1.0.jar
+echo Standard JAR: target/fasttheme-0.1.1.jar
 echo Native DLL  : src/main/resources/native/fasttheme.dll
+
 echo.
 pause
