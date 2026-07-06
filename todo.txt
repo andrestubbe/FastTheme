@@ -1,0 +1,2 @@
+[ ] Implement functions to show/hide or enable/disable Minimize and Maximize buttons on the native window by toggling WS_MINIMIZEBOX and WS_MAXIMIZEBOX styles.
+[ ] Implement function to hide the system icon from the title bar (e.g., by modifying window styles or sending WM_SETICON with a null icon).
