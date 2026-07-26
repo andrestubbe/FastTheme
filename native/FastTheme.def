@@ -1,6 +1,7 @@
 LIBRARY FastTheme
 EXPORTS
     Java_fasttheme_FastTheme_getWindowHandle
+    Java_fasttheme_FastTheme_getConsoleWindowHandle
     Java_fasttheme_FastTheme_setWindowTransparency
     Java_fasttheme_FastTheme_setTitleBarColor
     Java_fasttheme_FastTheme_setTitleBarTextColor

@@ -1,4 +1,4 @@
-# FastTheme — High-Performance Native Window Styling for Java [v0.3.0]
+# FastTheme — High-Performance Native Window Styling for Java [v0.1.2]
 
 **Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
@@ -102,8 +102,8 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
 <dependencies>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
-        <artifactId>fasttheme</artifactId>
-        <version>0.3.0</version>
+        <artifactId>FastTheme</artifactId>
+        <version>0.1.2</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -120,7 +120,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fasttheme:0.3.0'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.2'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
@@ -128,7 +128,7 @@ dependencies {
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[fasttheme-v0.3.0.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
+1. 📦 **[FastTheme-0.1.2.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
 2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
@@ -151,6 +151,7 @@ Want to see the high-performance transition engine in action?
 
 | Method | Description |
 |--------|-------------|
+| `long getConsoleWindowHandle()` | Retrieves the native Win32 `HWND` window handle of the active console. |
 | `void setBorderlessShadow(long hwnd, boolean enable)` | Enables borderless mode with native shadows (Raycast-style). |
 | `void setOverlayDragHeight(long hwnd, int pixels)` | Sets the height of the invisible drag zone. |
 | `void setTitleBarDarkMode(long hwnd, boolean enable)` | Toggles the native system dark mode for the title bar. |

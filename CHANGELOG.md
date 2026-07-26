@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-07-26
+### Added
+- **Native Console Window Support**: Added `getConsoleWindowHandle()` to query the native Win32 `HWND` of Windows console windows (`cmd.exe` / ConHost) with automatic root owner resolution (`GA_ROOTOWNER` / `GA_ROOT`).
+- **Enhanced Transparency Handling**: Updated `setWindowTransparency()` to automatically target parent/root window containers and trigger immediate frame invalidation and redraws (`SetWindowPos` + `RedrawWindow`).
+
 ## [0.1.0] - 2026-05-11
 ### Added
 - **First public release of FastTheme via JitPack.**

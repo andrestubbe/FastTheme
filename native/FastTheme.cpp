@@ -92,6 +92,20 @@ JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jc
 }
 
 /**
+ * @brief Retrieves the native window handle (HWND) of the current Windows Console.
+ */
+JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getConsoleWindowHandle(JNIEnv* env, jclass clazz) {
+    HWND hwnd = GetConsoleWindow();
+    if (hwnd != NULL) {
+        HWND root = GetAncestor(hwnd, GA_ROOTOWNER);
+        if (root != NULL && IsWindow(root)) return (jlong)root;
+        root = GetAncestor(hwnd, GA_ROOT);
+        if (root != NULL && IsWindow(root)) return (jlong)root;
+    }
+    return (jlong)hwnd;
+}
+
+/**
  * @brief Sets window transparency using SetLayeredWindowAttributes.
  */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv* env, jclass clazz, jlong hwndLong, jint alpha) {
@@ -99,7 +113,21 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv
     if (!IsWindow(hwnd)) return JNI_FALSE;
     LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
     SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
-    return SetLayeredWindowAttributes(hwnd, 0, (BYTE)alpha, LWA_ALPHA) ? JNI_TRUE : JNI_FALSE;
+    BOOL res = SetLayeredWindowAttributes(hwnd, 0, (BYTE)alpha, LWA_ALPHA);
+
+    HWND root = GetAncestor(hwnd, GA_ROOTOWNER);
+    if (root != NULL && root != hwnd && IsWindow(root)) {
+        LONG rootEx = GetWindowLong(root, GWL_EXSTYLE);
+        SetWindowLong(root, GWL_EXSTYLE, rootEx | WS_EX_LAYERED);
+        SetLayeredWindowAttributes(root, 0, (BYTE)alpha, LWA_ALPHA);
+        SetWindowPos(root, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+        RedrawWindow(root, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
+    }
+
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
+
+    return res ? JNI_TRUE : JNI_FALSE;
 }
 
 /**
