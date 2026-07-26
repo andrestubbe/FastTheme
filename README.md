@@ -1,4 +1,4 @@
-# FastTheme — High-Performance Native Window Styling for Java [v0.1.2]
+# FastTheme 0.1.2 [ALPHA-2026-07-26] — High-Performance Native Window Styling for Java
 
 **Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
