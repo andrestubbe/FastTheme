@@ -2,7 +2,7 @@
 
 **Modern Windows 10/11 window decorations and dark mode for Java applications.**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/andrestubbe/FastTheme/maven.yml?branch=main)](https://github.com/andrestubbe/FastTheme/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/andrestubbe/FastTheme/release.yml)](https://github.com/andrestubbe/FastTheme/actions)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
