@@ -144,7 +144,7 @@ Want to see the high-performance transition engine in action?
 1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
 2. Run the premium showcase: `.\run-demo2.bat`
 
-*Note: The demo showcases the v0.3.0 Borderless Shadow and Drag-Zone logic.*
+*Note: The demo showcases the v0.1.2 Borderless Shadow and Drag-Zone logic.*
 
 ---
 
