@@ -128,7 +128,7 @@ dependencies {
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.2.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
+1. 📦 **[fasttheme-0.1.2.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
 2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
