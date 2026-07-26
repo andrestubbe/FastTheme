@@ -15,6 +15,8 @@ public class FastTheme {
 
     public static native boolean setWindowTransparency(long hwnd, int alpha);
 
+    public static native boolean setWindowBackgroundColor(long hwnd, int r, int g, int b);
+
     public static native boolean setTitleBarColor(long hwnd, int r, int g, int b);
 
     public static native boolean setTitleBarTextColor(long hwnd, int r, int g, int b);

@@ -131,6 +131,18 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv
 }
 
 /**
+ * @brief Sets the native window background brush color to eliminate white window creation flash.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowBackgroundColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    HBRUSH hBrush = CreateSolidBrush(RGB(r, g, b));
+    SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
+    RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
+    return JNI_TRUE;
+}
+
+/**
  * @brief Toggles Immersive Dark Mode via DwmSetWindowAttribute.
  */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarDarkMode(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
