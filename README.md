@@ -22,6 +22,7 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 - [Installation](#installation)
 - [Try the Demo](#try-the-demo)
 - [API Reference](#api-reference)
+- [Documentation](#documentation)
 - [Platform Support](#platform-support)
 - [License](#license)
 - [Related Projects](#related-projects)
@@ -157,6 +158,16 @@ Want to see the high-performance transition engine in action?
 | `void setTitleBarDarkMode(long hwnd, boolean enable)` | Toggles the native system dark mode for the title bar. |
 | `void setWindowTransparency(long hwnd, int alpha)` | Sets native window transparency (0-255). |
 | `void setTitleBarColor(long hwnd, int r, int g, int b)` | Sets a custom native title bar background color. |
+
+---
+
+## Documentation
+
+- **[REFERENCE.md](docs/REFERENCE.md)**: Exhaustive catalog of `FastTheme` native methods, DWM constants, HWND extraction, and JNI contracts.
+- **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: Zero-allocation Win32 DWM bridge architecture, layered attributes, and flicker-free window subclassing.
+- **[ROADMAP.md](docs/ROADMAP.md)**: Planned milestone features and OS theme integration.
+- **[CHANGELOG.md](docs/CHANGELOG.md)**: Version history and release notes.
+- **[COMPILE.md](docs/COMPILE.md)**: Native C++ JNI build instructions and Maven deployment.
 
 ---
 
