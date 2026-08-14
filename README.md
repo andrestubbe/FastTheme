@@ -16,28 +16,6 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 
 ---
 
-## Table of Contents
-- [Key Features](#key-features)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Try the Demo](#try-the-demo)
-- [API Reference](#api-reference)
-- [Documentation](#documentation)
-- [Platform Support](#platform-support)
-- [License](#license)
-- [Related Projects](#related-projects)
-
----
-
-## Key Features
-
-- **🌙 Native Dark Mode** — Proper title bar and border coloring.
-- **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
-- **🪟 Premium Overlays** — Borderless windows with native shadows and custom drag zones.
-- **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
-
----
-
 ## Quick Start
 
 ```java
@@ -86,6 +64,31 @@ public class Demo {
 ```
 
 ---
+
+---
+
+## Table of Contents
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Try the Demo](#try-the-demo)
+- [API Reference](#api-reference)
+- [Documentation](#documentation)
+- [Platform Support](#platform-support)
+- [License](#license)
+- [Related Projects](#related-projects)
+
+---
+
+## Key Features
+
+- **🌙 Native Dark Mode** — Proper title bar and border coloring.
+- **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
+- **🪟 Premium Overlays** — Borderless windows with native shadows and custom drag zones.
+- **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
+
+---
+
 
 ## Installation
 
