@@ -1,60 +1,96 @@
 # FastTheme API Reference
 
-This document outlines the native Win32 DWM API contracts, methods, and JNI integrations of the **FastTheme** engine.
+This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.3).
 
 ---
 
 ## 1. Class: `fasttheme.FastTheme`
 
-Primary JNI boundary class for Windows Desktop Window Manager (DWM) and Win32 layered window styling.
+Primary facade for both the Dynamic Theme State Engine and the native Windows DWM styling bridge.
 
-### Static Native Methods
+### Dynamic Theme Methods
+
+*   `public static void set(ThemeData theme)`
+    *   **Description**: Activates a theme globally across the JVM and dispatches notifications to all registered listeners.
+*   `public static ThemeData current()`
+    *   **Description**: Returns the active `ThemeData` instance.
+*   `public static int get(int slotIndex)`
+    *   **Description**: Zero-allocation direct array read returning the 32-bit packed ARGB integer color.
+*   `public static int get(String keyName)`
+    *   **Description**: Returns 32-bit packed ARGB color by string key name.
+*   `public static java.awt.Color getColor(int slotIndex)` / `getColor(String keyName)`
+    *   **Description**: Converts the color to an AWT/Swing `java.awt.Color` object.
+*   `public static String getAnsiFg(int slotIndex)` / `getAnsiBg(int slotIndex)`
+    *   **Description**: Returns 24-bit Truecolor ANSI escape sequence string for CLI/TUI rendering.
+*   `public static void addListener(ThemeListener listener)` / `removeListener(ThemeListener listener)`
+    *   **Description**: Subscribes/unsubscribes an observer for live theme changes.
+*   `public static void applyToWindow(long hwnd)` / `applyToWindow(java.awt.Component component)`
+    *   **Description**: Synchronizes native Windows DWM title bar caption, text, and background colors with the active theme.
+
+### Native Win32 DWM Methods
 
 *   `public static native long getWindowHandle(java.awt.Component component)`
-    *   **Description**: Uses Java AWT Native Interface (JAWT) to extract the native 64-bit Win32 window handle (`HWND`) of a Swing/AWT component or frame.
-    *   **Returns**: 64-bit `HWND` address as a `long`, or `0` on failure.
-
 *   `public static native long getConsoleWindowHandle()`
-    *   **Description**: Retrieves the native Win32 `HWND` of the active console window (`cmd.exe` / ConHost) with automatic root owner resolution (`GA_ROOTOWNER` / `GA_ROOT`).
-    *   **Returns**: 64-bit `HWND` address of the console or its root container.
-
 *   `public static native boolean setWindowTransparency(long hwnd, int alpha)`
-    *   **Description**: Enables Win32 `WS_EX_LAYERED` window style and sets window opacity. Automatically applies attributes to parent/root containers and triggers immediate frame invalidation.
-    *   **Parameters**:
-        *   `hwnd`: 64-bit native window handle.
-        *   `alpha`: Alpha opacity from `0` (completely transparent) to `255` (opaque).
-    *   **Returns**: `true` on success, `false` on failure.
-
 *   `public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled)`
-    *   **Description**: Toggles Windows 10/11 immersive dark mode for the native window title bar using `DWMWA_USE_IMMERSIVE_DARK_MODE` (attribute 20).
-    *   **Parameters**: `enabled` — `true` for dark mode, `false` for light mode.
-
 *   `public static native boolean setTitleBarColor(long hwnd, int r, int g, int b)`
-    *   **Description**: Sets custom RGB title bar caption color on Windows 11 using `DWMWA_CAPTION_COLOR` (attribute 35).
-
 *   `public static native boolean setTitleBarTextColor(long hwnd, int r, int g, int b)`
-    *   **Description**: Sets custom RGB title bar text color on Windows 11 using `DWMWA_TEXT_COLOR` (attribute 36).
-
 *   `public static native boolean enableMica(long hwnd, boolean enabled)`
-    *   **Description**: Enables Windows 11 Mica backdrop material effect on the window frame via `DWMWA_MICA_EFFECT` (attribute 38).
-
 *   `public static native boolean setCornerStyle(long hwnd, int style)`
-    *   **Description**: Configures window corner preferences on Windows 11 (`DWMWA_WINDOW_CORNER_PREFERENCE` attribute 33).
-    *   **Styles**: `0` (Default), `1` (Square), `2` (Rounded), `3` (Small Rounded).
-
 *   `public static native boolean setBorderlessShadow(long hwnd, boolean enabled)`
-    *   **Description**: Removes window chrome while extending DWM frame into client area to maintain native Windows drop shadows. Subclasses window procedure to intercept `WM_NCCALCSIZE`, `WM_NCACTIVATE`, and `WM_NCPAINT`.
-
 *   `public static native boolean setOverlayDragHeight(long hwnd, int height)`
-    *   **Description**: Configures the invisible drag zone height at the top of borderless windows via `WM_NCHITTEST` interception.
-
 *   `public static native boolean isSystemDarkMode()`
-    *   **Description**: Checks global Windows dark mode preferences via the Registry (`AppsUseLightTheme`).
 
 ---
 
-## 2. Platform Requirements
+## 2. Class: `fasttheme.ThemeKeys`
 
-- **OS**: Windows 10 (Build 1903+) or Windows 11
-- **Architecture**: x86_64 (64-bit)
-- **Java Version**: JDK 17+
+Defines 49 standardized slot IDs for instant $O(1)$ primitive array lookups.
+
+*   `public static int indexOf(String keyName)`: Translates key name to slot ID.
+*   `public static String nameOf(int slotIndex)`: Translates slot ID to key name.
+*   **Slot Categories**:
+    *   *Window & Frame*: `TITLE_BAR_BACKGROUND`, `TITLE_BAR_TEXT`, `TITLE_BAR_BORDER`, `WINDOW_BACKGROUND`, `WINDOW_BORDER`, `CONTENT_BACKGROUND`
+    *   *Typography*: `TEXT_PRIMARY`, `TEXT_SECONDARY`, `TEXT_MUTED`, `TEXT_PLACEHOLDER`, `TEXT_INVERSE`
+    *   *Accent & Brand*: `ACCENT_PRIMARY`, `ACCENT_SECONDARY`, `ACCENT_HOVER`, `ACCENT_PRESSED`
+    *   *Buttons*: `BUTTON_NORMAL_BACKGROUND`, `BUTTON_NORMAL_FOREGROUND`, `BUTTON_NORMAL_BORDER`, `BUTTON_HOVER_*`, `BUTTON_PRESSED_*`, `BUTTON_DISABLED_*`
+    *   *Inputs*: `INPUT_BACKGROUND`, `INPUT_FOREGROUND`, `INPUT_BORDER`, `INPUT_BORDER_FOCUS`, `EDITOR_LINE_NUMBER`, `EDITOR_SELECTION`
+    *   *Navigation*: `TAB_BACKGROUND_NORMAL`, `TAB_BACKGROUND_SELECTED`, `TAB_BACKGROUND_HOVER`, `TAB_FOREGROUND_*`, `SPLIT_PANE_BAR`, `SCROLLBAR_THUMB`, `SCROLLBAR_TRACK`
+    *   *Status*: `STATUS_SUCCESS`, `STATUS_WARNING`, `STATUS_ERROR`, `STATUS_INFO`
+    *   *Popups & Tooltips*: `TOOLTIP_BACKGROUND`, `TOOLTIP_FOREGROUND`, `POPUP_BACKGROUND`, `POPUP_BORDER`, `POPUP_SHADOW`
+
+---
+
+## 3. Class: `fasttheme.ThemeData`
+
+Contiguous primitive storage for theme colors.
+
+*   `public int get(int slotIndex)`: Returns 32-bit ARGB value.
+*   `public void set(int slotIndex, int argb)`: Updates color slot.
+*   `public byte[] toBinary()`: Serializes to `.themebin` format (magic `0x4654484D`).
+*   `public String toText()`: Serializes to human-readable `.theme` format.
+*   `public ThemeData copy()`: Deep clone.
+
+---
+
+## 4. Class: `fasttheme.ThemeParser`
+
+*   `public static ThemeData parseText(String textContent)`: Parses `.theme` text with variable aliasing (`@KEY`).
+*   `public static ThemeData parseBinary(byte[] bytes)`: Deserializes binary `.themebin` payload.
+*   `public static ThemeData loadFromFile(String filePath)`: Auto-detects text vs. binary files.
+*   `public static ThemeData loadDefaultDark()`: Built-in dark preset.
+*   `public static ThemeData loadDefaultLight()`: Built-in light preset.
+*   `public static ThemeData loadDefaultCream()`: Built-in synthwave/TUI preset.
+
+---
+
+## 5. Class: `fasttheme.ThemeColorUtil`
+
+*   `public static int rgb(int r, int g, int b)` / `argb(int a, int r, int g, int b)`: Packs components into ARGB int.
+*   `public static double luminance(int argb)`: WCAG 2.1 relative luminance.
+*   `public static double contrastRatio(int c1, int c2)`: Contrast score between two colors.
+*   `public static int getContrastForeground(int bgArgb)`: Returns dark or white for guaranteed readability.
+*   `public static int lighten(int argb, float amount)` / `darken(int argb, float amount)`: Mathematical tinting/shading.
+*   `public static int blend(int c1, int c2, float t)`: Linear interpolation.
+*   `public static String toAnsiForeground(int argb)` / `toAnsiBackground(int argb)`: 24-bit Truecolor terminal codes.
+*   `public static int parseColor(String str)`: Parses hex (`#RRGGBB`, `0xRRGGBB`) and comma-separated RGB(A).

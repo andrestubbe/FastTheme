@@ -1,41 +1,40 @@
 # FastTheme Roadmap
 
-## Upcoming Features
+## Milestone Status
 
-### Real-time Runtime Theme Detection
-**Status:** Planning / Implementation
-
-While startup detection is already implemented, FastTheme needs a way to react to theme changes **at runtime** (e.g., when the user switches Windows modes while the app is running).
-
-**Implementation Details:**
-- **Mechanism:** Listen for `WM_SETTINGCHANGE` native events via a hidden message window or JNI hook.
-- **Source of Truth:** Monitor the registry key `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`.
-
-**Goal:**
-- [ ] Implement a `ThemeChangeListener` interface.
-- [ ] Add native logic to trigger events when `AppsUseLightTheme` changes.
-
-**Priority:** High - Crucial for apps that stay open for long periods.
-
-### Mica & Acrylic Material Support
+### Universal Color-Matrix & FastFileFormat (v0.1.3)
 **Status:** Released
-Windows 11 introduced Mica and Mica Alt materials. We now support these natively.
+- [x] Contiguous primitive array in-memory storage (`ThemeData`).
+- [x] Standardized 49-slot key matrix (`ThemeKeys`).
+- [x] Text parser supporting variable aliasing (`@KEY`) and sub-microsecond binary deserializer (`.themebin`).
+- [x] WCAG 2.1 contrast luminance calculation and auto-readable text foreground.
+- [x] Mathematical state generation (tinting/shading).
+- [x] 24-bit Truecolor ANSI CLI sequences.
+- [x] Central dynamic state management and `ThemeListener` observer events.
+
+### Native Console Window Transparency (v0.1.2)
+**Status:** Released
+- [x] Implement `getConsoleWindowHandle()` and `setWindowTransparency()` with root window frame traversal and invalidation.
+
+### Mica & Acrylic Material Support (v0.1.0)
+**Status:** Released
 - [x] Implement `DWM_SYSTEMBACKDROP_TYPE` enumerations.
 - [x] Add support for `DWMSBT_MAINWINDOW` (Mica) and `DWMSBT_TRANSIENTWINDOW` (Acrylic).
 
-### Premium Borderless Overlays
+### Premium Borderless Overlays (v0.1.0)
 **Status:** Released
-Native shadows and drag zones for borderless windows.
 - [x] Implement `WM_NCCALCSIZE` removal.
 - [x] Add `WM_NCHITTEST` drag zone logic.
 - [x] Lock resizing for fixed overlays.
 
-### Native Console Window Transparency
-**Status:** Released (v0.1.2)
-- [x] Implement `getConsoleWindowHandle()` and `setWindowTransparency()` with root window frame traversal and invalidation.
+## Upcoming Features
 
-### Titlebar Customization & Icons
+### Real-time OS Theme Change Detection
+**Status:** In Progress
+- [ ] Listen for `WM_SETTINGCHANGE` native events via a background message loop.
+- [ ] Automatically toggle active `ThemeData` between default dark and light presets when Windows system mode switches.
+
+### Extended Non-Client Area (NCA) Controls
 **Status:** Backlog
-Extended control over the non-client area (NCA) of the window.
 - [ ] Native methods to hide/show the window icon.
-- [ ] Support for centering title text or hiding it completely while keeping buttons.
+- [ ] Support for centering title text or custom titlebar metrics.

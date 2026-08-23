@@ -2,14 +2,145 @@ package fasttheme;
 
 import fastcore.FastCore;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * FastTheme - Universal Display, OS Window & Dynamic Theme Management Engine for FastJava.
+ */
 public class FastTheme {
-    public FastTheme() {}
 
     static {
-        FastCore.loadLibrary("fasttheme");
+        try {
+            FastCore.loadLibrary("fasttheme");
+        } catch (Throwable ignored) {}
     }
 
-    public static native long getWindowHandle(java.awt.Component component);
+    private static volatile ThemeData currentTheme = ThemeParser.loadDefaultDark();
+    private static final List<ThemeListener> listeners = new CopyOnWriteArrayList<>();
+
+    public FastTheme() {}
+
+    // --- Dynamic Theme State Management ---
+
+    /**
+     * Activates a theme globally and notifies all registered listeners.
+     */
+    public static void set(ThemeData theme) {
+        if (theme == null) return;
+        currentTheme = theme;
+        for (ThemeListener l : listeners) {
+            try {
+                l.onThemeChanged(theme);
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the currently active ThemeData instance.
+     */
+    public static ThemeData current() {
+        return currentTheme;
+    }
+
+    /**
+     * Zero-allocation direct slot access.
+     */
+    public static int get(int slotIndex) {
+        return currentTheme.get(slotIndex);
+    }
+
+    /**
+     * String key based lookup.
+     */
+    public static int get(String keyName) {
+        return currentTheme.get(keyName);
+    }
+
+    /**
+     * Returns the AWT/Swing Color object for the requested slot ID.
+     */
+    public static Color getColor(int slotIndex) {
+        return ThemeColorUtil.toAwtColor(get(slotIndex));
+    }
+
+    /**
+     * Returns the AWT/Swing Color object for the requested key name.
+     */
+    public static Color getColor(String keyName) {
+        return ThemeColorUtil.toAwtColor(get(keyName));
+    }
+
+    /**
+     * Returns the 24-bit Truecolor ANSI foreground sequence for CLI/TUI.
+     */
+    public static String getAnsiFg(int slotIndex) {
+        return ThemeColorUtil.toAnsiForeground(get(slotIndex));
+    }
+
+    /**
+     * Returns the 24-bit Truecolor ANSI background sequence for CLI/TUI.
+     */
+    public static String getAnsiBg(int slotIndex) {
+        return ThemeColorUtil.toAnsiBackground(get(slotIndex));
+    }
+
+    /**
+     * Registers a listener for live theme changes.
+     */
+    public static void addListener(ThemeListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a registered theme change listener.
+     */
+    public static void removeListener(ThemeListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * Synchronizes native Windows DWM title bar and background styling
+     * using colors from the currently active theme.
+     */
+    public static void applyToWindow(long hwnd) {
+        if (hwnd == 0) return;
+        try {
+            int titleBg = get(ThemeKeys.TITLE_BAR_BACKGROUND);
+            int titleFg = get(ThemeKeys.TITLE_BAR_TEXT);
+            int winBg = get(ThemeKeys.WINDOW_BACKGROUND);
+
+            setTitleBarColor(hwnd, ThemeColorUtil.red(titleBg), ThemeColorUtil.green(titleBg), ThemeColorUtil.blue(titleBg));
+            setTitleBarTextColor(hwnd, ThemeColorUtil.red(titleFg), ThemeColorUtil.green(titleFg), ThemeColorUtil.blue(titleFg));
+            setWindowBackgroundColor(hwnd, ThemeColorUtil.red(winBg), ThemeColorUtil.green(winBg), ThemeColorUtil.blue(winBg));
+
+            boolean isDark = ThemeColorUtil.luminance(winBg) < 0.5;
+            setTitleBarDarkMode(hwnd, isDark);
+        } catch (Throwable ignored) {}
+    }
+
+    /**
+     * Convenience method to apply theme to a Swing/AWT component window.
+     */
+    public static void applyToWindow(Component component) {
+        if (component == null) return;
+        try {
+            long hwnd = getWindowHandle(component);
+            if (hwnd != 0) {
+                applyToWindow(hwnd);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    // --- Native JNI Methods ---
+
+    public static native long getWindowHandle(Component component);
 
     public static native long getConsoleWindowHandle();
 

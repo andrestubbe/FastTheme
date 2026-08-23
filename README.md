@@ -1,14 +1,14 @@
-# FastTheme 0.1.2 [ALPHA-2026-07-26] — High-Performance Native Window Styling for Java
+# FastTheme 0.1.3 — Universal Color-Matrix & High-Performance Window Styling for Java
 
-**Modern Windows 10/11 window decorations and dark mode for Java applications.**
+**Universal, zero-allocation theme engine, color matrix, and native Windows 10/11 DWM window styling for Java applications.**
 
 [![Build](https://img.shields.io/github/actions/workflow/status/andrestubbe/FastTheme/release.yml)](https://github.com/andrestubbe/FastTheme/actions)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![JitPack](https://jitpack.io/v/andrestubbe/FastTheme.svg)](https://jitpack.io/#andrestubbe/FastTheme)
+[![JitPack](https://img.shields.io/badge/JitPack-v0.1.3-brightgreen.svg)](https://jitpack.io/#andrestubbe/FastTheme)
 
-FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the DWM (Desktop Window Manager) API.
+FastTheme combines **zero-allocation in-memory theme management** with **native Windows DWM styling**. It powers Swing, AWT, OpenGL, and CLI/TUI applications with consistent palettes, WCAG contrast safety, fast text/binary loading, and dark mode title bar integration.
 
 [![Premium Overlay Showcase](docs/screenshot.png)
 ![Premium Overlay Animation](docs/screenshot2.png)
@@ -18,77 +18,63 @@ FastTheme brings **native Windows styling** to Swing and AWT. It enables dark mo
 
 ## Quick Start
 
+### 1. Zero-Allocation Color Lookup & Theming
 ```java
-// Quick Start — Enabling Premium Overlay Mode
 import fasttheme.FastTheme;
-import javax.swing.JFrame;
+import fasttheme.ThemeKeys;
+import fasttheme.ThemeParser;
 
 public class Demo {
     public static void main(String[] args) {
-         JFrame frame = new JFrame();
-        frame.setSize(600, 96);
+        // Activate embedded preset (or load from .theme / .themebin)
+        FastTheme.set(ThemeParser.loadDefaultDark());
 
-        // Remove all Java window decorations (title bar, borders)
-        // Required for creating a true overlay-style window
-        frame.setUndecorated(true);
+        // Zero-allocation direct slot read (32-bit packed ARGB int)
+        int bg = FastTheme.get(ThemeKeys.WINDOW_BACKGROUND);
+        
+        // AWT/Swing Color
+        java.awt.Color titleColor = FastTheme.getColor(ThemeKeys.TITLE_BAR_BACKGROUND);
+        
+        // 24-bit Truecolor ANSI for Terminal/TUI
+        System.out.println(FastTheme.getAnsiFg(ThemeKeys.ACCENT_PRIMARY) + "⚡ FastTheme Loaded" + "\u001B[0m");
+    }
+}
+```
 
-        // Center the window on the screen
+### 2. Native Windows 10/11 Styling Bridge
+```java
+import fasttheme.FastTheme;
+import javax.swing.JFrame;
+import java.awt.Color;
+
+public class NativeDemo {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("FastTheme Window");
+        frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
-
-        // Set the window background to pure black
-        // Since the title bar is removed, the content area becomes the visible body
-        frame.getContentPane().setBackground(new Color(0, 0, 0));
-
-        // The native HWND is created only after the window becomes visible
         frame.setVisible(true);
 
         long hwnd = FastTheme.getWindowHandle(frame);
         if (hwnd != 0) {
-
-            // Enables the Windows 11 shadow (DWM + WS_THICKFRAME)
-            FastTheme.setBorderlessShadow(hwnd, true);
-
-            // Defines the height of the invisible drag zone at the top
-            // Allows the window to be dragged like Raycast/Spotlight
-            FastTheme.setOverlayDragHeight(hwnd, 6);
-
-            // Applies semi-transparency to the entire window (0–255)
-            FastTheme.setWindowTransparency(hwnd, 230);
-
-        } else {
-            System.err.println("❌ HWND is 0 – native window handle not found!");
+            // Automatically synchronizes DWM title bar and background from active theme
+            FastTheme.applyToWindow(hwnd);
         }
-
     }
 }
 ```
 
 ---
 
----
-
-## Table of Contents
-- [Key Features](#key-features)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Try the Demo](#try-the-demo)
-- [API Reference](#api-reference)
-- [Documentation](#documentation)
-- [Platform Support](#platform-support)
-- [License](#license)
-- [Related Projects](#related-projects)
-
----
-
 ## Key Features
 
-- **🌙 Native Dark Mode** — Proper title bar and border coloring.
-- **✨ Glass Effects** — Support for Mica and Acrylic effects (Win 11).
-- **🪟 Premium Overlays** — Borderless windows with native shadows and custom drag zones.
-- **🚀 Zero Lag** — Direct DWM attribute manipulation via native calls.
+- **⚡ Zero-Allocation Color Matrix** — Contiguous `int[]` storage indexed via 49 static slot constants (`ThemeKeys`).
+- **📄 Dual FastFileFormat** — Human-readable `.theme` text (with `@KEY` variable aliasing) and lightning-fast binary `.themebin`.
+- **🧮 WCAG 2.1 Contrast Safety** — Automatic high-contrast text foreground selection and mathematical tint/shade state generation.
+- **💻 CLI & TUI Ready** — Native 24-bit Truecolor ANSI escape sequences for terminal apps.
+- **🌙 Native Windows DWM Styling** — Immersive Dark Mode, custom title bar colors, Mica/Acrylic effects, and borderless drop shadows.
+- **🔄 Live State & Observers** — Dynamic notifications to registered listeners on theme switch.
 
 ---
-
 
 ## Installation
 
@@ -107,7 +93,7 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -124,62 +110,43 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.2'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.3'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
 
-### Option 3: Direct Download (No Build Tool)
-Download the latest JARs directly to add them to your classpath:
-
-1. 📦 **[fasttheme-0.1.2.jar](https://github.com/andrestubbe/FastTheme/releases)** (The Core Library)
-2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases)** (The Mandatory Native Loader)
-
-> [!IMPORTANT]
-> Both JARs must be in your classpath for the native JNI calls to function correctly.
-
 ---
 
-## Try the Demo
+## API Overview
 
-Want to see the high-performance transition engine in action?
-
-1. Clone this repository: `git clone https://github.com/andrestubbe/FastTheme.git`
-2. Run the premium showcase: `.\run-demo2.bat`
-
-*Note: The demo showcases the v0.1.2 Borderless Shadow and Drag-Zone logic.*
-
----
-
-## API Reference
-
-| Method | Description |
-|--------|-------------|
-| `long getConsoleWindowHandle()` | Retrieves the native Win32 `HWND` window handle of the active console. |
-| `void setBorderlessShadow(long hwnd, boolean enable)` | Enables borderless mode with native shadows (Raycast-style). |
-| `void setOverlayDragHeight(long hwnd, int pixels)` | Sets the height of the invisible drag zone. |
-| `void setTitleBarDarkMode(long hwnd, boolean enable)` | Toggles the native system dark mode for the title bar. |
-| `void setWindowTransparency(long hwnd, int alpha)` | Sets native window transparency (0-255). |
-| `void setTitleBarColor(long hwnd, int r, int g, int b)` | Sets a custom native title bar background color. |
+| Class | Purpose |
+|-------|---------|
+| `FastTheme` | Central facade for theme state, color lookups, listeners, and native DWM synchronization. |
+| `ThemeKeys` | 49 indexed static slots (`TITLE_BAR_BACKGROUND`, `ACCENT_PRIMARY`, etc.) with $O(1)$ bidirectional lookup. |
+| `ThemeData` | In-memory primitive array storage with `.toBinary()` and `.toText()` export. |
+| `ThemeParser` | Deserializer for text (`.theme`) and binary (`.themebin`) formats with embedded default presets. |
+| `ThemeColorUtil` | WCAG luminance/contrast math, state generator (tint/shade), and ANSI terminal formatting. |
+| `ThemeListener` | Observer interface for live theme change notifications. |
 
 ---
 
 ## Documentation
 
-- **[REFERENCE.md](docs/REFERENCE.md)**: Exhaustive catalog of `FastTheme` native methods, DWM constants, HWND extraction, and JNI contracts.
-- **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: Zero-allocation Win32 DWM bridge architecture, layered attributes, and flicker-free window subclassing.
-- **[ROADMAP.md](docs/ROADMAP.md)**: Planned milestone features and OS theme integration.
+- **[REFERENCE.md](docs/REFERENCE.md)**: Exhaustive API contracts and data structure reference.
+- **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: Zero-allocation architecture, Win32 DWM bridge, and theme design principles.
 - **[CHANGELOG.md](docs/CHANGELOG.md)**: Version history and release notes.
-- **[COMPILE.md](docs/COMPILE.md)**: Native C++ JNI build instructions and Maven deployment.
+- **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones.
+- **[COMPILE.md](docs/COMPILE.md)**: Native C++ JNI build instructions.
 
 ---
 
 ## Platform Support
 
-| Platform | Status |
-|----------|--------|
-| Windows 10 (1903+) | ✅ Dark Mode |
-| Windows 11 | ✅ Dark Mode, Mica, Acrylic |
+| Feature | Windows 10 (1903+) | Windows 11 | Linux / macOS |
+|---------|-------------------|------------|---------------|
+| Color Matrix & Theming | ✅ Full | ✅ Full | ✅ Full (Pure Java) |
+| ANSI CLI Sequences | ✅ Full | ✅ Full | ✅ Full |
+| Native DWM Titlebar & Mica | ✅ (Dark Mode) | ✅ Full | ➖ N/A (Native Windows) |
 
 ---
 
@@ -189,13 +156,10 @@ MIT License — See [LICENSE](LICENSE) file for details.
 ---
 
 ## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader
+- [FastCore](https://github.com/andrestubbe/FastCore) — Unified Native Loader
+- [FastUI](https://github.com/andrestubbe/FastUI) — High-Performance GUI Framework
+- [FastTUI](https://github.com/andrestubbe/FastTUI) — Terminal User Interface Toolkit
 - [FastAnimation](https://github.com/andrestubbe/FastAnimation) — High-precision animation engine
-- [FastTween](https://github.com/andrestubbe/FastTween) — SIMD-optimized interpolation
 
 ---
 **Made with ⚡ by Andre Stubbe**
-
-<!-- 
-SEO Keywords: java, jni, dark mode, mica, acrylic, dwm, windows 11, fastjava
--->

@@ -1,0 +1,93 @@
+package fasttheme;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.awt.Color;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class FastThemeTest {
+
+    @Test
+    public void testKeyMatrixLookup() {
+        assertEquals(ThemeKeys.TITLE_BAR_BACKGROUND, ThemeKeys.indexOf("TITLE_BAR_BACKGROUND"));
+        assertEquals(ThemeKeys.ACCENT_PRIMARY, ThemeKeys.indexOf("accent_primary"));
+        assertEquals("WINDOW_BACKGROUND", ThemeKeys.nameOf(ThemeKeys.WINDOW_BACKGROUND));
+        assertEquals(-1, ThemeKeys.indexOf("NON_EXISTENT_KEY"));
+    }
+
+    @Test
+    public void testThemeDataOperations() {
+        ThemeData theme = new ThemeData("Custom");
+        theme.set(ThemeKeys.WINDOW_BACKGROUND, ThemeColorUtil.rgb(20, 20, 20));
+
+        assertEquals(ThemeColorUtil.rgb(20, 20, 20), theme.get(ThemeKeys.WINDOW_BACKGROUND));
+        assertEquals(ThemeColorUtil.rgb(20, 20, 20), theme.get("WINDOW_BACKGROUND"));
+
+        // Binary serialization roundtrip
+        byte[] bin = theme.toBinary();
+        assertNotNull(bin);
+        assertTrue(bin.length > 0);
+
+        ThemeData parsed = ThemeParser.parseBinary(bin);
+        assertEquals("Custom", parsed.getName());
+        assertEquals(ThemeColorUtil.rgb(20, 20, 20), parsed.get(ThemeKeys.WINDOW_BACKGROUND));
+    }
+
+    @Test
+    public void testThemeTextParsingWithAliases() {
+        String themeText = """
+                # Test Theme
+                THEME = Test Cyber
+                
+                ACCENT_PRIMARY = #00E0FF
+                WINDOW_BACKGROUND = 19, 20, 31
+                BUTTON_NORMAL_BACKGROUND = @WINDOW_BACKGROUND
+                BUTTON_HOVER_BORDER = @ACCENT_PRIMARY
+                """;
+
+        ThemeData parsed = ThemeParser.parseText(themeText);
+        assertEquals("Test Cyber", parsed.getName());
+
+        int expectedAccent = ThemeColorUtil.parseColor("#00E0FF");
+        int expectedBg = ThemeColorUtil.rgb(19, 20, 31);
+
+        assertEquals(expectedAccent, parsed.get(ThemeKeys.ACCENT_PRIMARY));
+        assertEquals(expectedBg, parsed.get(ThemeKeys.WINDOW_BACKGROUND));
+        assertEquals(expectedBg, parsed.get(ThemeKeys.BUTTON_NORMAL_BACKGROUND));
+        assertEquals(expectedAccent, parsed.get(ThemeKeys.BUTTON_HOVER_BORDER));
+    }
+
+    @Test
+    public void testColorMathAndContrast() {
+        int darkBg = ThemeColorUtil.rgb(20, 20, 20);
+        int lightBg = ThemeColorUtil.rgb(240, 240, 240);
+
+        assertEquals(0xFFFFFFFF, ThemeColorUtil.getContrastForeground(darkBg));
+        assertEquals(0xFF111111, ThemeColorUtil.getContrastForeground(lightBg));
+
+        int blue = ThemeColorUtil.rgb(0, 100, 200);
+        int lighter = ThemeColorUtil.lighten(blue, 0.2f);
+        assertTrue(ThemeColorUtil.red(lighter) >= ThemeColorUtil.red(blue));
+        assertTrue(ThemeColorUtil.green(lighter) >= ThemeColorUtil.green(blue));
+    }
+
+    @Test
+    public void testGlobalFastThemeStateAndListeners() {
+        AtomicBoolean notified = new AtomicBoolean(false);
+        ThemeListener listener = newTheme -> notified.set(true);
+
+        FastTheme.addListener(listener);
+        try {
+            ThemeData light = ThemeParser.loadDefaultLight();
+            FastTheme.set(light);
+
+            assertTrue(notified.get());
+            assertEquals(light.get(ThemeKeys.WINDOW_BACKGROUND), FastTheme.get(ThemeKeys.WINDOW_BACKGROUND));
+            assertNotNull(FastTheme.getColor(ThemeKeys.WINDOW_BACKGROUND));
+            assertTrue(FastTheme.getAnsiFg(ThemeKeys.ACCENT_PRIMARY).contains("\u001B[38;2;"));
+        } finally {
+            FastTheme.removeListener(listener);
+        }
+    }
+}
