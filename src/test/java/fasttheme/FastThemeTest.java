@@ -35,6 +35,33 @@ public class FastThemeTest {
     }
 
     @Test
+    public void testDynamicCustomKeysAndElasticSlots() {
+        int customSlot1 = ThemeKeys.register("MY_CUSTOM_GLOW");
+        assertTrue(customSlot1 >= ThemeKeys.STANDARD_COUNT);
+        assertEquals(customSlot1, ThemeKeys.indexOf("MY_CUSTOM_GLOW"));
+        assertEquals("MY_CUSTOM_GLOW", ThemeKeys.nameOf(customSlot1));
+
+        ThemeData theme = new ThemeData("DynamicTest");
+        theme.set(customSlot1, ThemeColorUtil.rgb(255, 128, 0));
+        assertEquals(ThemeColorUtil.rgb(255, 128, 0), theme.get(customSlot1));
+        assertEquals(ThemeColorUtil.rgb(255, 128, 0), theme.get("MY_CUSTOM_GLOW"));
+
+        // Elastic set by string name
+        theme.set("ANOTHER_CUSTOM_KEY", ThemeColorUtil.rgb(0, 255, 100));
+        assertEquals(ThemeColorUtil.rgb(0, 255, 100), theme.get("ANOTHER_CUSTOM_KEY"));
+
+        // Text parsing with auto-registered custom keys
+        String customThemeText = """
+                THEME = ElasticCustom
+                BRAND_SPECIAL_COLOR = 120, 200, 255
+                BRAND_SUB_COLOR = @BRAND_SPECIAL_COLOR
+                """;
+        ThemeData parsedCustom = ThemeParser.parseText(customThemeText);
+        assertEquals(ThemeColorUtil.rgb(120, 200, 255), parsedCustom.get("BRAND_SPECIAL_COLOR"));
+        assertEquals(ThemeColorUtil.rgb(120, 200, 255), parsedCustom.get("BRAND_SUB_COLOR"));
+    }
+
+    @Test
     public void testThemeTextParsingWithAliases() {
         String themeText = """
                 # Test Theme

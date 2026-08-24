@@ -5,8 +5,9 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
- * Flat, high-performance in-memory representation of a theme state.
- * Stores 32-bit ARGB packed integer colors in a contiguous primitive array.
+ * Elastic, high-performance in-memory representation of a theme state.
+ * Stores 32-bit ARGB packed integer colors in a contiguous primitive array that
+ * automatically resizes to accommodate dynamic custom slots.
  */
 public final class ThemeData {
 
@@ -14,26 +15,39 @@ public final class ThemeData {
     public static final short FORMAT_VERSION = 1;
 
     private final String name;
-    private final int[] values;
+    private int[] values;
 
     public ThemeData(String name) {
-        this(name, new int[ThemeKeys.COUNT]);
+        this(name, new int[ThemeKeys.count()]);
+    }
+
+    public ThemeData(String name, int initialCapacity) {
+        this.name = (name != null && !name.trim().isEmpty()) ? name.trim() : "Unnamed";
+        int cap = Math.max(ThemeKeys.count(), initialCapacity);
+        this.values = new int[cap];
     }
 
     public ThemeData(String name, int[] values) {
         this.name = (name != null && !name.trim().isEmpty()) ? name.trim() : "Unnamed";
+        int required = ThemeKeys.count();
         if (values == null) {
-            this.values = new int[ThemeKeys.COUNT];
-        } else if (values.length == ThemeKeys.COUNT) {
-            this.values = Arrays.copyOf(values, ThemeKeys.COUNT);
+            this.values = new int[required];
         } else {
-            this.values = new int[ThemeKeys.COUNT];
-            System.arraycopy(values, 0, this.values, 0, Math.min(values.length, ThemeKeys.COUNT));
+            int len = Math.max(values.length, required);
+            this.values = new int[len];
+            System.arraycopy(values, 0, this.values, 0, values.length);
         }
     }
 
     public String getName() {
         return name;
+    }
+
+    private void ensureCapacity(int minCapacity) {
+        if (minCapacity > values.length) {
+            int newCap = Math.max(values.length * 2, minCapacity);
+            values = Arrays.copyOf(values, newCap);
+        }
     }
 
     /**
@@ -56,29 +70,36 @@ public final class ThemeData {
     }
 
     /**
-     * Sets the 32-bit ARGB color value for the given slot ID.
+     * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.
      */
     public void set(int slotIndex, int argb) {
-        if (slotIndex >= 0 && slotIndex < values.length) {
-            values[slotIndex] = argb;
-        }
+        if (slotIndex < 0) return;
+        ensureCapacity(slotIndex + 1);
+        values[slotIndex] = argb;
     }
 
     /**
-     * Sets the 32-bit ARGB color value by string key name.
+     * Sets the 32-bit ARGB color value by string key name, auto-registering the key if custom.
      */
     public void set(String keyName, int argb) {
-        int idx = ThemeKeys.indexOf(keyName);
+        int idx = ThemeKeys.getOrRegister(keyName);
         if (idx != -1) {
             set(idx, argb);
         }
     }
 
     /**
-     * Direct reference to the raw primitive array (read-only usage recommended).
+     * Direct reference to the raw primitive array.
      */
     public int[] getRawValues() {
         return values;
+    }
+
+    /**
+     * Returns the number of currently allocated color slots in this instance.
+     */
+    public int capacity() {
+        return values.length;
     }
 
     /**
@@ -86,17 +107,18 @@ public final class ThemeData {
      */
     public byte[] toBinary() {
         byte[] nameBytes = name.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        int totalSize = 4 + 2 + 2 + nameBytes.length + 2 + (values.length * 4);
+        int activeSlots = Math.min(values.length, ThemeKeys.count());
+        int totalSize = 4 + 2 + 2 + nameBytes.length + 2 + (activeSlots * 4);
         ByteBuffer buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN);
 
         buf.putInt(MAGIC);
         buf.putShort(FORMAT_VERSION);
         buf.putShort((short) nameBytes.length);
         buf.put(nameBytes);
-        buf.putShort((short) values.length);
+        buf.putShort((short) activeSlots);
 
-        for (int v : values) {
-            buf.putInt(v);
+        for (int i = 0; i < activeSlots; i++) {
+            buf.putInt(values[i]);
         }
 
         return buf.array();
@@ -110,7 +132,8 @@ public final class ThemeData {
         sb.append("# FastTheme Definition\r\n");
         sb.append("THEME = ").append(name).append("\r\n\r\n");
 
-        for (int i = 0; i < values.length; i++) {
+        int activeSlots = Math.min(values.length, ThemeKeys.count());
+        for (int i = 0; i < activeSlots; i++) {
             String keyName = ThemeKeys.nameOf(i);
             if (keyName != null) {
                 int c = values[i];

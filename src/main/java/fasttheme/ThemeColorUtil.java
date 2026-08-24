@@ -11,22 +11,10 @@ public final class ThemeColorUtil {
     public static final String ANSI_ESCAPE = "\u001B[";
     public static final String ANSI_RESET = "\u001B[0m";
 
-    public static int rgb(int r, int g, int b) {
-        return (0xFF << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+    private ThemeColorUtil() {
     }
 
-    public static int argb(int a, int r, int g, int b) {
-        return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
-    }
 
-    public static int alpha(int argb) { return (argb >>> 24) & 0xFF; }
-    public static int red(int argb)   { return (argb >>> 16) & 0xFF; }
-    public static int green(int argb) { return (argb >>> 8) & 0xFF; }
-    public static int blue(int argb)  { return argb & 0xFF; }
-
-    public static int setAlpha(int argb, int newAlpha) {
-        return ((newAlpha & 0xFF) << 24) | (argb & 0x00FFFFFF);
-    }
 
     public static Color toAwtColor(int argb) {
         return new Color(red(argb), green(argb), blue(argb), alpha(argb));
@@ -60,15 +48,6 @@ public final class ThemeColorUtil {
         double brighter = Math.max(l1, l2);
         double darker = Math.min(l1, l2);
         return (brighter + 0.05) / (darker + 0.05);
-    }
-
-    /**
-     * Returns either pure white (0xFFFFFFFF) or dark (0xFF111111) text color
-     * to guarantee maximum readability against the given background.
-     */
-    public static int getContrastForeground(int bgArgb) {
-        double lum = luminance(bgArgb);
-        return (lum > 0.45) ? 0xFF111111 : 0xFFFFFFFF;
     }
 
     /**
@@ -161,10 +140,46 @@ public final class ThemeColorUtil {
         // Raw integer string
         try {
             return (int) Long.parseLong(s);
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         return 0;
     }
 
-    private ThemeColorUtil() {}
+    public static int rgb(int r, int g, int b) {
+        return (0xFF << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+    }
+
+    public static int argb(int a, int r, int g, int b) {
+        return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+    }
+
+    public static int alpha(int argb) {
+        return (argb >>> 24) & 0xFF;
+    }
+
+    public static int red(int argb) {
+        return (argb >>> 16) & 0xFF;
+    }
+
+    public static int green(int argb) {
+        return (argb >>> 8) & 0xFF;
+    }
+
+    public static int blue(int argb) {
+        return argb & 0xFF;
+    }
+
+    /**
+     * Returns either pure white (0xFFFFFFFF) or dark (0xFF111111) text color
+     * to guarantee maximum readability against the given background.
+     */
+    public static int getContrastForeground(int bgArgb) {
+        double lum = luminance(bgArgb);
+        return (lum > 0.45) ? 0xFF111111 : 0xFFFFFFFF;
+    }
+
+    public static int setAlpha(int argb, int newAlpha) {
+        return ((newAlpha & 0xFF) << 24) | (argb & 0x00FFFFFF);
+    }
 }

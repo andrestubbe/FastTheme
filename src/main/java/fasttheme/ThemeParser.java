@@ -11,12 +11,13 @@ import java.util.Map;
 
 /**
  * Ultra-fast parser and deserializer for text (.theme) and binary (.themebin) formats,
- * including embedded default theme presets.
+ * supporting dynamic custom keys, variable aliasing, and embedded presets.
  */
 public final class ThemeParser {
 
     /**
-     * Parses a human-readable .theme formatted string into a ThemeData instance.
+     * Parses a human-readable .theme formatted string into a ThemeData instance,
+     * automatically registering any unknown/custom keys on the fly.
      */
     public static ThemeData parseText(String text) {
         if (text == null || text.trim().isEmpty()) {
@@ -24,7 +25,7 @@ public final class ThemeParser {
         }
 
         String themeName = "CustomTheme";
-        Map<String, String> rawMap = new HashMap<>(ThemeKeys.COUNT * 2);
+        Map<String, String> rawMap = new HashMap<>(64);
 
         String[] lines = text.split("\\r?\\n");
         for (String line : lines) {
@@ -46,46 +47,44 @@ public final class ThemeParser {
             }
         }
 
-        int[] values = new int[ThemeKeys.COUNT];
+        ThemeData theme = new ThemeData(themeName);
 
-        // Pass 1: Parse direct colors
-        Map<String, Integer> resolvedColors = new HashMap<>(ThemeKeys.COUNT * 2);
+        // Pass 1: Parse direct colors and auto-register custom keys
+        Map<String, Integer> resolvedColors = new HashMap<>(rawMap.size() * 2);
         for (Map.Entry<String, String> entry : rawMap.entrySet()) {
+            String key = entry.getKey();
             String val = entry.getValue();
             if (!val.startsWith("@")) {
                 int c = ThemeColorUtil.parseColor(val);
-                resolvedColors.put(entry.getKey(), c);
-                int slot = ThemeKeys.indexOf(entry.getKey());
-                if (slot != -1) {
-                    values[slot] = c;
-                }
+                resolvedColors.put(key, c);
+                int slot = ThemeKeys.getOrRegister(key);
+                theme.set(slot, c);
             }
         }
 
         // Pass 2: Resolve @KEY aliases
         for (Map.Entry<String, String> entry : rawMap.entrySet()) {
+            String key = entry.getKey();
             String val = entry.getValue();
             if (val.startsWith("@")) {
                 String aliasKey = val.substring(1).trim().toUpperCase();
                 Integer resolved = resolvedColors.get(aliasKey);
                 if (resolved == null) {
-                    int slot = ThemeKeys.indexOf(aliasKey);
-                    if (slot != -1) {
-                        resolved = values[slot];
+                    int aliasSlot = ThemeKeys.indexOf(aliasKey);
+                    if (aliasSlot != -1) {
+                        resolved = theme.get(aliasSlot);
                     }
                 }
 
                 if (resolved != null) {
-                    resolvedColors.put(entry.getKey(), resolved);
-                    int targetSlot = ThemeKeys.indexOf(entry.getKey());
-                    if (targetSlot != -1) {
-                        values[targetSlot] = resolved;
-                    }
+                    resolvedColors.put(key, resolved);
+                    int targetSlot = ThemeKeys.getOrRegister(key);
+                    theme.set(targetSlot, resolved);
                 }
             }
         }
 
-        return new ThemeData(themeName, values);
+        return theme;
     }
 
     /**
@@ -113,15 +112,13 @@ public final class ThemeParser {
         String name = new String(nameBytes, java.nio.charset.StandardCharsets.UTF_8);
 
         short slotCount = buf.getShort();
-        int[] values = new int[ThemeKeys.COUNT];
+        ThemeData theme = new ThemeData(name, slotCount);
         for (int i = 0; i < slotCount; i++) {
             int val = buf.getInt();
-            if (i < values.length) {
-                values[i] = val;
-            }
+            theme.set(i, val);
         }
 
-        return new ThemeData(name, values);
+        return theme;
     }
 
     /**
