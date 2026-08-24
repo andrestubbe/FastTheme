@@ -12,9 +12,9 @@
 
 **FastTheme** brings **native Windows 10/11 styling and schema-free dynamic theming** to Java Swing, AWT, OpenGL, and CLI applications. It enables native dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the Desktop Window Manager (DWM) API, paired with an open, dynamically-allocated theme engine.
 
-[**Watch Premium Overlay Showcase (YouTube)**](https://www.youtube.com/watch?v=00bgKmWOEk8)
+[**Watch Window Styling Demo (YouTube)**](https://youtu.be/6FVXiFB1itw) | [**Watch Premium Overlay Demo (YouTube)**](https://youtu.be/00bgKmWOEk8)
 
-[![Premium Overlay Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=00bgKmWOEk8)
+[![Premium Overlay Showcase](docs/screenshot.png)](https://youtu.be/00bgKmWOEk8)
 ![Premium Overlay Animation](docs/screenshot2.png)
 
 ---
@@ -182,8 +182,8 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 | Case | Java Example | Launcher | Description |
 |---|---|---|---|
-| **Premium Borderless Overlay Showcase** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
-| **Window Styling & Live Transitions** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
+| **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
+| **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
 | **JMH Microbenchmark Suite** | [FastThemeBenchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/FastThemeBenchmark.java) | `run-benchmark.bat` | Zero-allocation slot array access, dynamic string lookups, and parser throughput benchmarks. |
 
 ---
