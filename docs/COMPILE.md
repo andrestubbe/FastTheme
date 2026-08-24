@@ -4,7 +4,7 @@
 
 - JDK 17+
 - Maven 3.9+
-- **Windows:** Visual Studio 2019+ or Build Tools
+- **Windows:** Visual Studio 2019+ or C++ Build Tools
 
 ## Build
 
@@ -15,14 +15,7 @@ compile.bat
 mvn clean package
 ```
 
-The build script compiles the native library and packages it with the JAR.
-
-## Run Examples
-
-```bash
-cd examples/00-basic-usage
-mvn compile exec:java
-```
+The build script compiles the native C++ library (`build/fasttheme.dll`) and Maven packages it into the root of the JAR under `native/fasttheme.dll`.
 
 ## Installation
 
@@ -40,7 +33,7 @@ mvn compile exec:java
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.4</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -58,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.2'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.4'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
@@ -71,8 +64,4 @@ See [Releases Page](https://github.com/andrestubbe/FastTheme/releases)
 
 ### JNI UnsatisfiedLinkError
 
-If you get `UnsatisfiedLinkError`, the native library was not found:
-
-1. Ensure `compile.bat` was run successfully
-2. Check that the DLL exists in the project root or `build/`
-3. Ensure the DLL is in PATH or copy to `C:\Windows\System32`
+If you get `UnsatisfiedLinkError`, ensure that `FastCore` is present on the classpath, as it automatically extracts and loads the embedded `native/fasttheme.dll` at runtime.

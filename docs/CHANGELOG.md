@@ -2,15 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2026-08-24
+### Changed
+- **100% Schema-Free Pure Dynamic Registry (`ThemeKeys`)**: Removed all hardcoded slot constants and presets; any string key is dynamically allocated an integer slot ID on demand.
+- **Pure Format Deserializer (`ThemeParser`)**: Streamlined parser dedicated purely to text (`.theme`) and binary (`.themebin`) formats and file loading.
+- **Flexible OS Titlebar Synchronization**: Added `applyToWindow(hwnd, titleBgKey, titleFgKey, winBgKey)` supporting custom key names.
+- **Decoupled ANSI Generation**: Terminal Truecolor formatting is handled externally via `FastANSI` (`FastANSI.fgArgb()`).
+
 ## [0.1.3] - 2026-08-24
 ### Added
-- **Universal Color Key Matrix (`ThemeKeys`)**: 49 standardized, indexed slots covering window framing, typography, button states, inputs, tabs, and popups with $O(1)$ lookup.
-- **In-Memory Theme Storage (`ThemeData`)**: Contiguous `int[]` primitive array for zero-allocation 32-bit ARGB packed colors with `.toBinary()` and `.toText()` export.
-- **Dual Text/Binary Theme Parser (`ThemeParser`)**: High-speed parser for `.theme` (with two-pass `@KEY` variable aliasing) and `.themebin` binary streams.
+- **Open Dynamic Key Registry (`ThemeKeys`)**: Fully elastic, thread-safe dynamic key allocator (`ThemeKeys.slot("KEY")`, `ThemeKeys.register("KEY")`) supporting arbitrary custom keys with $O(1)$ primitive array reads.
+- **Elastic Theme Storage (`ThemeData`)**: Contiguous `int[]` primitive array that automatically expands on demand for 32-bit ARGB packed colors with `.toBinary()` and `.toText()` export.
+- **Dual Text/Binary Theme Parser (`ThemeParser`)**: High-speed parser for `.theme` (supporting `@KEY` variable aliasing and automatic registration of unknown keys) and `.themebin` binary streams.
 - **Embedded Default Presets**: Built-in zero-dependency presets (`loadDefaultDark()`, `loadDefaultLight()`, `loadDefaultCream()`).
-- **Color Mathematics & WCAG Metrics (`ThemeColorUtil`)**: WCAG 2.1 relative luminance, contrast ratio calculation, auto-readable foreground determination, tint/shade state generation, and ANSI 24-bit Truecolor terminal formatting.
-- **Live Theme State & OS Sync (`FastTheme`)**: Global state management (`FastTheme.set()`, `FastTheme.current()`), dynamic observer notifications (`ThemeListener`), and automatic native DWM window color synchronization (`FastTheme.applyToWindow()`).
+- **Color Mathematics & WCAG Metrics (`ThemeColorUtil`)**: WCAG 2.1 relative luminance, contrast ratio calculation, auto-readable foreground determination, tint/shade state generation, and color string parsing.
+- **Live Theme State & OS Sync (`FastTheme`)**: Global state management (`FastTheme.set()`, `FastTheme.load()`, `FastTheme.current()`), dynamic observer notifications (`ThemeListener`), and automatic native DWM window color synchronization (`FastTheme.applyToWindow()`).
 - **JitPack Configuration (`jitpack.yml`)**: Added OpenJDK 17 build profile.
+
+### Changed
+- **Decoupled ANSI Generation**: Relocated Truecolor terminal escape sequences to `FastANSI` (`FastANSI.fgArgb()`, `FastANSI.bgArgb()`) for clean modular separation.
 
 ## [0.1.2] - 2026-07-26
 ### Added

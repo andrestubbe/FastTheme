@@ -1,15 +1,15 @@
 package fasttheme;
 
 /**
- * Listener interface for observing dynamic theme transitions.
+ * Functional observer interface for subscribing to global theme changes in FastTheme.
  */
 @FunctionalInterface
 public interface ThemeListener {
 
     /**
-     * Invoked when the global active theme changes.
+     * Invoked when the globally active theme changes.
      *
-     * @param newTheme the newly activated ThemeData
+     * @param newTheme The newly activated {@link ThemeData} instance.
      */
     void onThemeChanged(ThemeData newTheme);
 }

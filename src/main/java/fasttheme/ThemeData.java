@@ -11,22 +11,46 @@ import java.util.Arrays;
  */
 public final class ThemeData {
 
-    public static final int MAGIC = 0x4654484D; // "FTHM"
+    /**
+     * Magic header constant for binary .themebin files ("FTHM").
+     */
+    public static final int MAGIC = 0x4654484D;
+
+    /**
+     * Binary format version.
+     */
     public static final short FORMAT_VERSION = 1;
 
     private final String name;
     private int[] values;
 
+    /**
+     * Constructs a ThemeData instance with the given theme name.
+     *
+     * @param name Name of the theme.
+     */
     public ThemeData(String name) {
         this(name, new int[ThemeKeys.count()]);
     }
 
+    /**
+     * Constructs a ThemeData instance with a specified initial capacity.
+     *
+     * @param name Name of the theme.
+     * @param initialCapacity Minimum slot capacity to preallocate.
+     */
     public ThemeData(String name, int initialCapacity) {
         this.name = (name != null && !name.trim().isEmpty()) ? name.trim() : "Unnamed";
         int cap = Math.max(ThemeKeys.count(), initialCapacity);
         this.values = new int[cap];
     }
 
+    /**
+     * Constructs a ThemeData instance initialized with an array of ARGB values.
+     *
+     * @param name Name of the theme.
+     * @param values Initial color array.
+     */
     public ThemeData(String name, int[] values) {
         this.name = (name != null && !name.trim().isEmpty()) ? name.trim() : "Unnamed";
         int required = ThemeKeys.count();
@@ -39,10 +63,6 @@ public final class ThemeData {
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
     private void ensureCapacity(int minCapacity) {
         if (minCapacity > values.length) {
             int newCap = Math.max(values.length * 2, minCapacity);
@@ -51,52 +71,9 @@ public final class ThemeData {
     }
 
     /**
-     * Retrieves the 32-bit ARGB color value for the given slot ID.
-     * Zero-allocation, direct array access.
-     */
-    public int get(int slotIndex) {
-        if (slotIndex >= 0 && slotIndex < values.length) {
-            return values[slotIndex];
-        }
-        return 0;
-    }
-
-    /**
-     * Retrieves the 32-bit ARGB color value by string key name.
-     */
-    public int get(String keyName) {
-        int idx = ThemeKeys.indexOf(keyName);
-        return idx != -1 ? get(idx) : 0;
-    }
-
-    /**
-     * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.
-     */
-    public void set(int slotIndex, int argb) {
-        if (slotIndex < 0) return;
-        ensureCapacity(slotIndex + 1);
-        values[slotIndex] = argb;
-    }
-
-    /**
-     * Sets the 32-bit ARGB color value by string key name, auto-registering the key if custom.
-     */
-    public void set(String keyName, int argb) {
-        int idx = ThemeKeys.getOrRegister(keyName);
-        if (idx != -1) {
-            set(idx, argb);
-        }
-    }
-
-    /**
-     * Direct reference to the raw primitive array.
-     */
-    public int[] getRawValues() {
-        return values;
-    }
-
-    /**
-     * Returns the number of currently allocated color slots in this instance.
+     * Returns the current capacity of the internal color array.
+     *
+     * @return Total allocated slot capacity.
      */
     public int capacity() {
         return values.length;
@@ -104,6 +81,8 @@ public final class ThemeData {
 
     /**
      * Serializes this theme into the ultra-compact .themebin binary format.
+     *
+     * @return Byte array containing serialized binary payload.
      */
     public byte[] toBinary() {
         byte[] nameBytes = name.getBytes(java.nio.charset.StandardCharsets.UTF_8);
@@ -126,6 +105,8 @@ public final class ThemeData {
 
     /**
      * Serializes this theme into the human-readable .theme text format.
+     *
+     * @return Formatted .theme text content.
      */
     public String toText() {
         StringBuilder sb = new StringBuilder(1024);
@@ -152,7 +133,80 @@ public final class ThemeData {
         return sb.toString();
     }
 
+    /**
+     * Creates a deep copy of this ThemeData instance.
+     *
+     * @return Cloned ThemeData instance.
+     */
     public ThemeData copy() {
         return new ThemeData(this.name, this.values);
+    }
+
+    /**
+     * Retrieves the 32-bit ARGB color value for the given slot ID.
+     * Zero-allocation direct primitive array read.
+     *
+     * @param slotIndex Integer slot index.
+     * @return Packed 32-bit ARGB color, or 0 if slot is unpopulated/out of range.
+     */
+    public int get(int slotIndex) {
+        if (slotIndex >= 0 && slotIndex < values.length) {
+            return values[slotIndex];
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the name of this theme.
+     *
+     * @return Theme name string.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Retrieves the 32-bit ARGB color value by string key name.
+     *
+     * @param keyName String key name.
+     * @return Packed 32-bit ARGB color, or 0 if key is unregistered.
+     */
+    public int get(String keyName) {
+        int idx = ThemeKeys.indexOf(keyName);
+        return idx != -1 ? get(idx) : 0;
+    }
+
+    /**
+     * Returns direct reference to the raw primitive ARGB values array.
+     *
+     * @return Underlying int[] array.
+     */
+    public int[] getRawValues() {
+        return values;
+    }
+
+    /**
+     * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.
+     *
+     * @param slotIndex Integer slot index.
+     * @param argb Packed 32-bit ARGB color value.
+     */
+    public void set(int slotIndex, int argb) {
+        if (slotIndex < 0) return;
+        ensureCapacity(slotIndex + 1);
+        values[slotIndex] = argb;
+    }
+
+    /**
+     * Sets the 32-bit ARGB color value by string key name, auto-registering the key if custom.
+     *
+     * @param keyName String key name.
+     * @param argb Packed 32-bit ARGB color value.
+     */
+    public void set(String keyName, int argb) {
+        int idx = ThemeKeys.getOrRegister(keyName);
+        if (idx != -1) {
+            set(idx, argb);
+        }
     }
 }
