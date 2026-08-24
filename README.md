@@ -133,7 +133,7 @@ Traditional Java Look & Feels (like FlatLaf, Radiance, or Nimbus) style internal
 3. **100% Schema-Free & Dynamic Registry**  
    No rigid enum constraints or hardcoded schemas. Applications and plugins allocate custom theme tokens dynamically on demand (`ThemeKeys.slot("custom.token")`).
 
-4. **Dual FastFileFormat (.theme & .themebin)**  
+4. **Dual Formats (.theme & .themebin)**  
    Support for both human-readable `.theme` text definitions (with `@KEY` alias resolution) and sub-microsecond binary `.themebin` payloads for instant CLI and desktop startup.
 
 5. **Unified Design Matrix (GUI, TUI, and OS)**  
@@ -145,7 +145,7 @@ Traditional Java Look & Feels (like FlatLaf, Radiance, or Nimbus) style internal
 
 - **🌙 Native Windows 10/11 Styling** — Immersive Dark Mode, custom title bar captions, Mica materials, and borderless drop shadows.
 - **⚡ Open Dynamic Key Registry** — Unlimited dynamic keys registered on demand (`ThemeKeys.slot("KEY")`) with $O(1)$ primitive array reads.
-- **📄 Dual FastFileFormat** — Human-readable `.theme` text (supporting `@KEY` variable aliasing) and sub-microsecond binary `.themebin`.
+- **📄 Dual File Formats** — Human-readable `.theme` text (supporting `@KEY` variable aliasing) and sub-microsecond binary `.themebin`.
 - **🧮 WCAG 2.1 Contrast Safety** — Relative luminance calculation, auto-readable text foreground selection, and tint/shade math.
 - **🔄 Live Observer State** — Global JVM state management with dynamic `ThemeListener` change notifications.
 - **📦 Zero Dependency Bloat** — Purely decoupled and standalone, requiring only `FastCore` for native library extraction.
