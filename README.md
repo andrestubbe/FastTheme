@@ -164,17 +164,49 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 ## API Quick Reference
 
-| Class / Method | Description |
+### Dynamic Theme State Management (`FastTheme`)
+
+| Method | Description |
 |---|---|
-| `FastTheme.load(String text)` | Parses and globally activates a `.theme` formatted definition. |
-| `FastTheme.set(ThemeData theme)` | Activates a `ThemeData` instance and notifies all registered observers. |
-| `FastTheme.get(String key)` / `get(int slot)` | Retrieves packed 32-bit ARGB color value. |
-| `FastTheme.getColor(String key)` | Returns standard Java AWT/Swing `java.awt.Color` object. |
-| `FastTheme.applyToWindow(hwnd, ...)` | Synchronizes native Windows DWM title bar caption, text, and background colors. |
-| `ThemeKeys.slot(String key)` | Retrieves existing slot ID or registers a new dynamic slot index on demand. |
-| `ThemeParser.parseText(text)` | Deserializes text formatted `.theme` content with variable alias resolution. |
-| `ThemeParser.parseBinary(bytes)` | Deserializes binary `.themebin` payload. |
-| `ThemeColorUtil.getContrastForeground(bg)` | Returns optimal high-contrast text color based on WCAG 2.1 luminance. |
+| `FastTheme.load(String text)` | Parses and globally activates a `.theme` formatted text definition. |
+| `FastTheme.load(byte[] binaryData)` | Deserializes and globally activates a `.themebin` binary payload. |
+| `FastTheme.loadFile(String path)` / `(File file)` | Loads and activates `.theme` or `.themebin` directly from a file path. |
+| `FastTheme.set(ThemeData theme)` | Activates a `ThemeData` instance globally and notifies all registered listeners. |
+| `FastTheme.current()` | Returns the currently active `ThemeData` instance. |
+| `FastTheme.get(String key)` / `get(int slot)` | Retrieves packed 32-bit ARGB color integer ($O(1)$ zero-allocation array read for slot). |
+| `FastTheme.getColor(String key)` / `(int slot)` | Converts the resolved color to a standard Java AWT/Swing `Color` object. |
+| `FastTheme.addListener(ThemeListener)` / `removeListener(...)` | Registers/unregisters functional observers for live theme change events. |
+
+### Native Win32 DWM Window Styling (`FastTheme`)
+
+| Native Method | Description |
+|---|---|
+| `FastTheme.getWindowHandle(Component comp)` | Extracts the native 64-bit `HWND` handle from an AWT/Swing component. |
+| `FastTheme.getConsoleWindowHandle()` | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). |
+| `FastTheme.applyToWindow(long hwnd)` / `(Component comp)` | Automatically applies title bar background, text, and window colors from active theme. |
+| `FastTheme.applyToWindow(hwnd, bgKey, fgKey, winKey)` | Applies specific user-defined theme keys to the native window DWM chrome. |
+| `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | Toggles Windows 10/11 immersive dark mode for the native title bar. |
+| `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | Sets the native caption background color on Windows 11. |
+| `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | Sets the native title bar text/foreground color on Windows 11. |
+| `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | Sets the Win32 window background fill color. |
+| `FastTheme.setWindowTransparency(long hwnd, int alpha)` | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). |
+| `FastTheme.enableMica(long hwnd, boolean enabled)` | Enables Windows 11 native Mica backdrop material effect. |
+| `FastTheme.setCornerStyle(long hwnd, int style)` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). |
+| `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | Removes native title bar while preserving native OS drop shadow (Raycast-style). |
+| `FastTheme.setOverlayDragHeight(long hwnd, int height)` | Defines top invisible grab area (in pixels) for draggable borderless windows. |
+| `FastTheme.isSystemDarkMode()` | Detects global Windows system dark mode setting. |
+
+### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
+
+| Utility Method | Description |
+|---|---|
+| `ThemeKeys.slot(String key)` | Retrieves existing slot ID or registers a dynamic slot index on demand. |
+| `ThemeKeys.indexOf(String key)` / `nameOf(int slot)` | Bidirectional translation between dynamic string key names and slot indices. |
+| `ThemeParser.parseText(String text)` | Deserializes human-readable `.theme` content with `@KEY` alias resolution. |
+| `ThemeParser.parseBinary(byte[] bytes)` | Deserializes ultra-fast binary `.themebin` payload. |
+| `ThemeColorUtil.getContrastForeground(int bg)` | Calculates optimal high-contrast foreground color based on WCAG 2.1 relative luminance. |
+| `ThemeColorUtil.lighten(argb, amt)` / `darken(argb, amt)` | Pure mathematical tinting and shading for hover/pressed UI states. |
+| `ThemeColorUtil.blend(c1, c2, float t)` | Linear color interpolation and channel alpha blending. |
 
 ---
 
