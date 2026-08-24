@@ -122,18 +122,22 @@ public class BorderlessDemo {
 
 ## Why FastTheme?
 
-Standard Java desktop applications suffer from dated window aesthetics and rigid styling models:
+Traditional Java Look & Feels (like FlatLaf, Radiance, or Nimbus) style internal Swing components, but leave the OS window frame untouched or resort to flickering, undecorated window simulations. **FastTheme bridges the gap between Java and the native OS compositor while delivering zero-allocation theme execution:**
 
-- **Missing Native Chrome**: Swing cannot natively color Windows 10/11 title bars or apply Mica/Acrylic backdrop materials without native JNI hooks.
-- **Flicker on Resizing**: Simulating custom undecorated window chrome in pure Java causes white-flash background erasing and jitter during resizing.
-- **Rigid Theming Models**: Traditional theme managers rely on heavy HashMaps, object allocations, or hardcoded enum slots that cannot be extended dynamically.
+1. **Real Native Windows Chrome (Beyond Swing Simulation)**  
+   Controls the actual Windows 10/11 Desktop Window Manager (DWM) directly via JNI. Get real OS dark mode title bars, native caption colors, Mica/Acrylic glass materials, Windows 11 rounded corners, and native borderless drop shadows without custom decoration lag or resize jitter.
 
-**FastTheme** solves this fundamentally:
+2. **Zero-Allocation Memory Architecture**  
+   Built like a game engine rather than a bloated UI framework. Themes are stored in flat, contiguous `int[]` primitive ARGB arrays delivering sub-nanosecond $O(1)$ slot reads with **0 bytes GC allocation** in hot rendering loops.
 
-- **True DWM Native Integration**: Hooks directly into Windows Desktop Window Manager (`DwmSetWindowAttribute`) to style title bars, enable Mica materials, and maintain native drop shadows.
-- **Zero-Allocation Array Lookups**: Themes are backed by elastic contiguous `int[]` primitive arrays, guaranteeing sub-nanosecond $O(1)$ reads without object churn.
-- **100% Schema-Free Dynamic Keys**: Applications and plugins can define and parse arbitrary custom keys on the fly without rigid presets.
-- **WCAG 2.1 Contrast Safety**: Built-in luminance and contrast scoring ensures readable text and accessible state tinting.
+3. **100% Schema-Free & Dynamic Registry**  
+   No rigid enum constraints or hardcoded schemas. Applications and plugins allocate custom theme tokens dynamically on demand (`ThemeKeys.slot("custom.token")`).
+
+4. **Dual FastFileFormat (.theme & .themebin)**  
+   Support for both human-readable `.theme` text definitions (with `@KEY` alias resolution) and sub-microsecond binary `.themebin` payloads for instant CLI and desktop startup.
+
+5. **Unified Design Matrix (GUI, TUI, and OS)**  
+   A single theme definition simultaneously synchronizes Swing/AWT window chrome, borderless overlay geometries, and terminal CLI interfaces.
 
 ---
 
