@@ -86,6 +86,11 @@ public class FastThemeTest {
             assertEquals(light.get(ThemeKeys.WINDOW_BACKGROUND), FastTheme.get(ThemeKeys.WINDOW_BACKGROUND));
             assertNotNull(FastTheme.getColor(ThemeKeys.WINDOW_BACKGROUND));
             assertTrue(FastTheme.getAnsiFg(ThemeKeys.ACCENT_PRIMARY).contains("\u001B[38;2;"));
+
+            // Test FastTheme.load(String)
+            FastTheme.load("THEME = DirectLoad\nACCENT_PRIMARY = 255,0,128\n");
+            assertEquals(ThemeColorUtil.rgb(255, 0, 128), FastTheme.get(ThemeKeys.ACCENT_PRIMARY));
+            assertEquals("DirectLoad", FastTheme.current().getName());
         } finally {
             FastTheme.removeListener(listener);
         }

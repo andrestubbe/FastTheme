@@ -26,6 +26,20 @@ public class FastTheme {
     // --- Dynamic Theme State Management ---
 
     /**
+     * Parses and activates a theme from a .theme text definition.
+     */
+    public static void load(String text) {
+        set(ThemeParser.parseText(text));
+    }
+
+    /**
+     * Deserializes and activates a theme from a .themebin binary payload.
+     */
+    public static void load(byte[] binaryData) {
+        set(ThemeParser.parseBinary(binaryData));
+    }
+
+    /**
      * Activates a theme globally and notifies all registered listeners.
      */
     public static void set(ThemeData theme) {
