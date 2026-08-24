@@ -107,8 +107,8 @@ public class BorderlessDemo {
 
 - [Why FastTheme?](#why-fasttheme)
 - [Quick Start](#quick-start)
+- [Key Features](#key-features)
 - [Real-World Scenarios](#real-world-scenarios)
-- [Features](#features)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
 - [Technical Examples & Hero Demos](#technical-examples--hero-demos)
@@ -137,16 +137,7 @@ Standard Java desktop applications suffer from dated window aesthetics and rigid
 
 ---
 
-## Real-World Scenarios
-
-- **⚡ Live Reactive Theming** — Real-time theme reloading and user-customizable color palettes without window rebuilding or UI flicker.
-- **🪟 Windows 11 Immersive Chrome** — Seamless Mica backdrops, dark mode title bars, and custom accent styling for enterprise desktop suites.
-- **🚀 Raycast & Spotlight Overlays** — Draggable borderless launcher windows with native drop shadows, rounded corners, and subtle alpha glass.
-- **♿ High-Contrast Accessible Tooling** — Automated WCAG 2.1 compliance guaranteeing text readability on dynamic user palettes.
-
----
-
-## Features
+## Key Features
 
 - **🌙 Native Windows 10/11 Styling** — Immersive Dark Mode, custom title bar captions, Mica materials, and borderless drop shadows.
 - **⚡ Open Dynamic Key Registry** — Unlimited dynamic keys registered on demand (`ThemeKeys.slot("KEY")`) with $O(1)$ primitive array reads.
@@ -154,6 +145,15 @@ Standard Java desktop applications suffer from dated window aesthetics and rigid
 - **🧮 WCAG 2.1 Contrast Safety** — Relative luminance calculation, auto-readable text foreground selection, and tint/shade math.
 - **🔄 Live Observer State** — Global JVM state management with dynamic `ThemeListener` change notifications.
 - **📦 Zero Dependency Bloat** — Purely decoupled and standalone, requiring only `FastCore` for native library extraction.
+
+---
+
+## Real-World Scenarios
+
+- **⚡ Live Reactive Theming** — Real-time theme reloading and user-customizable color palettes without window rebuilding or UI flicker.
+- **🪟 Windows 11 Immersive Chrome** — Seamless Mica backdrops, dark mode title bars, and custom accent styling for enterprise desktop suites.
+- **🚀 Raycast & Spotlight Overlays** — Draggable borderless launcher windows with native drop shadows, rounded corners, and subtle alpha glass.
+- **♿ High-Contrast Accessible Tooling** — Automated WCAG 2.1 compliance guaranteeing text readability on dynamic user palettes.
 
 ---
 
