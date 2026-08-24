@@ -107,7 +107,7 @@ public class BorderlessDemo {
 
 - [Why FastTheme?](#why-fasttheme)
 - [Quick Start](#quick-start)
-- [Real-World Examples](#real-world-examples)
+- [Real-World Scenarios](#real-world-scenarios)
 - [Features](#features)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
@@ -137,56 +137,12 @@ Standard Java desktop applications suffer from dated window aesthetics and rigid
 
 ---
 
-## Real-World Examples
+## Real-World Scenarios
 
-### 1. Live Runtime Dark / Light Mode Switching with Functional Observers
-```java
-// Register an observer to seamlessly update UI components whenever theme changes
-FastTheme.addListener(newTheme -> {
-    SwingUtilities.invokeLater(() -> {
-        myPanel.setBackground(FastTheme.getColor("window.background"));
-        myLabel.setForeground(FastTheme.getColor("text.primary"));
-        FastTheme.applyToWindow(myFrame); // Dynamically syncs Win32 DWM titlebar & OS dark mode
-        myPanel.repaint();
-    });
-});
-
-// Switch active theme at runtime (e.g. from user settings or file hot reload)
-FastTheme.loadFile("themes/neon-cyberpunk.theme");
-```
-
-### 2. High-Precision WCAG Accessible Button Styler
-```java
-int bg = FastTheme.get("button.background");
-
-// Mathematically determine guaranteed contrast foreground (WCAG 2.1)
-Color fgColor = new Color(ThemeColorUtil.getContrastForeground(bg), true);
-
-// Generate deterministic hover and pressed states from base token
-Color hoverBg = new Color(ThemeColorUtil.lighten(bg, 0.15f), true);
-Color pressedBg = new Color(ThemeColorUtil.darken(bg, 0.15f), true);
-
-myButton.setBackground(new Color(bg, true));
-myButton.setForeground(fgColor);
-```
-
-### 3. Spotlight / Raycast-Style Draggable Command Palette
-```java
-JFrame palette = new JFrame();
-palette.setSize(640, 420);
-palette.setLocationRelativeTo(null);
-palette.getContentPane().setBackground(new Color(15, 17, 23));
-palette.addNotify(); // Realize native Win32 peer
-
-long hwnd = FastTheme.getWindowHandle(palette);
-if (hwnd != 0) {
-    FastTheme.setBorderlessShadow(hwnd, true);     // Undecorated with native OS drop shadow
-    FastTheme.setOverlayDragHeight(hwnd, 52);      // Top 52px act as invisible native drag zone
-    FastTheme.setCornerStyle(hwnd, 2);            // Windows 11 Rounded Corners (2 = Rounded)
-    FastTheme.setWindowTransparency(hwnd, 240);   // Subtle 94% glass opacity
-}
-palette.setVisible(true);
-```
+- **⚡ Live Reactive Theming** — Real-time theme reloading and user-customizable color palettes without window rebuilding or UI flicker.
+- **🪟 Windows 11 Immersive Chrome** — Seamless Mica backdrops, dark mode title bars, and custom accent styling for enterprise desktop suites.
+- **🚀 Raycast & Spotlight Overlays** — Draggable borderless launcher windows with native drop shadows, rounded corners, and subtle alpha glass.
+- **♿ High-Contrast Accessible Tooling** — Automated WCAG 2.1 compliance guaranteeing text readability on dynamic user palettes.
 
 ---
 
