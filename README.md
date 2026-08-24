@@ -26,6 +26,7 @@
 import fasttheme.FastTheme;
 import fasttheme.ThemeKeys;
 import fasttheme.ThemeParser;
+import java.awt.Color;
 
 public class Demo {
     public static void main(String[] args) {
@@ -47,7 +48,7 @@ public class Demo {
         int fastBg = FastTheme.get(bgSlot);
 
         // 4. AWT/Swing Color Object
-        java.awt.Color awtBg = FastTheme.getColor("window.background");
+        Color awtBg = FastTheme.getColor("window.background");
     }
 }
 ```
