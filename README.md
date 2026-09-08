@@ -12,7 +12,7 @@
 
 **FastTheme** brings **native Windows 10/11 styling and schema-free dynamic theming** to Java Swing, AWT, OpenGL, and CLI applications. It enables native dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the Desktop Window Manager (DWM) API, paired with an open, dynamically-allocated theme engine.
 
-[**Watch Styling Demo (YouTube)**](https://youtu.be/6FVXiFB1itw) | [**Watch Overlay Demo (YouTube)**](https://youtu.be/00bgKmWOEk8)
+[**Watch Styling Demo (YouTube)**](https://youtu.be/6FVXiFB1itw) | [**Watch Overlay Demo (YouTube)**](https://youtu.be/00bgKmWOEk8) | Watch JMH Benchmark (YouTube)
 
 [![Premium Overlay Showcase](docs/screenshot.png)](https://youtu.be/00bgKmWOEk8)
 [![Premium Overlay Animation](docs/screenshot2.png)](https://youtu.be/00bgKmWOEk8)
