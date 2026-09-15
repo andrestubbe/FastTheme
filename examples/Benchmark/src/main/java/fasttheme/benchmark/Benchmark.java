@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Warmup(iterations = 3, time = 1)
 @Measurement(iterations = 5, time = 1)
 @Fork(1)
-public class FastThemeBenchmark {
+public class Benchmark {
 
     private int slot;
     private String key;
@@ -43,27 +43,27 @@ public class FastThemeBenchmark {
         sampleBgColor = ThemeColorUtil.rgb(19, 20, 31);
     }
 
-    @Benchmark
+    @org.openjdk.jmh.annotations.Benchmark
     public int benchmarkCachedSlotAccess() {
         return FastTheme.get(slot);
     }
 
-    @Benchmark
+    @org.openjdk.jmh.annotations.Benchmark
     public int benchmarkStringKeyLookup() {
         return FastTheme.get(key);
     }
 
-    @Benchmark
+    @org.openjdk.jmh.annotations.Benchmark
     public ThemeData benchmarkTextParsing() {
         return ThemeParser.parseText(themeText);
     }
 
-    @Benchmark
+    @org.openjdk.jmh.annotations.Benchmark
     public ThemeData benchmarkBinaryDeserialization() {
         return ThemeParser.parseBinary(binaryPayload);
     }
 
-    @Benchmark
+    @org.openjdk.jmh.annotations.Benchmark
     public int benchmarkWcagContrastForeground() {
         return ThemeColorUtil.getContrastForeground(sampleBgColor);
     }

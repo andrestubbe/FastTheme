@@ -111,7 +111,7 @@ public class BorderlessDemo {
 - [Real-World Scenarios](#real-world-scenarios)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
-- [Technical Examples & Hero Demos](#technical-examples--hero-demos)
+- [Technical Demos & Benchmarks](#technical-demos--benchmarks)
 - [Installation](#installation)
 - [Documentation](#documentation)
 - [Platform Support](#platform-support)
@@ -224,13 +224,13 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 ---
 
-## Technical Examples & Hero Demos
+## Technical Demos & Benchmarks
 
 | Case | Java Example | Launcher | Description |
 |---|---|---|---|
 | **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
 | **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
-| **JMH Microbenchmark Suite** | [FastThemeBenchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/FastThemeBenchmark.java) | `run-benchmark.bat` | Zero-allocation slot array access, dynamic string lookups, and parser throughput benchmarks. |
+| **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Zero-allocation slot array access, dynamic string lookups, and parser throughput benchmarks. |
 
 ---
 
