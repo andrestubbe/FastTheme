@@ -139,6 +139,15 @@ Traditional Java Look & Feels (like FlatLaf, Radiance, or Nimbus) style internal
 5. **Unified Design Matrix (GUI, TUI, and OS)**  
    A single theme definition simultaneously synchronizes Swing/AWT window chrome, borderless overlay geometries, and terminal CLI interfaces.
 
+| Feature | FlatLaf / Swing Look&Feel | JNA DWM Hacks | FastTheme |
+|:---|:---|:---|:---|
+| **Window Frame Styling** | Swing custom decoration | Manual JNA calls | **Native DWM (`DwmSetWindowAttribute`)** |
+| **Windows 11 Rounded Corners**| Emulated in Java graphics | Manual pointer struct | **Native OS DWM Corner Preference** |
+| **Runtime Color Query** | `Map<String, Object>` / UIDefaults | Object wrappers | **Sub-nanosecond `int[]` Slot Lookup** |
+| **Garbage Collection Churn** | High (`java.awt.Color` objects) | Native handle churn | **0 Bytes GC (Packed 32-bit ARGB `int`)** |
+| **Format & Startup** | XML / Properties parsing | Hardcoded C bindings | **Dual Text (`.theme`) & Binary (`.themebin`)**|
+| **Dependencies** | External Look&Feel JAR | JNA Runtime (~15 MB) | **Pure Java 17+ backed by FastCore** |
+
 ---
 
 ## Key Features
