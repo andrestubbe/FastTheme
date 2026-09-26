@@ -9,14 +9,12 @@ import fastwindow.FastWindow;
  */
 public class MicaDemo {
     public static void main(String[] args) {
-        // Auto-hide console if started via batch script
-        long consoleHwnd = FastTheme.getConsoleWindowHandle();
-        if (consoleHwnd != 0) {
-            FastTheme.setWindowTransparency(consoleHwnd, 0);
-        }
+        // Console stays visible (transparent hiding removed so errors/logs remain readable)
 
         try (FastNativeWindow window = FastWindow.create("FastTheme — Windows 11 Mica Material", 900, 560)) {
             long hwnd = window.getHWND();
+            System.out.println("[MicaDemo] Window created successfully, HWND = " + hwnd);
+
             if (hwnd != 0) {
                 // Apply Windows 11 Mica material and dark title bar
                 FastTheme.setTitleBarDarkMode(hwnd, true);
@@ -26,6 +24,7 @@ public class MicaDemo {
 
             // Display window seamlessly
             window.setVisible(true);
+            System.out.println("[MicaDemo] Window is now visible. Close window to exit.");
 
             long lastFpsTime = System.nanoTime();
             int frames = 0;
@@ -43,10 +42,6 @@ public class MicaDemo {
                     Thread.sleep(16); // ~60 Hz event tick
                 } catch (InterruptedException ignored) {}
             }
-        }
-
-        if (consoleHwnd != 0) {
-            FastTheme.setWindowTransparency(consoleHwnd, 255);
         }
     }
 }

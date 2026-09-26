@@ -9,14 +9,10 @@ import fastwindow.FastWindow;
  */
 public class MicaAltDemo {
     public static void main(String[] args) {
-        // Auto-hide console if started via batch script
-        long consoleHwnd = FastTheme.getConsoleWindowHandle();
-        if (consoleHwnd != 0) {
-            FastTheme.setWindowTransparency(consoleHwnd, 0);
-        }
-
         try (FastNativeWindow window = FastWindow.create("FastTheme — Windows 11 Mica Alt (Tabbed)", 900, 560)) {
             long hwnd = window.getHWND();
+            System.out.println("[MicaAltDemo] Window created successfully, HWND = " + hwnd);
+
             if (hwnd != 0) {
                 // Apply Windows 11 Mica Alt material and dark title bar
                 FastTheme.setTitleBarDarkMode(hwnd, true);
@@ -26,6 +22,7 @@ public class MicaAltDemo {
 
             // Display window seamlessly
             window.setVisible(true);
+            System.out.println("[MicaAltDemo] Window is now visible. Close window to exit.");
 
             long lastFpsTime = System.nanoTime();
             int frames = 0;
@@ -43,10 +40,6 @@ public class MicaAltDemo {
                     Thread.sleep(16); // ~60 Hz event tick
                 } catch (InterruptedException ignored) {}
             }
-        }
-
-        if (consoleHwnd != 0) {
-            FastTheme.setWindowTransparency(consoleHwnd, 255);
         }
     }
 }
