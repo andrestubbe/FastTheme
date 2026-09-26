@@ -1,55 +1,52 @@
 package fasttheme;
 
-import javax.swing.*;
-import java.awt.*;
+import fastwindow.FastNativeWindow;
+import fastwindow.FastWindow;
 
+/**
+ * Windows 11 Acrylic Blur Demo powered by FastWindow and FastTheme.
+ * Creates a standalone native Win32 window with real Windows 11 Acrylic backdrop and dark titlebar.
+ */
 public class AcrylicDemo {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("FastTheme - Windows 11 Acrylic Demo");
-            frame.setSize(800, 500);
-            frame.setLocationRelativeTo(null);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setUndecorated(true);
-            frame.setBackground(new Color(0, 0, 0, 0));
+        // Auto-hide console if started via batch script
+        long consoleHwnd = FastTheme.getConsoleWindowHandle();
+        if (consoleHwnd != 0) {
+            FastTheme.setWindowTransparency(consoleHwnd, 0);
+        }
 
-            JPanel content = new JPanel();
-            content.setOpaque(false);
-            content.setLayout(new BorderLayout());
-
-            JLabel label = new JLabel("Windows 11 Acrylic (Transient Blur) Active", SwingConstants.CENTER);
-            label.setFont(new Font("Segoe UI", Font.BOLD, 22));
-            label.setForeground(new Color(245, 245, 245));
-            content.add(label, BorderLayout.CENTER);
-
-            JLabel hint = new JLabel("Background windows and desktop blur dynamically underneath this window (Press ESC to close)", SwingConstants.CENTER);
-            hint.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            hint.setForeground(new Color(190, 190, 190));
-            hint.setBorder(BorderFactory.createEmptyBorder(0, 0, 40, 0));
-            content.add(hint, BorderLayout.SOUTH);
-
-            frame.setContentPane(content);
-            frame.setVisible(true);
-
-            long hwnd = FastTheme.getWindowHandle(frame);
+        try (FastNativeWindow window = FastWindow.create("FastTheme — Windows 11 Acrylic Transient Blur", 900, 560)) {
+            long hwnd = window.getHWND();
             if (hwnd != 0) {
-                FastTheme.setBorderlessShadow(hwnd, true);
-                FastTheme.setOverlayDragHeight(hwnd, 40);
+                // Apply Windows 11 Acrylic material and dark title bar
                 FastTheme.setTitleBarDarkMode(hwnd, true);
-                FastTheme.setCornerStyle(hwnd, 2); // Rounded corners
+                FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_ACRYLIC);
             }
 
-            // Close on ESC key
-            frame.addKeyListener(new java.awt.event.KeyAdapter() {
-                @Override
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
-                        frame.dispose();
-                        System.exit(0);
-                    }
+            // Display window seamlessly
+            window.setVisible(true);
+
+            long lastFpsTime = System.nanoTime();
+            int frames = 0;
+
+            while (window.pollEvents()) {
+                frames++;
+                long now = System.nanoTime();
+                if (now - lastFpsTime >= 1_000_000_000L) {
+                    window.setTitle("FastTheme Acrylic Backdrop (Win11) - FPS: " + frames);
+                    frames = 0;
+                    lastFpsTime = now;
                 }
-            });
-        });
+
+                try {
+                    Thread.sleep(16); // ~60 Hz event tick
+                } catch (InterruptedException ignored) {}
+            }
+        }
+
+        if (consoleHwnd != 0) {
+            FastTheme.setWindowTransparency(consoleHwnd, 255);
+        }
     }
 }
