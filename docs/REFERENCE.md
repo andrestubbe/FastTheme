@@ -1,6 +1,6 @@
 # FastTheme API Reference
 
-This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.4).
+This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.5).
 
 ---
 

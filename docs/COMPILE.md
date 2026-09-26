@@ -33,7 +33,7 @@ The build script compiles the native C++ library (`build/fasttheme.dll`) and Mav
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.4</version>
+        <version>0.1.5</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.4'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.5'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
