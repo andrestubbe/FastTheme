@@ -188,53 +188,45 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 ## API Quick Reference
 
-### 1. `FastTheme`
+### Dynamic Theme State Management (`FastTheme`)
 
-#### Constructor
-| Constructor | Description |
-|---|---|
-| `new FastTheme()` | Constructs a new `FastTheme` facade instance. |
+| Method | Type | Description |
+|---|---|---|
+| `new FastTheme()` | Constructor | Constructs a new `FastTheme` facade instance. |
+| `FastTheme.load(String text)` | Method | Parses and globally activates a `.theme` formatted text definition. |
+| `FastTheme.load(byte[] binaryData)` | Method | Deserializes and globally activates a `.themebin` binary payload. |
+| `FastTheme.loadFile(String path)` / `(File file)` | Method | Loads and activates `.theme` or `.themebin` directly from a file path. |
+| `FastTheme.addListener(ThemeListener)` | Method | Registers functional observers for live theme change events. |
+| `FastTheme.removeListener(ThemeListener)` | Method | Unregisters functional observers for live theme change events. |
+| `FastTheme.current()` | Getter | Returns the currently active `ThemeData` instance. |
+| `FastTheme.get(String key)` / `get(int slot)` | Getter | Retrieves packed 32-bit ARGB color integer ($O(1)$ zero-allocation array read for slot). |
+| `FastTheme.getColor(String key)` / `(int slot)` | Getter | Converts the resolved color to a standard Java AWT/Swing `Color` object. |
+| `FastTheme.set(ThemeData theme)` | Setter | Activates a `ThemeData` instance globally and notifies all registered listeners. |
 
-#### Methods (Actions & Operations)
-| Method | Description |
-|---|---|
-| `FastTheme.load(String text)` | Parses and globally activates a `.theme` formatted text definition. |
-| `FastTheme.load(byte[] binaryData)` | Deserializes and globally activates a `.themebin` binary payload. |
-| `FastTheme.loadFile(String path)` / `(File file)` | Loads and activates `.theme` or `.themebin` directly from a file path. |
-| `FastTheme.applyToWindow(long hwnd)` / `(Component comp)` | Automatically applies title bar background, text, and window colors from active theme. |
-| `FastTheme.applyToWindow(hwnd, bgKey, fgKey, winKey)` | Applies specific user-defined theme keys to the native window DWM chrome. |
-| `FastTheme.addListener(ThemeListener)` | Registers functional observers for live theme change events. |
-| `FastTheme.removeListener(ThemeListener)` | Unregisters functional observers for live theme change events. |
-| `FastTheme.enableMica(long hwnd, boolean enabled)` | Enables Windows 11 native Mica backdrop material effect (with legacy fallback). |
+### Native Win32 DWM Window Styling (`FastTheme`)
 
-#### Getters
-| Method | Description |
-|---|---|
-| `FastTheme.current()` | Returns the currently active `ThemeData` instance. |
-| `FastTheme.get(String key)` / `get(int slot)` | Retrieves packed 32-bit ARGB color integer ($O(1)$ zero-allocation array read for slot). |
-| `FastTheme.getColor(String key)` / `(int slot)` | Converts the resolved color to a standard Java AWT/Swing `Color` object. |
-| `FastTheme.getWindowHandle(Component comp)` | Extracts the native 64-bit `HWND` handle from an AWT/Swing component. |
-| `FastTheme.getConsoleWindowHandle()` | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). |
-| `FastTheme.isNativeAvailable()` | Checks whether the native Windows styling DLL is loaded and functional. |
-| `FastTheme.isSystemDarkMode()` | Detects global Windows system dark mode setting. |
+| Native Method | Type | Description |
+|---|---|---|
+| `FastTheme.applyToWindow(long hwnd)` / `(Component comp)` | Method | Automatically applies title bar background, text, and window colors from active theme. |
+| `FastTheme.applyToWindow(hwnd, bgKey, fgKey, winKey)` | Method | Applies specific user-defined theme keys to the native window DWM chrome. |
+| `FastTheme.enableMica(long hwnd, boolean enabled)` | Method | Enables Windows 11 native Mica backdrop material effect (with legacy fallback). |
+| `FastTheme.getWindowHandle(Component comp)` | Getter | Extracts the native 64-bit `HWND` handle from an AWT/Swing component. |
+| `FastTheme.getConsoleWindowHandle()` | Getter | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). |
+| `FastTheme.isNativeAvailable()` | Getter | Checks whether the native Windows styling DLL is loaded and functional. |
+| `FastTheme.isSystemDarkMode()` | Getter | Detects global Windows system dark mode setting. |
+| `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | Setter | Toggles Windows 10/11 immersive dark mode for the native title bar. |
+| `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | Setter | Sets the native caption background color on Windows 11. |
+| `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | Setter | Sets the native title bar text/foreground color on Windows 11. |
+| `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | Setter | Sets the Win32 window background fill color. |
+| `FastTheme.setWindowTransparency(long hwnd, int alpha)` | Setter | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). |
+| `FastTheme.setSystemBackdropType(long hwnd, int type)` | Setter | Sets native Windows 11 backdrop material (`BACKDROP_MICA`, `BACKDROP_ACRYLIC`, `BACKDROP_MICA_ALT`). |
+| `FastTheme.setCornerStyle(long hwnd, int style)` | Setter | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). |
+| `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | Setter | Removes native title bar while preserving native OS drop shadow (Raycast-style). |
+| `FastTheme.setOverlayDragHeight(long hwnd, int height)` | Setter | Defines top invisible grab area (in pixels) for draggable borderless windows. |
+| `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | Setter | Toggles native minimize and maximize buttons in the window title bar. |
+| `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | Setter | Toggles native Win32 window topmost z-order. |
 
-#### Setters
-| Method | Description |
-|---|---|
-| `FastTheme.set(ThemeData theme)` | Activates a `ThemeData` instance globally and notifies all registered listeners. |
-| `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | Toggles Windows 10/11 immersive dark mode for the native title bar. |
-| `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | Sets the native caption background color on Windows 11. |
-| `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | Sets the native title bar text/foreground color on Windows 11. |
-| `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | Sets the Win32 window background fill color. |
-| `FastTheme.setWindowTransparency(long hwnd, int alpha)` | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). |
-| `FastTheme.setSystemBackdropType(long hwnd, int type)` | Sets native Windows 11 backdrop material (`BACKDROP_MICA`, `BACKDROP_ACRYLIC`, `BACKDROP_MICA_ALT`). |
-| `FastTheme.setCornerStyle(long hwnd, int style)` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). |
-| `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | Removes native title bar while preserving native OS drop shadow (Raycast-style). |
-| `FastTheme.setOverlayDragHeight(long hwnd, int height)` | Defines top invisible grab area (in pixels) for draggable borderless windows. |
-| `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | Toggles native minimize and maximize buttons in the window title bar. |
-| `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | Toggles native Win32 window topmost z-order. |
-
-### 2. Supporting Classes (`ThemeData`, `ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
+### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
 
 | Utility Method | Description |
 |---|---|
@@ -296,6 +288,12 @@ Add the JitPack repository and dependencies to your `pom.xml`:
         <artifactId>FastFileFormat</artifactId>
         <version>0.1.1</version>
     </dependency>
+    <!-- FastBinary - High-Performance Binary Bit-Packing & VarInt Engine -->
+    <dependency>
+        <groupId>com.github.andrestubbe</groupId>
+        <artifactId>FastBinary</artifactId>
+        <version>0.1.1</version>
+    </dependency>
 </dependencies>
 ```
 
@@ -310,6 +308,7 @@ dependencies {
     implementation 'com.github.andrestubbe:FastTheme:0.1.5'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
     implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
+    implementation 'com.github.andrestubbe:FastBinary:0.1.1'
 }
 ```
 
@@ -320,6 +319,7 @@ Download the pre-built JARs directly to add them to your classpath:
 1. 📦 **[FastTheme-0.1.5.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.5/FastTheme-0.1.5.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
 3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
+4. 📦 **[FastBinary-0.1.1.jar](https://github.com/andrestubbe/FastBinary/releases/download/0.1.1/FastBinary-0.1.1.jar)** (Binary Bit-Packing Engine)
 
 ---
 
