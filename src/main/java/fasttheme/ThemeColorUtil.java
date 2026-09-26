@@ -8,9 +8,15 @@ import java.awt.Color;
  */
 public final class ThemeColorUtil {
 
-    private ThemeColorUtil() {
-    }
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
 
+    private ThemeColorUtil() {}
+
+    // =========================================================================
+    // METHODS (Actions & Operations)
+    // =========================================================================
 
     /**
      * Calculates the WCAG 2.1 relative luminance of a color.
@@ -76,12 +82,12 @@ public final class ThemeColorUtil {
     }
 
     /**
-     * Linearly blends between two colors.
+     * Linearly interpolates (blends) between two packed ARGB colors.
      *
-     * @param c1 Start packed ARGB color.
-     * @param c2 End packed ARGB color.
+     * @param c1 Start color.
+     * @param c2 End color.
      * @param t  Interpolation factor (0.0 = c1, 1.0 = c2).
-     * @return Blended packed ARGB color.
+     * @return Interpolated packed ARGB color.
      */
     public static int blend(int c1, int c2, float t) {
         t = Math.max(0.0f, Math.min(1.0f, t));
@@ -93,58 +99,87 @@ public final class ThemeColorUtil {
     }
 
     /**
-     * Parses a color string in hex format (#RGB, #RRGGBB, #AARRGGBB, 0xRRGGBB)
-     * or comma-separated format (R,G,B or R,G,B,A).
+     * Parses a string representation of a color into a packed 32-bit ARGB integer.
+     * Supports formats:
+     * - Hex: #RGB, #RRGGBB, #AARRGGBB, 0xRRGGBB
+     * - RGB: rgb(r, g, b)
+     * - RGBA: rgba(r, g, b, a)
+     * - Comma-separated: r, g, b or r, g, b, a
      *
-     * @param str Color representation string.
-     * @return Packed 32-bit ARGB integer.
+     * @param str Color string representation.
+     * @return Packed 32-bit ARGB color integer.
+     * @throws IllegalArgumentException If color string cannot be parsed.
      */
     public static int parseColor(String str) {
-        if (str == null) return 0;
+        if (str == null || str.trim().isEmpty()) {
+            throw new IllegalArgumentException("Color string cannot be null or empty");
+        }
         String s = str.trim();
-        if (s.isEmpty()) return 0;
 
-        if (s.startsWith("#")) {
-            s = s.substring(1);
-            if (s.length() == 3) {
-                int r = Integer.parseInt(s.substring(0, 1) + s.substring(0, 1), 16);
-                int g = Integer.parseInt(s.substring(1, 2) + s.substring(1, 2), 16);
-                int b = Integer.parseInt(s.substring(2, 3) + s.substring(2, 3), 16);
+        // 1. Hex format (#... or 0x...)
+        if (s.startsWith("#") || s.startsWith("0x") || s.startsWith("0X")) {
+            String hex = s.startsWith("#") ? s.substring(1) : s.substring(2);
+            if (hex.length() == 3) {
+                int r = Integer.parseInt(hex.substring(0, 1), 16) * 17;
+                int g = Integer.parseInt(hex.substring(1, 2), 16) * 17;
+                int b = Integer.parseInt(hex.substring(2, 3), 16) * 17;
                 return rgb(r, g, b);
-            } else if (s.length() == 6) {
-                return (0xFF << 24) | (int) Long.parseLong(s, 16);
-            } else if (s.length() == 8) {
-                return (int) Long.parseLong(s, 16);
+            } else if (hex.length() == 6) {
+                int rgb = Integer.parseInt(hex, 16);
+                return 0xFF000000 | rgb;
+            } else if (hex.length() == 8) {
+                long argb = Long.parseLong(hex, 16);
+                return (int) argb;
             }
-        } else if (s.startsWith("0x") || s.startsWith("0X")) {
-            long val = Long.parseLong(s.substring(2), 16);
-            if (s.length() <= 8) {
-                return (0xFF << 24) | (int) val;
+            throw new IllegalArgumentException("Invalid hex color format: " + str);
+        }
+
+        // 2. Functional format: rgb(...) or rgba(...)
+        if (s.toLowerCase().startsWith("rgb(") && s.endsWith(")")) {
+            String[] parts = s.substring(4, s.length() - 1).split(",");
+            if (parts.length == 3) {
+                return rgb(Integer.parseInt(parts[0].trim()),
+                           Integer.parseInt(parts[1].trim()),
+                           Integer.parseInt(parts[2].trim()));
             }
-            return (int) val;
-        } else if (s.contains(",")) {
-            String[] parts = s.split(",");
-            if (parts.length >= 3) {
-                int r = Integer.parseInt(parts[0].trim());
-                int g = Integer.parseInt(parts[1].trim());
-                int b = Integer.parseInt(parts[2].trim());
-                int a = (parts.length >= 4) ? Integer.parseInt(parts[3].trim()) : 255;
-                return argb(a, r, g, b);
+        }
+        if (s.toLowerCase().startsWith("rgba(") && s.endsWith(")")) {
+            String[] parts = s.substring(5, s.length() - 1).split(",");
+            if (parts.length == 4) {
+                float aVal = Float.parseFloat(parts[3].trim());
+                int alpha = (aVal <= 1.0f) ? (int) (aVal * 255) : (int) aVal;
+                return argb(alpha,
+                            Integer.parseInt(parts[0].trim()),
+                            Integer.parseInt(parts[1].trim()),
+                            Integer.parseInt(parts[2].trim()));
             }
         }
 
-        try {
-            return (0xFF << 24) | (int) Long.parseLong(s, 16);
-        } catch (NumberFormatException e) {
-            return 0;
+        // 3. Comma-separated: r, g, b[, a]
+        if (s.contains(",")) {
+            String[] parts = s.split(",");
+            if (parts.length == 3) {
+                return rgb(Integer.parseInt(parts[0].trim()),
+                           Integer.parseInt(parts[1].trim()),
+                           Integer.parseInt(parts[2].trim()));
+            } else if (parts.length == 4) {
+                float aVal = Float.parseFloat(parts[3].trim());
+                int alpha = (aVal <= 1.0f) ? (int) (aVal * 255) : (int) aVal;
+                return argb(alpha,
+                            Integer.parseInt(parts[0].trim()),
+                            Integer.parseInt(parts[1].trim()),
+                            Integer.parseInt(parts[2].trim()));
+            }
         }
+
+        throw new IllegalArgumentException("Unrecognized color format: " + str);
     }
 
     /**
-     * Converts a 32-bit packed ARGB integer to a standard Java AWT Color object.
+     * Converts a 32-bit packed ARGB integer into an AWT Color object.
      *
      * @param argb Packed 32-bit ARGB color.
-     * @return Corresponding {@link java.awt.Color} object.
+     * @return Corresponding {@link java.awt.Color}.
      */
     public static Color toAwtColor(int argb) {
         return new Color(argb, true);
@@ -174,6 +209,10 @@ public final class ThemeColorUtil {
     public static int argb(int a, int r, int g, int b) {
         return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
+
+    // =========================================================================
+    // GETTERS
+    // =========================================================================
 
     /**
      * Extracts the alpha component (0..255) from a packed 32-bit ARGB integer.
@@ -228,4 +267,3 @@ public final class ThemeColorUtil {
         return whiteContrast >= darkContrast ? 0xFFFFFFFF : 0xFF111111;
     }
 }
-

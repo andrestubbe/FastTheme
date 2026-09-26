@@ -17,8 +17,15 @@ public final class ThemeKeys {
     private static final List<String> NAMES = new ArrayList<>();
     private static final Map<String, Integer> NAME_TO_INDEX = new HashMap<>(128);
 
-    private ThemeKeys() {
-    }
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+
+    private ThemeKeys() {}
+
+    // =========================================================================
+    // METHODS (Actions & Operations)
+    // =========================================================================
 
     /**
      * Registers a key name dynamically and returns its unique allocated slot index.
@@ -43,6 +50,24 @@ public final class ThemeKeys {
             return newIndex;
         }
     }
+
+    /**
+     * Clears all registered keys from the dynamic registry.
+     *
+     * @deprecated Strictly for test cleanup only. Calling this at runtime invalidates existing
+     *             ThemeData instances because global slot positions are reset and reallocated.
+     */
+    @Deprecated
+    public static void clear() {
+        synchronized (LOCK) {
+            NAMES.clear();
+            NAME_TO_INDEX.clear();
+        }
+    }
+
+    // =========================================================================
+    // GETTERS
+    // =========================================================================
 
     /**
      * Retrieves the slot index for a given key, or dynamically registers it on demand.
@@ -96,21 +121,6 @@ public final class ThemeKeys {
     }
 
     /**
-     * Clears all registered keys from the dynamic registry.
-     *
-     * @deprecated Strictly for test cleanup only. Calling this at runtime invalidates existing
-     *             ThemeData instances because global slot positions are reset and reallocated.
-     */
-    @Deprecated
-    public static void clear() {
-        synchronized (LOCK) {
-            NAMES.clear();
-            NAME_TO_INDEX.clear();
-        }
-    }
-
-
-    /**
      * Retrieves the slot index for a given key, or dynamically registers it on demand.
      *
      * @param keyName The string key name.
@@ -132,4 +142,3 @@ public final class ThemeKeys {
         }
     }
 }
-

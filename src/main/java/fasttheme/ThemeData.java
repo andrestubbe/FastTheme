@@ -24,6 +24,9 @@ public final class ThemeData {
     private final String name;
     private int[] values;
 
+    // =========================================================================
+    // CONSTRUCTORS
+    // =========================================================================
 
     /**
      * Constructs a ThemeData instance with the given theme name.
@@ -63,6 +66,10 @@ public final class ThemeData {
             System.arraycopy(values, 0, this.values, 0, values.length);
         }
     }
+
+    // =========================================================================
+    // METHODS (Actions & Operations)
+    // =========================================================================
 
     private void ensureCapacity(int minCapacity) {
         if (minCapacity > values.length) {
@@ -112,39 +119,36 @@ public final class ThemeData {
         for (int i = 0; i < activeSlots; i++) {
             byte[] kb = keyBytesList[i];
             buf.putShort((short) kb.length);
-            buf.put(kb);
+            if (kb.length > 0) {
+                buf.put(kb);
+            }
             buf.putInt(values[i]);
         }
 
         return buf.array();
     }
 
-
     /**
-     * Serializes this theme into the human-readable .theme text format.
+     * Serializes this theme into human-readable .theme text format.
      *
-     * @return Formatted .theme text content.
+     * @return Formatted theme text representation.
      */
     public String toText() {
         StringBuilder sb = new StringBuilder(1024);
-        sb.append("# FastTheme Definition\r\n");
-        sb.append("THEME = ").append(name).append("\r\n\r\n");
+        sb.append("# FastTheme Definition\n");
+        sb.append("NAME = ").append(name).append("\n\n");
 
         int activeSlots = Math.min(values.length, ThemeKeys.count());
         for (int i = 0; i < activeSlots; i++) {
-            String keyName = ThemeKeys.nameOf(i);
-            if (keyName != null) {
+            String key = ThemeKeys.nameOf(i);
+            if (key != null) {
                 int c = values[i];
-                int a = (c >>> 24) & 0xFF;
-                int r = (c >>> 16) & 0xFF;
-                int g = (c >>> 8) & 0xFF;
-                int b = c & 0xFF;
-
-                if (a == 255) {
-                    sb.append(String.format("%-32s = %d,%d,%d\r\n", keyName, r, g, b));
-                } else {
-                    sb.append(String.format("%-32s = %d,%d,%d,%d\r\n", keyName, r, g, b, a));
-                }
+                sb.append(String.format("%-25s = #%02X%02X%02X%02X\n",
+                        key,
+                        (c >>> 24) & 0xFF,
+                        (c >>> 16) & 0xFF,
+                        (c >>> 8) & 0xFF,
+                        c & 0xFF));
             }
         }
         return sb.toString();
@@ -159,6 +163,19 @@ public final class ThemeData {
         return new ThemeData(this.name, this.values);
     }
 
+    // =========================================================================
+    // GETTERS
+    // =========================================================================
+
+    /**
+     * Returns the name of this theme.
+     *
+     * @return Theme name string.
+     */
+    public String getName() {
+        return name;
+    }
+
     /**
      * Retrieves the 32-bit ARGB color value for the given slot ID.
      * Zero-allocation direct primitive array read.
@@ -171,15 +188,6 @@ public final class ThemeData {
             return values[slotIndex];
         }
         return 0;
-    }
-
-    /**
-     * Returns the name of this theme.
-     *
-     * @return Theme name string.
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -209,6 +217,9 @@ public final class ThemeData {
         return values;
     }
 
+    // =========================================================================
+    // SETTERS
+    // =========================================================================
 
     /**
      * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.

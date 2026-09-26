@@ -16,7 +16,15 @@ import java.util.Map;
  */
 public final class ThemeParser {
 
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+
     private ThemeParser() {}
+
+    // =========================================================================
+    // METHODS (Actions & Operations)
+    // =========================================================================
 
     /**
      * Parses a human-readable .theme formatted string into a ThemeData instance,
@@ -60,19 +68,19 @@ public final class ThemeParser {
         for (Map.Entry<String, String> entry : rawMap.entrySet()) {
             String key = entry.getKey();
             String val = entry.getValue();
+
             if (!val.startsWith("@")) {
-                int c = ThemeColorUtil.parseColor(val);
-                resolvedColors.put(key, c);
-                int slot = ThemeKeys.getOrRegister(key);
-                theme.set(slot, c);
+                int parsed = ThemeColorUtil.parseColor(val);
+                resolvedColors.put(key, parsed);
+                theme.set(key, parsed);
             }
         }
 
-        // Pass 2: Resolve @KEY aliases (iterative resolution for chains like A -> @B -> @C -> #HEX)
+        // Pass 2: Iterative multi-hop alias resolution (e.g. A = @B, B = @C)
         Map<String, String> pendingAliases = new HashMap<>();
         for (Map.Entry<String, String> entry : rawMap.entrySet()) {
             if (entry.getValue().startsWith("@")) {
-                pendingAliases.put(entry.getKey(), entry.getValue().substring(1).trim().toUpperCase(java.util.Locale.ROOT));
+                pendingAliases.put(entry.getKey(), entry.getValue().substring(1).trim().toUpperCase());
             }
         }
 
@@ -81,57 +89,53 @@ public final class ThemeParser {
             progress = false;
             java.util.Iterator<Map.Entry<String, String>> it = pendingAliases.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<String, String> entry = it.next();
-                String key = entry.getKey();
-                String targetKey = entry.getValue();
-
-                Integer resolved = resolvedColors.get(targetKey);
-                if (resolved == null) {
-                    int aliasSlot = ThemeKeys.indexOf(targetKey);
-                    if (aliasSlot != -1) {
-                        resolved = theme.get(aliasSlot);
-                    }
-                }
-
-                if (resolved != null) {
-                    resolvedColors.put(key, resolved);
-                    int targetSlot = ThemeKeys.getOrRegister(key);
-                    theme.set(targetSlot, resolved);
+                Map.Entry<String, String> aliasEntry = it.next();
+                String targetKey = aliasEntry.getValue();
+                if (resolvedColors.containsKey(targetKey)) {
+                    int resolvedColor = resolvedColors.get(targetKey);
+                    String srcKey = aliasEntry.getKey();
+                    resolvedColors.put(srcKey, resolvedColor);
+                    theme.set(srcKey, resolvedColor);
                     it.remove();
                     progress = true;
                 }
             }
         }
 
+        // Any leftover aliases are cyclic or refer to missing keys
+        for (Map.Entry<String, String> unresolved : pendingAliases.entrySet()) {
+            System.err.println("[FastTheme] Warning: Unresolved or cyclic alias @" + unresolved.getValue() + " for key " + unresolved.getKey());
+        }
 
         return theme;
     }
 
     /**
-     * Parses a binary .themebin byte payload into a ThemeData instance.
+     * Deserializes a binary .themebin payload into a ThemeData instance.
+     * Supports V2 self-describing key names and V1 legacy format.
      *
-     * @param bytes Serialized byte array containing the binary format.
-     * @return Deserialized {@link ThemeData} instance.
+     * @param bytes Serialized byte array.
+     * @return Fully populated {@link ThemeData} instance.
      */
     public static ThemeData parseBinary(byte[] bytes) {
-        if (bytes == null || bytes.length < 10) {
-            throw new IllegalArgumentException("Invalid binary theme data");
+        if (bytes == null || bytes.length < 8) {
+            throw new IllegalArgumentException("Invalid binary theme data: payload too short");
         }
 
         ByteBuffer buf = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
         int magic = buf.getInt();
         if (magic != ThemeData.MAGIC) {
-            throw new IllegalArgumentException("Invalid magic header for .themebin");
+            throw new IllegalArgumentException(String.format("Invalid theme magic: 0x%08X (expected 0x%08X)", magic, ThemeData.MAGIC));
         }
 
         short version = buf.getShort();
-        if (version > ThemeData.FORMAT_VERSION) {
-            throw new IllegalArgumentException("Unsupported .themebin format version: " + version);
+        if (version != 1 && version != 2) {
+            throw new IllegalArgumentException("Unsupported theme binary version: " + version);
         }
 
         short nameLen = buf.getShort();
         if (nameLen < 0 || buf.remaining() < nameLen + 2) {
-            throw new IllegalArgumentException("Corrupted .themebin payload: invalid name length");
+            throw new IllegalArgumentException("Corrupt theme binary: invalid name length (" + nameLen + ")");
         }
         byte[] nameBytes = new byte[nameLen];
         buf.get(nameBytes);
@@ -139,85 +143,87 @@ public final class ThemeParser {
 
         short slotCount = buf.getShort();
         if (slotCount < 0) {
-            throw new IllegalArgumentException("Corrupted .themebin payload: negative slot count");
+            throw new IllegalArgumentException("Corrupt theme binary: invalid slot count (" + slotCount + ")");
         }
 
         ThemeData theme = new ThemeData(name, slotCount);
 
-        if (version == 1) {
-            // V1 legacy positional format
-            if (buf.remaining() < slotCount * 4) {
-                throw new IllegalArgumentException("Corrupted .themebin payload: truncated V1 slot values");
-            }
-            for (int i = 0; i < slotCount; i++) {
-                int val = buf.getInt();
-                theme.set(i, val);
-            }
-        } else {
-            // V2 self-describing format with key names
+        if (version == 2) {
+            // V2: Self-describing key name + ARGB per slot
             for (int i = 0; i < slotCount; i++) {
                 if (buf.remaining() < 2) {
-                    throw new IllegalArgumentException("Corrupted .themebin payload: missing key length");
+                    throw new IllegalArgumentException("Corrupt V2 theme binary: truncated key length at slot " + i);
                 }
                 short keyLen = buf.getShort();
                 if (keyLen < 0 || buf.remaining() < keyLen + 4) {
-                    throw new IllegalArgumentException("Corrupted .themebin payload: invalid key entry");
+                    throw new IllegalArgumentException("Corrupt V2 theme binary: truncated key data at slot " + i);
                 }
-                byte[] kb = new byte[keyLen];
-                buf.get(kb);
-                int val = buf.getInt();
-
-                String keyName = new String(kb, java.nio.charset.StandardCharsets.UTF_8);
-                int slot = ThemeKeys.getOrRegister(keyName);
-                theme.set(slot, val);
+                String keyName = null;
+                if (keyLen > 0) {
+                    byte[] kb = new byte[keyLen];
+                    buf.get(kb);
+                    keyName = new String(kb, java.nio.charset.StandardCharsets.UTF_8);
+                }
+                int argb = buf.getInt();
+                if (keyName != null && !keyName.isEmpty()) {
+                    theme.set(keyName, argb);
+                } else {
+                    theme.set(i, argb);
+                }
+            }
+        } else {
+            // V1: Legacy raw slot positions
+            if (buf.remaining() < slotCount * 4) {
+                throw new IllegalArgumentException("Corrupt V1 theme binary: payload shorter than slot array (" + buf.remaining() + " < " + (slotCount * 4) + ")");
+            }
+            for (int i = 0; i < slotCount; i++) {
+                theme.set(i, buf.getInt());
             }
         }
 
         return theme;
     }
 
-
-
     /**
-     * Loads a theme from a file path (supports both .theme text and .themebin binary).
+     * Loads and auto-detects either a .theme or .themebin file from a Path.
      *
-     * @param filePath Absolute or relative path to the theme file.
-     * @return Loaded {@link ThemeData} instance.
-     * @throws IOException If an I/O error occurs reading the file.
-     */
-    public static ThemeData loadFromFile(String filePath) throws IOException {
-        if (filePath == null) throw new IllegalArgumentException("File path cannot be null");
-        return loadFromFile(Paths.get(filePath));
-    }
-
-    /**
-     * Loads a theme from a Path.
-     *
-     * @param path Path to the theme file.
-     * @return Loaded {@link ThemeData} instance.
-     * @throws IOException If an I/O error occurs reading the file.
+     * @param path File system Path.
+     * @return Populated {@link ThemeData}.
+     * @throws IOException If file reading fails.
      */
     public static ThemeData loadFromFile(Path path) throws IOException {
-        byte[] bytes = Files.readAllBytes(path);
-        String fileName = path.getFileName().toString().toLowerCase();
-
-        if (fileName.endsWith(".themebin") || (bytes.length >= 4 && ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt() == ThemeData.MAGIC)) {
-            return parseBinary(bytes);
-        } else {
-            String text = new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
-            return parseText(text);
+        byte[] allBytes = Files.readAllBytes(path);
+        if (allBytes.length >= 4) {
+            int magic = ((allBytes[0] & 0xFF)) |
+                        ((allBytes[1] & 0xFF) << 8) |
+                        ((allBytes[2] & 0xFF) << 16) |
+                        ((allBytes[3] & 0xFF) << 24);
+            if (magic == ThemeData.MAGIC) {
+                return parseBinary(allBytes);
+            }
         }
+        return parseText(new String(allBytes, java.nio.charset.StandardCharsets.UTF_8));
     }
 
     /**
-     * Loads a theme from a File.
+     * Loads and auto-detects either a .theme or .themebin file from a File instance.
      *
-     * @param file Theme file.
-     * @return Loaded {@link ThemeData} instance.
-     * @throws IOException If an I/O error occurs reading the file.
+     * @param file File instance.
+     * @return Populated {@link ThemeData}.
+     * @throws IOException If file reading fails.
      */
     public static ThemeData loadFromFile(File file) throws IOException {
-        if (file == null) throw new IllegalArgumentException("File cannot be null");
         return loadFromFile(file.toPath());
+    }
+
+    /**
+     * Loads and auto-detects either a .theme or .themebin file from a string file path.
+     *
+     * @param filePath String path.
+     * @return Populated {@link ThemeData}.
+     * @throws IOException If file reading fails.
+     */
+    public static ThemeData loadFromFile(String filePath) throws IOException {
+        return loadFromFile(Paths.get(filePath));
     }
 }

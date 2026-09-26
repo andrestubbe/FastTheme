@@ -15,7 +15,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class FastTheme {
 
+    // System Backdrop Types (Windows 11 Build 22621+)
+    public static final int BACKDROP_AUTO = 0;
+    public static final int BACKDROP_NONE = 1;
+    public static final int BACKDROP_MICA = 2;
+    public static final int BACKDROP_ACRYLIC = 3;
+    public static final int BACKDROP_MICA_ALT = 4;
+
     private static final boolean NATIVE_AVAILABLE;
+    private static volatile ThemeData currentTheme = new ThemeData("Default");
+    private static final List<ThemeListener> listeners = new CopyOnWriteArrayList<>();
 
     static {
         boolean loaded = false;
@@ -28,25 +37,18 @@ public class FastTheme {
         NATIVE_AVAILABLE = loaded;
     }
 
-    /**
-     * Checks if the native Windows styling engine (FastTheme DLL) is loaded and available.
-     *
-     * @return True if native methods can be invoked.
-     */
-    public static boolean isNativeAvailable() {
-        return NATIVE_AVAILABLE;
-    }
-
-    private static volatile ThemeData currentTheme = new ThemeData("Default");
-
-    private static final List<ThemeListener> listeners = new CopyOnWriteArrayList<>();
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
 
     /**
      * Constructs a FastTheme instance.
      */
     public FastTheme() {}
 
-    // --- Dynamic Theme State Management ---
+    // =========================================================================
+    // METHODS (Actions & Operations)
+    // =========================================================================
 
     /**
      * Parses and activates a theme from a .theme text definition.
@@ -97,21 +99,120 @@ public class FastTheme {
     }
 
     /**
-     * Activates a theme globally across the JVM and notifies all registered listeners.
+     * Registers a listener for live theme changes.
      *
-     * @param theme The {@link ThemeData} to set as active.
+     * @param listener Observer callback.
      */
-    public static void set(ThemeData theme) {
-        if (theme == null) return;
-        currentTheme = theme;
-        for (ThemeListener l : listeners) {
-            try {
-                l.onThemeChanged(theme);
-            } catch (Exception e) {
-                System.err.println("[FastTheme] Listener failed on theme change: " + e.getMessage());
-            }
+    public static void addListener(ThemeListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
         }
+    }
 
+    /**
+     * Removes a registered theme change listener.
+     *
+     * @param listener Observer callback.
+     */
+    public static void removeListener(ThemeListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
+     * Synchronizes native Windows DWM title bar and background styling
+     * using standard key names ("TITLE_BAR_BACKGROUND", "TITLE_BAR_TEXT", "WINDOW_BACKGROUND").
+     *
+     * @param hwnd 64-bit native window handle.
+     */
+    public static void applyToWindow(long hwnd) {
+        applyToWindow(hwnd, "TITLE_BAR_BACKGROUND", "TITLE_BAR_TEXT", "WINDOW_BACKGROUND");
+    }
+
+    /**
+     * Synchronizes native Windows DWM title bar and background styling
+     * using user-specified key names from the active theme.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param titleBgKey Key name for title bar background color.
+     * @param titleFgKey Key name for title bar text color.
+     * @param winBgKey Key name for window client background color.
+     */
+    public static void applyToWindow(long hwnd, String titleBgKey, String titleFgKey, String winBgKey) {
+        if (hwnd == 0 || !isNativeAvailable()) return;
+        try {
+            int titleBg = get(titleBgKey);
+            int titleFg = get(titleFgKey);
+            int winBg = get(winBgKey);
+
+            if (titleBg != 0) {
+                setTitleBarColor(hwnd, ThemeColorUtil.red(titleBg), ThemeColorUtil.green(titleBg), ThemeColorUtil.blue(titleBg));
+            }
+            if (titleFg != 0) {
+                setTitleBarTextColor(hwnd, ThemeColorUtil.red(titleFg), ThemeColorUtil.green(titleFg), ThemeColorUtil.blue(titleFg));
+            }
+            if (winBg != 0) {
+                setWindowBackgroundColor(hwnd, ThemeColorUtil.red(winBg), ThemeColorUtil.green(winBg), ThemeColorUtil.blue(winBg));
+                boolean isDark = ThemeColorUtil.contrastRatio(winBg, 0xFFFFFFFF) >= ThemeColorUtil.contrastRatio(winBg, 0xFF111111);
+                setTitleBarDarkMode(hwnd, isDark);
+            }
+        } catch (Exception e) {
+            System.err.println("[FastTheme] Failed to apply window theme: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Convenience method to apply theme styling to a Swing/AWT component window.
+     *
+     * @param component Swing or AWT component.
+     */
+    public static void applyToWindow(Component component) {
+        if (component == null) return;
+        try {
+            long hwnd = getWindowHandle(component);
+            if (hwnd != 0) {
+                applyToWindow(hwnd);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    /**
+     * Convenience method to apply theme styling to a Swing/AWT component window with custom key names.
+     *
+     * @param component Swing or AWT component.
+     * @param titleBgKey Key name for title bar background color.
+     * @param titleFgKey Key name for title bar text color.
+     * @param winBgKey Key name for window client background color.
+     */
+    public static void applyToWindow(Component component, String titleBgKey, String titleFgKey, String winBgKey) {
+        if (component == null) return;
+        try {
+            long hwnd = getWindowHandle(component);
+            if (hwnd != 0) {
+                applyToWindow(hwnd, titleBgKey, titleFgKey, winBgKey);
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    /**
+     * Enables or disables Windows 11 Mica material effect.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param enabled True to enable Mica effect.
+     * @return True if operation succeeded.
+     */
+    public static native boolean enableMica(long hwnd, boolean enabled);
+
+    // =========================================================================
+    // GETTERS
+    // =========================================================================
+
+    /**
+     * Checks if the native Windows styling engine (FastTheme DLL) is loaded and available.
+     *
+     * @return True if native methods can be invoked.
+     */
+    public static boolean isNativeAvailable() {
+        return NATIVE_AVAILABLE;
     }
 
     /**
@@ -164,102 +265,6 @@ public class FastTheme {
     }
 
     /**
-     * Registers a listener for live theme changes.
-     *
-     * @param listener Observer callback.
-     */
-    public static void addListener(ThemeListener listener) {
-        if (listener != null) {
-            listeners.add(listener);
-        }
-    }
-
-    /**
-     * Removes a registered theme change listener.
-     */
-    public static void removeListener(ThemeListener listener) {
-        listeners.remove(listener);
-    }
-
-    /**
-     * Synchronizes native Windows DWM title bar and background styling
-     * using standard key names ("TITLE_BAR_BACKGROUND", "TITLE_BAR_TEXT", "WINDOW_BACKGROUND").
-     *
-     * @param hwnd 64-bit native window handle.
-     */
-    public static void applyToWindow(long hwnd) {
-        applyToWindow(hwnd, "TITLE_BAR_BACKGROUND", "TITLE_BAR_TEXT", "WINDOW_BACKGROUND");
-    }
-
-    /**
-     * Synchronizes native Windows DWM title bar and background styling
-     * using user-specified key names from the active theme.
-     *
-     * @param hwnd 64-bit native window handle.
-     * @param titleBgKey Key name for title bar background color.
-     * @param titleFgKey Key name for title bar text color.
-     * @param winBgKey Key name for window client background color.
-     */
-    public static void applyToWindow(long hwnd, String titleBgKey, String titleFgKey, String winBgKey) {
-        if (hwnd == 0 || !isNativeAvailable()) return;
-        try {
-            int titleBg = get(titleBgKey);
-            int titleFg = get(titleFgKey);
-            int winBg = get(winBgKey);
-
-            if (titleBg != 0) {
-                setTitleBarColor(hwnd, ThemeColorUtil.red(titleBg), ThemeColorUtil.green(titleBg), ThemeColorUtil.blue(titleBg));
-            }
-            if (titleFg != 0) {
-                setTitleBarTextColor(hwnd, ThemeColorUtil.red(titleFg), ThemeColorUtil.green(titleFg), ThemeColorUtil.blue(titleFg));
-            }
-            if (winBg != 0) {
-                setWindowBackgroundColor(hwnd, ThemeColorUtil.red(winBg), ThemeColorUtil.green(winBg), ThemeColorUtil.blue(winBg));
-                boolean isDark = ThemeColorUtil.contrastRatio(winBg, 0xFFFFFFFF) >= ThemeColorUtil.contrastRatio(winBg, 0xFF111111);
-                setTitleBarDarkMode(hwnd, isDark);
-            }
-        } catch (Exception e) {
-            System.err.println("[FastTheme] Failed to apply window theme: " + e.getMessage());
-        }
-    }
-
-
-    /**
-     * Convenience method to apply theme styling to a Swing/AWT component window.
-     *
-     * @param component Swing or AWT component.
-     */
-    public static void applyToWindow(Component component) {
-        if (component == null) return;
-        try {
-            long hwnd = getWindowHandle(component);
-            if (hwnd != 0) {
-                applyToWindow(hwnd);
-            }
-        } catch (Throwable ignored) {}
-    }
-
-    /**
-     * Convenience method to apply theme styling to a Swing/AWT component window with custom key names.
-     *
-     * @param component Swing or AWT component.
-     * @param titleBgKey Key name for title bar background color.
-     * @param titleFgKey Key name for title bar text color.
-     * @param winBgKey Key name for window client background color.
-     */
-    public static void applyToWindow(Component component, String titleBgKey, String titleFgKey, String winBgKey) {
-        if (component == null) return;
-        try {
-            long hwnd = getWindowHandle(component);
-            if (hwnd != 0) {
-                applyToWindow(hwnd, titleBgKey, titleFgKey, winBgKey);
-            }
-        } catch (Throwable ignored) {}
-    }
-
-    // --- Native JNI Methods ---
-
-    /**
      * Extracts the native HWND handle for a Swing/AWT component.
      *
      * @param component The AWT or Swing component.
@@ -273,6 +278,34 @@ public class FastTheme {
      * @return 64-bit console window handle.
      */
     public static native long getConsoleWindowHandle();
+
+    /**
+     * Queries Windows system dark mode setting.
+     *
+     * @return True if Windows is in dark mode.
+     */
+    public static native boolean isSystemDarkMode();
+
+    // =========================================================================
+    // SETTERS
+    // =========================================================================
+
+    /**
+     * Activates a theme globally across the JVM and notifies all registered listeners.
+     *
+     * @param theme The {@link ThemeData} to set as active.
+     */
+    public static void set(ThemeData theme) {
+        if (theme == null) return;
+        currentTheme = theme;
+        for (ThemeListener l : listeners) {
+            try {
+                l.onThemeChanged(theme);
+            } catch (Exception e) {
+                System.err.println("[FastTheme] Listener failed on theme change: " + e.getMessage());
+            }
+        }
+    }
 
     /**
      * Sets native window transparency.
@@ -325,22 +358,6 @@ public class FastTheme {
      */
     public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
 
-    // System Backdrop Types (Windows 11 Build 22621+)
-    public static final int BACKDROP_AUTO = 0;
-    public static final int BACKDROP_NONE = 1;
-    public static final int BACKDROP_MICA = 2;
-    public static final int BACKDROP_ACRYLIC = 3;
-    public static final int BACKDROP_MICA_ALT = 4;
-
-    /**
-     * Enables or disables Windows 11 Mica material effect.
-     *
-     * @param hwnd 64-bit native window handle.
-     * @param enabled True to enable Mica effect.
-     * @return True if operation succeeded.
-     */
-    public static native boolean enableMica(long hwnd, boolean enabled);
-
     /**
      * Sets the native system backdrop material on Windows 11 (Mica, Acrylic, Mica Alt).
      *
@@ -349,7 +366,6 @@ public class FastTheme {
      * @return True if operation succeeded.
      */
     public static native boolean setSystemBackdropType(long hwnd, int type);
-
 
     /**
      * Sets window corner style on Windows 11.
@@ -377,13 +393,6 @@ public class FastTheme {
      * @return True if operation succeeded.
      */
     public static native boolean setOverlayDragHeight(long hwnd, int height);
-
-    /**
-     * Queries Windows system dark mode setting.
-     *
-     * @return True if Windows is in dark mode.
-     */
-     public static native boolean isSystemDarkMode();
 
     /**
      * Toggles visibility of minimize and maximize buttons in the native title bar.
