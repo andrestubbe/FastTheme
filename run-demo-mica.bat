@@ -6,12 +6,11 @@ echo ===========================================
 echo FastTheme Mica Backdrop Demo (v0.1.5)
 echo ===========================================
 echo.
-echo Launching: Windows 11 Mica Material Demo
+echo Launching: Windows 11 Mica Material Demo (ESC to close)...
 echo.
 
 cd examples
-echo Compiling and Launching MicaDemo...
-call mvn compile exec:java -Dexec.mainClass="fasttheme.MicaDemo"
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.MicaDemo"
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Demo failed to launch.

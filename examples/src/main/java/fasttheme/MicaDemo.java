@@ -10,9 +10,9 @@ public class MicaDemo {
             frame.setSize(800, 500);
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-            // Transparency on Swing side so the DWM Mica surface shines through
+            frame.setUndecorated(true);
             frame.setBackground(new Color(0, 0, 0, 0));
+
             JPanel content = new JPanel();
             content.setOpaque(false);
             content.setLayout(new BorderLayout());
@@ -33,10 +33,23 @@ public class MicaDemo {
 
             long hwnd = FastTheme.getWindowHandle(frame);
             if (hwnd != 0) {
+                FastTheme.setBorderlessShadow(hwnd, true);
+                FastTheme.setOverlayDragHeight(hwnd, 40);
                 FastTheme.setTitleBarDarkMode(hwnd, true);
                 FastTheme.setCornerStyle(hwnd, 2); // Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA);
             }
+
+            // Close on ESC key
+            frame.addKeyListener(new java.awt.event.KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+                        frame.dispose();
+                        System.exit(0);
+                    }
+                }
+            });
         });
     }
 }

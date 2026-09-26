@@ -6,12 +6,11 @@ echo ===========================================
 echo FastTheme Acrylic Backdrop Demo (v0.1.5)
 echo ===========================================
 echo.
-echo Launching: Windows 11 Acrylic Material Demo
+echo Launching: Windows 11 Acrylic Material Demo (ESC to close)...
 echo.
 
 cd examples
-echo Compiling and Launching AcrylicDemo...
-call mvn compile exec:java -Dexec.mainClass="fasttheme.AcrylicDemo"
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.AcrylicDemo"
 if %errorlevel% neq 0 (
     echo.
     echo [ERROR] Demo failed to launch.
