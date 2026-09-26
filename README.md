@@ -252,6 +252,9 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 | Case | Java Example | Launcher | Description |
 |---|---|---|---|
+| **Windows 11 Mica Material** | [MicaDemo.java](examples/src/main/java/fasttheme/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
+| **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/src/main/java/fasttheme/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
+| **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/src/main/java/fasttheme/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
 | **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
 | **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
 | **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Zero-allocation slot array access, dynamic string lookups, and parser throughput benchmarks. |
