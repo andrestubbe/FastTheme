@@ -16,8 +16,11 @@ public class MicaDemo {
             System.out.println("[MicaDemo] Window created successfully, HWND = " + hwnd);
 
             if (hwnd != 0) {
-                // Apply Windows 11 Mica material and dark title bar
+                // Apply Windows 11 Dark Mode, Titlebar, and matching Body Background
                 FastTheme.setTitleBarDarkMode(hwnd, true);
+                FastTheme.setTitleBarColor(hwnd, 20, 20, 20);
+                FastTheme.setTitleBarTextColor(hwnd, 240, 240, 240);
+                FastTheme.setWindowBackgroundColor(hwnd, 20, 20, 20);
                 FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA);
             }
