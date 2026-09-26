@@ -263,11 +263,11 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 ## Installation
 
-FastJava modules require **two** dependencies: the module itself, and `FastCore` (which handles the native library extraction).
+FastJava modules are published via JitPack and can be installed with standard build tools or direct download.
 
 ### Option 1: Maven (Recommended)
 
-Add the JitPack repository and the dependency to your `pom.xml`:
+Add the JitPack repository and dependencies to your `pom.xml`:
 
 ```xml
 <repositories>
@@ -278,6 +278,7 @@ Add the JitPack repository and the dependency to your `pom.xml`:
 </repositories>
 
 <dependencies>
+    <!-- Core FastTheme Engine -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
@@ -288,6 +289,12 @@ Add the JitPack repository and the dependency to your `pom.xml`:
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastcore</artifactId>
         <version>0.1.0</version>
+    </dependency>
+    <!-- FastFileFormat - Dual-Format (.theme/.themebin) Parser & Serializer -->
+    <dependency>
+        <groupId>com.github.andrestubbe</groupId>
+        <artifactId>FastFileFormat</artifactId>
+        <version>0.1.1</version>
     </dependency>
 </dependencies>
 ```
@@ -301,18 +308,18 @@ repositories {
 
 dependencies {
     implementation 'com.github.andrestubbe:FastTheme:0.1.5'
-    // Required Native JNI loader
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
+    implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
 }
 ```
 
 ### Option 3: Direct Download (No Build Tool)
 
-Download the latest JAR directly to add it to your classpath:
+Download the pre-built JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.5.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.5/FastTheme-0.1.5.jar)** (The Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.5.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.5/FastTheme-0.1.5.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
-
+3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
 
 ---
 
@@ -345,6 +352,7 @@ MIT License — See [LICENSE](LICENSE) for details.
 ## Related Projects
 
 - [FastCore](https://github.com/andrestubbe/FastCore) — Native JNI Loader and Utilities
+- [FastFileFormat](https://github.com/andrestubbe/FastFileFormat) — Dual text/binary serialization and parser engine
 - [FastAnimation](https://github.com/andrestubbe/FastAnimation) — Zero overhead timeline orchestration
 - [FastTween](https://github.com/andrestubbe/FastTween) — Zero overhead pool-based tweening
 - [FastDWM](https://github.com/andrestubbe/FastDWM) — Native Desktop Window Manager API
