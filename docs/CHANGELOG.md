@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - **Windows 11 System Backdrop Engine**: Added `setSystemBackdropType(long hwnd, int type)` with support for `BACKDROP_MICA`, `BACKDROP_ACRYLIC`, and `BACKDROP_MICA_ALT` via official DWM attribute 38 and frame extension.
 - **Dedicated Material Demos**: Added `MicaDemo`, `AcrylicDemo`, and `MicaAltDemo` showcasing transparent Swing client areas with hardware-accelerated DWM backgrounds.
+- **Native Window Chrome Controls**: Added `setWindowButtonsVisible(hwnd, min, max)` to dynamically toggle minimize/maximize buttons and `setAlwaysOnTop(hwnd, bool)` for native topmost z-order control.
 - **Self-Describing Binary Format (V2)**: `.themebin` serializes key names alongside slot values, enabling robust persistence across JVM sessions while maintaining backward-compatible V1 decoding.
 - **Iterative Multi-Hop Alias Resolution**: `ThemeParser.parseText` resolves nested variable chains (e.g., `A = @B`, `B = @C`) with cycle detection.
 - **Native Status Indicator**: Added `isNativeAvailable()` to safely verify JNI DLL presence before calling platform-specific methods.

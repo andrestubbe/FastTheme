@@ -46,6 +46,8 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static native boolean setBorderlessShadow(long hwnd, boolean enabled)`
 *   `public static native boolean setOverlayDragHeight(long hwnd, int height)`
 *   `public static native boolean isSystemDarkMode()`
+*   `public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize)`
+*   `public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop)`
 
 ---
 

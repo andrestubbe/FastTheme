@@ -383,5 +383,24 @@ public class FastTheme {
      *
      * @return True if Windows is in dark mode.
      */
-    public static native boolean isSystemDarkMode();
+     public static native boolean isSystemDarkMode();
+
+    /**
+     * Toggles visibility of minimize and maximize buttons in the native title bar.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param showMinimize True to display minimize button, false to hide.
+     * @param showMaximize True to display maximize button, false to hide.
+     * @return True if operation succeeded.
+     */
+    public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize);
+
+    /**
+     * Toggles whether the native window stays always on top.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param alwaysOnTop True to make topmost, false for normal z-order.
+     * @return True if operation succeeded.
+     */
+    public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop);
 }

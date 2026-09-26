@@ -395,4 +395,48 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env
     return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
 }
 
+/**
+ * @brief Toggles minimize and maximize buttons on standard native window title bar.
+ * 
+ * @param showMinimize True to display the minimize button, false to remove.
+ * @param showMaximize True to display the maximize button, false to remove.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowButtonsVisible(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean showMinimize, jboolean showMaximize) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    LONG_PTR style = GetWindowLongPtr(hwnd, GWL_STYLE);
+    if (showMinimize) {
+        style |= WS_MINIMIZEBOX;
+    } else {
+        style &= ~WS_MINIMIZEBOX;
+    }
+
+    if (showMaximize) {
+        style |= WS_MAXIMIZEBOX;
+    } else {
+        style &= ~WS_MAXIMIZEBOX;
+    }
+
+    SetWindowLongPtr(hwnd, GWL_STYLE, style);
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+                 SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    return JNI_TRUE;
+}
+
+/**
+ * @brief Toggles whether the native window stays always on top.
+ * 
+ * @param alwaysOnTop True to make topmost, false for normal z-order.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setAlwaysOnTop(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean alwaysOnTop) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    HWND insertAfter = alwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST;
+    BOOL res = SetWindowPos(hwnd, insertAfter, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    return res ? JNI_TRUE : JNI_FALSE;
+}
+
 } // extern "C"

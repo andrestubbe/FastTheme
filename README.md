@@ -222,6 +222,8 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | Removes native title bar while preserving native OS drop shadow (Raycast-style). |
 | `FastTheme.setOverlayDragHeight(long hwnd, int height)` | Defines top invisible grab area (in pixels) for draggable borderless windows. |
 | `FastTheme.isSystemDarkMode()` | Detects global Windows system dark mode setting. |
+| `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | Toggles native minimize and maximize buttons in the window title bar. |
+| `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | Toggles native Win32 window topmost z-order. |
 
 ### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
 
