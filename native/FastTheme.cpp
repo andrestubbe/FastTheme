@@ -12,7 +12,7 @@
  * - Managing window-wide transparency.
  * 
  * @author FastJava Team
- * @version 0.2.0
+ * @version 0.1.4
  */
 
 #include <jni.h>
@@ -35,7 +35,19 @@
 #endif
 
 #ifndef DWMWA_MICA_EFFECT
-#define DWMWA_MICA_EFFECT 38
+#define DWMWA_MICA_EFFECT 1029
+#endif
+
+#ifndef DWMWA_SYSTEMBACKDROP_TYPE
+#define DWMWA_SYSTEMBACKDROP_TYPE 38
+#endif
+
+#ifndef DWMSBT_AUTO
+#define DWMSBT_AUTO 0
+#define DWMSBT_NONE 1
+#define DWMSBT_MAINWINDOW 2      // Mica
+#define DWMSBT_TRANSIENTWINDOW 3 // Acrylic
+#define DWMSBT_TABBEDWINDOW 4    // Mica Alt
 #endif
 
 /**
@@ -71,12 +83,22 @@ JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jc
 
     JAWT_DrawingSurface* ds = awt.GetDrawingSurface(env, component);
     if (!ds) return 0;
-    ds->Lock(ds);
+    if ((ds->Lock(ds) & JAWT_LOCK_ERROR) != 0) {
+        awt.FreeDrawingSurface(ds);
+        return 0;
+    }
+
     JAWT_DrawingSurfaceInfo* dsi = ds->GetDrawingSurfaceInfo(ds);
-    HWND hwnd = ((JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo)->hwnd;
-    ds->FreeDrawingSurfaceInfo(dsi);
+    HWND hwnd = NULL;
+    if (dsi != NULL) {
+        if (dsi->platformInfo != NULL) {
+            hwnd = ((JAWT_Win32DrawingSurfaceInfo*)dsi->platformInfo)->hwnd;
+        }
+        ds->FreeDrawingSurfaceInfo(dsi);
+    }
     ds->Unlock(ds);
     awt.FreeDrawingSurface(ds);
+
 
     // Walk up to find the actual top-level frame window
     if (hwnd != NULL) {
@@ -136,11 +158,28 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowBackgroundColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b) {
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
-    HBRUSH hBrush = CreateSolidBrush(RGB(r, g, b));
-    SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
+
+    HBRUSH hNewBrush = CreateSolidBrush(RGB(r, g, b));
+    if (!hNewBrush) return JNI_FALSE;
+
+    // Free previously stored custom brush for this window to prevent GDI handle leak
+    HBRUSH hOldCustomBrush = (HBRUSH)GetPropW(hwnd, L"FastTheme_CustomBgBrush");
+    if (hOldCustomBrush != NULL) {
+        DeleteObject(hOldCustomBrush);
+    }
+    SetPropW(hwnd, L"FastTheme_CustomBgBrush", (HANDLE)hNewBrush);
+
+    // Apply brush to window class for early initialization paints
+    HBRUSH hPrevClassBrush = (HBRUSH)SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)hNewBrush);
+    // If the previous class brush was a custom created brush not attached to this window, delete it
+    if (hPrevClassBrush != NULL && hPrevClassBrush != hOldCustomBrush && hPrevClassBrush != (HBRUSH)GetStockObject(BLACK_BRUSH) && hPrevClassBrush != (HBRUSH)GetStockObject(WHITE_BRUSH)) {
+        DeleteObject(hPrevClassBrush);
+    }
+
     RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
     return JNI_TRUE;
 }
+
 
 /**
  * @brief Toggles Immersive Dark Mode via DwmSetWindowAttribute.
@@ -176,15 +215,43 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv*
 }
 
 /**
+ * @brief Sets the system backdrop type on Windows 11 (Build 22621+).
+ * 
+ * @param type 0 = Auto, 1 = None, 2 = Mica, 3 = Acrylic, 4 = Mica Alt (Tabbed)
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setSystemBackdropType(JNIEnv* env, jclass clazz, jlong hwndLong, jint type) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+
+    int backdrop = type;
+    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
+    if (FAILED(hr)) {
+        // Fallback for older Windows 11 builds (22000) if Mica is requested
+        if (type == DWMSBT_MAINWINDOW) {
+            BOOL micaVal = TRUE;
+            hr = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &micaVal, sizeof(micaVal));
+        } else if (type == DWMSBT_NONE) {
+            BOOL micaVal = FALSE;
+            hr = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &micaVal, sizeof(micaVal));
+        }
+    }
+
+    if (SUCCEEDED(hr) && type != DWMSBT_NONE) {
+        MARGINS margins = { -1, -1, -1, -1 };
+        DwmExtendFrameIntoClientArea(hwnd, &margins);
+    }
+
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+/**
  * @brief Enables the Mica material effect (Windows 11+).
  */
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_enableMica(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled) {
-    HWND hwnd = (HWND)hwndLong;
-    if (!IsWindow(hwnd)) return JNI_FALSE;
-    int backdrop = enabled ? 2 : 0; // 2 = Mica Backdrop
-    HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, &backdrop, sizeof(backdrop));
-    return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+    return Java_fasttheme_FastTheme_setSystemBackdropType(env, clazz, hwndLong, enabled ? DWMSBT_MAINWINDOW : DWMSBT_NONE);
 }
+
 
 /**
  * @brief Sets the window corner style preference (Windows 11+).
@@ -239,11 +306,18 @@ LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
             return hit;
         }
 
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
             SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
             RemovePropW(hwnd, L"FastTheme_OldProc");
             RemovePropW(hwnd, L"FastTheme_DragHeight");
+            HBRUSH hBrush = (HBRUSH)GetPropW(hwnd, L"FastTheme_CustomBgBrush");
+            if (hBrush != NULL) {
+                DeleteObject(hBrush);
+                RemovePropW(hwnd, L"FastTheme_CustomBgBrush");
+            }
             break;
+        }
+
     }
     return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
 }

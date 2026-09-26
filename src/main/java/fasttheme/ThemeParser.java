@@ -68,15 +68,26 @@ public final class ThemeParser {
             }
         }
 
-        // Pass 2: Resolve @KEY aliases
+        // Pass 2: Resolve @KEY aliases (iterative resolution for chains like A -> @B -> @C -> #HEX)
+        Map<String, String> pendingAliases = new HashMap<>();
         for (Map.Entry<String, String> entry : rawMap.entrySet()) {
-            String key = entry.getKey();
-            String val = entry.getValue();
-            if (val.startsWith("@")) {
-                String aliasKey = val.substring(1).trim().toUpperCase();
-                Integer resolved = resolvedColors.get(aliasKey);
+            if (entry.getValue().startsWith("@")) {
+                pendingAliases.put(entry.getKey(), entry.getValue().substring(1).trim().toUpperCase(java.util.Locale.ROOT));
+            }
+        }
+
+        boolean progress = true;
+        while (!pendingAliases.isEmpty() && progress) {
+            progress = false;
+            java.util.Iterator<Map.Entry<String, String>> it = pendingAliases.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, String> entry = it.next();
+                String key = entry.getKey();
+                String targetKey = entry.getValue();
+
+                Integer resolved = resolvedColors.get(targetKey);
                 if (resolved == null) {
-                    int aliasSlot = ThemeKeys.indexOf(aliasKey);
+                    int aliasSlot = ThemeKeys.indexOf(targetKey);
                     if (aliasSlot != -1) {
                         resolved = theme.get(aliasSlot);
                     }
@@ -86,9 +97,12 @@ public final class ThemeParser {
                     resolvedColors.put(key, resolved);
                     int targetSlot = ThemeKeys.getOrRegister(key);
                     theme.set(targetSlot, resolved);
+                    it.remove();
+                    progress = true;
                 }
             }
         }
+
 
         return theme;
     }
@@ -116,19 +130,53 @@ public final class ThemeParser {
         }
 
         short nameLen = buf.getShort();
+        if (nameLen < 0 || buf.remaining() < nameLen + 2) {
+            throw new IllegalArgumentException("Corrupted .themebin payload: invalid name length");
+        }
         byte[] nameBytes = new byte[nameLen];
         buf.get(nameBytes);
         String name = new String(nameBytes, java.nio.charset.StandardCharsets.UTF_8);
 
         short slotCount = buf.getShort();
+        if (slotCount < 0) {
+            throw new IllegalArgumentException("Corrupted .themebin payload: negative slot count");
+        }
+
         ThemeData theme = new ThemeData(name, slotCount);
-        for (int i = 0; i < slotCount; i++) {
-            int val = buf.getInt();
-            theme.set(i, val);
+
+        if (version == 1) {
+            // V1 legacy positional format
+            if (buf.remaining() < slotCount * 4) {
+                throw new IllegalArgumentException("Corrupted .themebin payload: truncated V1 slot values");
+            }
+            for (int i = 0; i < slotCount; i++) {
+                int val = buf.getInt();
+                theme.set(i, val);
+            }
+        } else {
+            // V2 self-describing format with key names
+            for (int i = 0; i < slotCount; i++) {
+                if (buf.remaining() < 2) {
+                    throw new IllegalArgumentException("Corrupted .themebin payload: missing key length");
+                }
+                short keyLen = buf.getShort();
+                if (keyLen < 0 || buf.remaining() < keyLen + 4) {
+                    throw new IllegalArgumentException("Corrupted .themebin payload: invalid key entry");
+                }
+                byte[] kb = new byte[keyLen];
+                buf.get(kb);
+                int val = buf.getInt();
+
+                String keyName = new String(kb, java.nio.charset.StandardCharsets.UTF_8);
+                int slot = ThemeKeys.getOrRegister(keyName);
+                theme.set(slot, val);
+            }
         }
 
         return theme;
     }
+
+
 
     /**
      * Loads a theme from a file path (supports both .theme text and .themebin binary).

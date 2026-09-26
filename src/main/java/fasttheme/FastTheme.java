@@ -15,13 +15,30 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class FastTheme {
 
+    private static final boolean NATIVE_AVAILABLE;
+
     static {
+        boolean loaded = false;
         try {
             FastCore.loadLibrary("fasttheme");
-        } catch (Throwable ignored) {}
+            loaded = true;
+        } catch (Throwable t) {
+            System.err.println("[FastTheme] Native styling bridge unavailable: " + t.getMessage());
+        }
+        NATIVE_AVAILABLE = loaded;
+    }
+
+    /**
+     * Checks if the native Windows styling engine (FastTheme DLL) is loaded and available.
+     *
+     * @return True if native methods can be invoked.
+     */
+    public static boolean isNativeAvailable() {
+        return NATIVE_AVAILABLE;
     }
 
     private static volatile ThemeData currentTheme = new ThemeData("Default");
+
     private static final List<ThemeListener> listeners = new CopyOnWriteArrayList<>();
 
     /**
@@ -90,10 +107,11 @@ public class FastTheme {
         for (ThemeListener l : listeners) {
             try {
                 l.onThemeChanged(theme);
-            } catch (Throwable t) {
-                t.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("[FastTheme] Listener failed on theme change: " + e.getMessage());
             }
         }
+
     }
 
     /**
@@ -183,7 +201,7 @@ public class FastTheme {
      * @param winBgKey Key name for window client background color.
      */
     public static void applyToWindow(long hwnd, String titleBgKey, String titleFgKey, String winBgKey) {
-        if (hwnd == 0) return;
+        if (hwnd == 0 || !isNativeAvailable()) return;
         try {
             int titleBg = get(titleBgKey);
             int titleFg = get(titleFgKey);
@@ -197,11 +215,14 @@ public class FastTheme {
             }
             if (winBg != 0) {
                 setWindowBackgroundColor(hwnd, ThemeColorUtil.red(winBg), ThemeColorUtil.green(winBg), ThemeColorUtil.blue(winBg));
-                boolean isDark = ThemeColorUtil.luminance(winBg) < 0.5;
+                boolean isDark = ThemeColorUtil.contrastRatio(winBg, 0xFFFFFFFF) >= ThemeColorUtil.contrastRatio(winBg, 0xFF111111);
                 setTitleBarDarkMode(hwnd, isDark);
             }
-        } catch (Throwable ignored) {}
+        } catch (Exception e) {
+            System.err.println("[FastTheme] Failed to apply window theme: " + e.getMessage());
+        }
     }
+
 
     /**
      * Convenience method to apply theme styling to a Swing/AWT component window.
@@ -304,6 +325,13 @@ public class FastTheme {
      */
     public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
 
+    // System Backdrop Types (Windows 11 Build 22621+)
+    public static final int BACKDROP_AUTO = 0;
+    public static final int BACKDROP_NONE = 1;
+    public static final int BACKDROP_MICA = 2;
+    public static final int BACKDROP_ACRYLIC = 3;
+    public static final int BACKDROP_MICA_ALT = 4;
+
     /**
      * Enables or disables Windows 11 Mica material effect.
      *
@@ -312,6 +340,16 @@ public class FastTheme {
      * @return True if operation succeeded.
      */
     public static native boolean enableMica(long hwnd, boolean enabled);
+
+    /**
+     * Sets the native system backdrop material on Windows 11 (Mica, Acrylic, Mica Alt).
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param type Backdrop type (BACKDROP_NONE, BACKDROP_MICA, BACKDROP_ACRYLIC, BACKDROP_MICA_ALT).
+     * @return True if operation succeeded.
+     */
+    public static native boolean setSystemBackdropType(long hwnd, int type);
+
 
     /**
      * Sets window corner style on Windows 11.

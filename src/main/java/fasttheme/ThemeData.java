@@ -17,12 +17,13 @@ public final class ThemeData {
     public static final int MAGIC = 0x4654484D;
 
     /**
-     * Binary format version.
+     * Binary format version (V2: self-describing key names included).
      */
-    public static final short FORMAT_VERSION = 1;
+    public static final short FORMAT_VERSION = 2;
 
     private final String name;
     private int[] values;
+
 
     /**
      * Constructs a ThemeData instance with the given theme name.
@@ -87,7 +88,19 @@ public final class ThemeData {
     public byte[] toBinary() {
         byte[] nameBytes = name.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         int activeSlots = Math.min(values.length, ThemeKeys.count());
-        int totalSize = 4 + 2 + 2 + nameBytes.length + 2 + (activeSlots * 4);
+
+        // Calculate size for V2 self-describing format:
+        // header (4) + version (2) + nameLen (2) + nameBytes + slotCount (2) + per-slot entries (keyLen (2) + keyBytes + argb (4))
+        byte[][] keyBytesList = new byte[activeSlots][];
+        int slotsPayloadSize = 0;
+        for (int i = 0; i < activeSlots; i++) {
+            String k = ThemeKeys.nameOf(i);
+            byte[] kb = (k != null) ? k.getBytes(java.nio.charset.StandardCharsets.UTF_8) : new byte[0];
+            keyBytesList[i] = kb;
+            slotsPayloadSize += 2 + kb.length + 4;
+        }
+
+        int totalSize = 4 + 2 + 2 + nameBytes.length + 2 + slotsPayloadSize;
         ByteBuffer buf = ByteBuffer.allocate(totalSize).order(ByteOrder.LITTLE_ENDIAN);
 
         buf.putInt(MAGIC);
@@ -97,11 +110,15 @@ public final class ThemeData {
         buf.putShort((short) activeSlots);
 
         for (int i = 0; i < activeSlots; i++) {
+            byte[] kb = keyBytesList[i];
+            buf.putShort((short) kb.length);
+            buf.put(kb);
             buf.putInt(values[i]);
         }
 
         return buf.array();
     }
+
 
     /**
      * Serializes this theme into the human-readable .theme text format.
@@ -177,13 +194,21 @@ public final class ThemeData {
     }
 
     /**
-     * Returns direct reference to the raw primitive ARGB values array.
+     * Returns a copy of the raw primitive ARGB values array to preserve encapsulation.
      *
-     * @return Underlying int[] array.
+     * @return Cloned int[] array of theme color values.
      */
     public int[] getRawValues() {
+        return Arrays.copyOf(values, values.length);
+    }
+
+    /**
+     * Package-private direct array access for zero-allocation internal operations.
+     */
+    int[] directValues() {
         return values;
     }
+
 
     /**
      * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.

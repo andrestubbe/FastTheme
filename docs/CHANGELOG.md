@@ -2,7 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2026-09-26
+### Added
+- **Windows 11 System Backdrop Engine**: Added `setSystemBackdropType(long hwnd, int type)` with support for `BACKDROP_MICA`, `BACKDROP_ACRYLIC`, and `BACKDROP_MICA_ALT` via official DWM attribute 38 and frame extension.
+- **Dedicated Material Demos**: Added `MicaDemo`, `AcrylicDemo`, and `MicaAltDemo` showcasing transparent Swing client areas with hardware-accelerated DWM backgrounds.
+- **Self-Describing Binary Format (V2)**: `.themebin` serializes key names alongside slot values, enabling robust persistence across JVM sessions while maintaining backward-compatible V1 decoding.
+- **Iterative Multi-Hop Alias Resolution**: `ThemeParser.parseText` resolves nested variable chains (e.g., `A = @B`, `B = @C`) with cycle detection.
+- **Native Status Indicator**: Added `isNativeAvailable()` to safely verify JNI DLL presence before calling platform-specific methods.
+
+### Fixed
+- **GDI Handle Leak**: Prevented unbounded `HBRUSH` allocation in `setWindowBackgroundColor` via window property tracking and `DeleteObject()` cleanup on overwrite and `WM_NCDESTROY`.
+- **JAWT Crash Protection**: Added null verification for `dsi` and `dsi->platformInfo` in `getWindowHandle`.
+- **Thread Safety in `ThemeKeys`**: Replaced race-prone check-then-act registration with synchronized locking and `Locale.ROOT` string normalization.
+- **Buffer Safety in `ThemeParser`**: Added bounds validation for `nameLen` and `slotCount` in `parseBinary`.
+- **Contrast Accuracy**: Corrected `ThemeColorUtil.getContrastForeground` to compare genuine WCAG contrast ratios.
+- **Encapsulation**: Guarded `ThemeData.getRawValues()` with defensive copying.
+
 ## [0.1.4] - 2026-08-24
+
 ### Changed
 - **100% Schema-Free Pure Dynamic Registry (`ThemeKeys`)**: Removed all hardcoded slot constants and presets; any string key is dynamically allocated an integer slot ID on demand.
 - **Pure Format Deserializer (`ThemeParser`)**: Streamlined parser dedicated purely to text (`.theme`) and binary (`.themebin`) formats and file loading.

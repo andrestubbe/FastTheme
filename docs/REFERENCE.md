@@ -38,7 +38,10 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled)`
 *   `public static native boolean setTitleBarColor(long hwnd, int r, int g, int b)`
 *   `public static native boolean setTitleBarTextColor(long hwnd, int r, int g, int b)`
+*   `public static boolean isNativeAvailable()`
+*   `public static native boolean setSystemBackdropType(long hwnd, int type)`
 *   `public static native boolean enableMica(long hwnd, boolean enabled)`
+
 *   `public static native boolean setCornerStyle(long hwnd, int style)`
 *   `public static native boolean setBorderlessShadow(long hwnd, boolean enabled)`
 *   `public static native boolean setOverlayDragHeight(long hwnd, int height)`

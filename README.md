@@ -1,6 +1,7 @@
-# FastTheme 0.1.4 [ALPHA-2026-08-24] — High-Performance Native Window Styling & Dynamic Theming for Java
+# FastTheme 0.1.5 [ALPHA-2026-09-26] — High-Performance Native Window Styling & Dynamic Theming for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.4-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.4)
+[![Status](https://img.shields.io/badge/status-0.1.5-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.5)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
@@ -213,7 +214,10 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | Sets the native title bar text/foreground color on Windows 11. |
 | `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | Sets the Win32 window background fill color. |
 | `FastTheme.setWindowTransparency(long hwnd, int alpha)` | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). |
+| `FastTheme.isNativeAvailable()` | Checks whether the native Windows styling DLL is loaded and functional. |
+| `FastTheme.setSystemBackdropType(long hwnd, int type)` | Sets native Windows 11 backdrop material (`BACKDROP_MICA`, `BACKDROP_ACRYLIC`, `BACKDROP_MICA_ALT`). |
 | `FastTheme.enableMica(long hwnd, boolean enabled)` | Enables Windows 11 native Mica backdrop material effect. |
+
 | `FastTheme.setCornerStyle(long hwnd, int style)` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). |
 | `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | Removes native title bar while preserving native OS drop shadow (Raycast-style). |
 | `FastTheme.setOverlayDragHeight(long hwnd, int height)` | Defines top invisible grab area (in pixels) for draggable borderless windows. |
@@ -263,7 +267,7 @@ Add the JitPack repository and the dependency to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.4</version>
+        <version>0.1.5</version>
     </dependency>
     <!-- Required Native JNI loader -->
     <dependency>
@@ -282,7 +286,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.4'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.5'
     // Required Native JNI loader
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
@@ -292,8 +296,9 @@ dependencies {
 
 Download the latest JAR directly to add it to your classpath:
 
-1. 📦 **[FastTheme-0.1.4.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.4/FastTheme-0.1.4.jar)** (The Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.5.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.5/FastTheme-0.1.5.jar)** (The Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
+
 
 ---
 

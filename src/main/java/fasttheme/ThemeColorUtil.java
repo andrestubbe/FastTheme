@@ -223,6 +223,9 @@ public final class ThemeColorUtil {
      * @return Optimal foreground color in packed 32-bit ARGB format.
      */
     public static int getContrastForeground(int bgArgb) {
-        return luminance(bgArgb) < 0.5 ? 0xFFFFFFFF : 0xFF111111;
+        double whiteContrast = contrastRatio(bgArgb, 0xFFFFFFFF);
+        double darkContrast = contrastRatio(bgArgb, 0xFF111111);
+        return whiteContrast >= darkContrast ? 0xFFFFFFFF : 0xFF111111;
     }
 }
+

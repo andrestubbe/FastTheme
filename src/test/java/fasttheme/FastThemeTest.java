@@ -120,4 +120,41 @@ public class FastThemeTest {
             FastTheme.removeListener(listener);
         }
     }
+
+    @Test
+    public void testV2BinarySelfDescribingAfterRegistryClear() {
+        ThemeData original = new ThemeData("PersistedTheme");
+        original.set("window.bg", 0xFF102030);
+        original.set("window.fg", 0xFFE0E0E0);
+        byte[] binary = original.toBinary();
+
+        // Clear registry to simulate loading in a fresh JVM session where slots were not yet known
+        ThemeKeys.clear();
+        assertEquals(0, ThemeKeys.count());
+
+        ThemeData restored = ThemeParser.parseBinary(binary);
+        assertEquals("PersistedTheme", restored.getName());
+        assertEquals(0xFF102030, restored.get("window.bg"));
+        assertEquals(0xFFE0E0E0, restored.get("window.fg"));
+        assertEquals(2, ThemeKeys.count());
+    }
+
+    @Test
+    public void testMultiHopAliasChaining() {
+        String themeText = """
+                THEME = MultiHopTest
+                primary = #FF0055
+                button.bg = @primary
+                button.hover = @button.bg
+                button.active = @button.hover
+                """;
+
+        ThemeData theme = ThemeParser.parseText(themeText);
+        int expected = ThemeColorUtil.parseColor("#FF0055");
+        assertEquals(expected, theme.get("primary"));
+        assertEquals(expected, theme.get("button.bg"));
+        assertEquals(expected, theme.get("button.hover"));
+        assertEquals(expected, theme.get("button.active"));
+    }
 }
+
