@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2026-09-27
+### Fixed
+- **Mica & Acrylic Background Frame Refresh**: Resolved white window body flashes and maximized inset borders by introducing native `BackdropSubclassProc` that continuously clears update rectangles with a transparent/DWM-permeable brush across initial display, resizing, and window maximizing.
+- **Transparent Titlebar Flow**: Integrated `DWMWA_CAPTION_COLOR = DWMWA_COLOR_NONE` and `DwmExtendFrameIntoClientArea` to allow Windows 11 Mica, Mica Alt, and Acrylic materials to flow seamlessly across both title bar and window client area.
+- **Standalone FastWindow Integration**: Updated all material demos (`MicaDemo`, `MicaAltDemo`, `AcrylicDemo`) to run on pure Win32 `FastWindow` contexts without AWT/Swing frame lockups.
+
 ## [0.1.5] - 2026-09-26
 ### Added
 - **Windows 11 System Backdrop Engine**: Added `setSystemBackdropType(long hwnd, int type)` with support for `BACKDROP_MICA`, `BACKDROP_ACRYLIC`, and `BACKDROP_MICA_ALT` via official DWM attribute 38 and frame extension.

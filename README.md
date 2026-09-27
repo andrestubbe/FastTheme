@@ -1,6 +1,6 @@
-# FastTheme 0.1.5 [ALPHA-2026-09-26] — High-Performance Native Window Styling & Dynamic Theming for Java
+# FastTheme 0.1.6 [ALPHA-2026-09-27] — High-Performance Native Window Styling & Dynamic Theming for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.5-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.5)
+[![Status](https://img.shields.io/badge/status-0.1.6-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.6)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
@@ -274,7 +274,7 @@ Add the JitPack repository and dependencies to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.5</version>
+        <version>0.1.6</version>
     </dependency>
     <!-- Required Native JNI loader -->
     <dependency>
@@ -305,7 +305,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.5'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.6'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
     implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
     implementation 'com.github.andrestubbe:FastBinary:0.1.1'
@@ -316,7 +316,7 @@ dependencies {
 
 Download the pre-built JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.5.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.5/FastTheme-0.1.5.jar)** (Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.6.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.6/FastTheme-0.1.6.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
 3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
 4. 📦 **[FastBinary-0.1.1.jar](https://github.com/andrestubbe/FastBinary/releases/download/0.1.1/FastBinary-0.1.1.jar)** (Binary Bit-Packing Engine)
