@@ -92,11 +92,24 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Copy DLL to resources (so Maven can bundle it)
+:: Copy DLL to all required target locations
 echo.
-echo Copying DLL to resources...
-if not exist src\main\resources\native mkdir src\main\resources\native
-copy /Y build\fasttheme.dll src\main\resources\native\fasttheme.dll
+echo Copying DLL to release, resources, and .fastcore cache...
+if not exist "release" mkdir release
+if not exist "src\main\resources\native" mkdir "src\main\resources\native"
+if not exist "src\main\resources\win32-x86-64" mkdir "src\main\resources\win32-x86-64"
+if not exist "target\classes\native" mkdir "target\classes\native"
+set "FASTCORE_DIR=%USERPROFILE%\.fastcore\native\fasttheme"
+if not exist "!FASTCORE_DIR!" mkdir "!FASTCORE_DIR!"
+
+copy /Y build\fasttheme.dll release\fasttheme.dll >nul
+copy /Y build\fasttheme.dll src\main\resources\fasttheme.dll >nul
+copy /Y build\fasttheme.dll src\main\resources\native\fasttheme.dll >nul
+copy /Y build\fasttheme.dll src\main\resources\win32-x86-64\fasttheme.dll >nul
+copy /Y build\fasttheme.dll target\classes\native\fasttheme.dll >nul 2>&1
+copy /Y build\fasttheme.dll target\classes\fasttheme.dll >nul 2>&1
+copy /Y build\fasttheme.dll "!FASTCORE_DIR!\fasttheme.dll" >nul
+powershell -NoProfile -Command "Unblock-File -Path '!FASTCORE_DIR!\fasttheme.dll', 'release\fasttheme.dll', 'src\main\resources\native\fasttheme.dll' -ErrorAction SilentlyContinue" >nul 2>&1
 
 :: Cleanup temporary native artifacts
 del /Q build\*.obj
@@ -120,7 +133,7 @@ if %errorlevel% neq 0 (
 :: Success
 echo.
 echo =====================================================
-echo BUILD SUCCESSFUL! (v0.1.2)
+echo BUILD SUCCESSFUL! (v0.1.6)
 echo =====================================================
 echo.
 echo FastTheme JNI Bridge created with:
@@ -128,7 +141,7 @@ echo - Native Window Styling (Transparency, Colors)
 echo - Windows 11 Immersive Dark Mode support
 echo - Native HWND extraction via JAWT
 echo.
-echo Standard JAR: target/fasttheme-0.1.2.jar
-echo Native DLL  : src/main/resources/native/fasttheme.dll
+echo Standard JAR: target/fasttheme-0.1.6.jar
+echo Native DLL  : release/fasttheme.dll
 echo.
 pause
