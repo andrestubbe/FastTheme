@@ -1,7 +1,6 @@
 # FastTheme 0.1.6 [ALPHA-2026-09-27] — High-Performance Native Window Styling & Dynamic Theming for Java
 
 [![Status](https://img.shields.io/badge/status-0.1.6-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.6)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
