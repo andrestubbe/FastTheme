@@ -13,18 +13,16 @@ public class MicaAltDemo {
             long hwnd = window.getHWND();
             System.out.println("[MicaAltDemo] Window created successfully, HWND = " + hwnd);
 
+            // Display window first so DWM surface exists
+            window.setVisible(true);
+
             if (hwnd != 0) {
-                // Apply Windows 11 Dark Mode, Titlebar, and matching Body Background
+                // Let Windows 11 Mica Alt material flow across both titlebar and body
                 FastTheme.setTitleBarDarkMode(hwnd, true);
-                FastTheme.setTitleBarColor(hwnd, 20, 20, 20);
-                FastTheme.setTitleBarTextColor(hwnd, 240, 240, 240);
-                FastTheme.setWindowBackgroundColor(hwnd, 20, 20, 20);
                 FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA_ALT);
             }
 
-            // Display window seamlessly
-            window.setVisible(true);
             System.out.println("[MicaAltDemo] Window is now visible. Close window to exit.");
 
             long lastFpsTime = System.nanoTime();

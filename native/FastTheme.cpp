@@ -42,6 +42,18 @@
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
 #endif
 
+#ifndef DWMWA_CAPTION_COLOR
+#define DWMWA_CAPTION_COLOR 35
+#endif
+
+#ifndef DWMWA_TEXT_COLOR
+#define DWMWA_TEXT_COLOR 36
+#endif
+
+#ifndef DWMWA_COLOR_NONE
+#define DWMWA_COLOR_NONE 0xFFFFFFFE
+#endif
+
 #ifndef DWMSBT_AUTO
 #define DWMSBT_AUTO 0
 #define DWMSBT_NONE 1
@@ -214,6 +226,50 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv*
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+// Subclass window procedure specifically for windows using DWM system backdrops (Mica/Acrylic)
+static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_BackdropOldProc");
+    if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
+
+    switch (msg) {
+        case WM_ERASEBKGND:
+            return 1;
+
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            if (hdc) {
+                HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
+                FillRect(hdc, &ps.rcPaint, blackBrush);
+            }
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+
+        case WM_SIZE: {
+            LRESULT res = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+            // On size/maximize, immediately fill client rect with black brush so DWM Mica displays
+            HDC hdc = GetDC(hwnd);
+            if (hdc) {
+                RECT rc;
+                GetClientRect(hwnd, &rc);
+                HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
+                FillRect(hdc, &rc, blackBrush);
+                ReleaseDC(hwnd, hdc);
+            }
+            RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
+            return res;
+        }
+
+        case WM_NCDESTROY: {
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
+            RemovePropW(hwnd, L"FastTheme_BackdropOldProc");
+            break;
+        }
+    }
+    return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+}
+
 /**
  * @brief Sets the system backdrop type on Windows 11 (Build 22621+).
  * 
@@ -237,11 +293,42 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setSystemBackdropType(JNIEnv
     }
 
     if (SUCCEEDED(hr) && type != DWMSBT_NONE) {
+        // Set transparent caption color so title bar seamlessly displays Mica material
+        COLORREF transparentColor = DWMWA_COLOR_NONE;
+        DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &transparentColor, sizeof(transparentColor));
+
+        // Extend DWM frame into full client area
         MARGINS margins = { -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+        // Reset any opaque GDI window class background brush to null/stock so Mica is not blocked
+        SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(NULL_BRUSH));
+
+        // Subclass window to intercept WM_PAINT and continuously clear new areas (e.g. on maximize) with black brush
+        if (!GetPropW(hwnd, L"FastTheme_BackdropOldProc")) {
+            WNDPROC oldProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)BackdropSubclassProc);
+            SetPropW(hwnd, L"FastTheme_BackdropOldProc", (HANDLE)oldProc);
+        }
+
+        // Invalidate and clear client rect immediately
+        HDC hdc = GetDC(hwnd);
+        if (hdc) {
+            RECT rc;
+            GetClientRect(hwnd, &rc);
+            HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
+            FillRect(hdc, &rc, blackBrush);
+            ReleaseDC(hwnd, hdc);
+        }
+    } else if (type == DWMSBT_NONE) {
+        WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_BackdropOldProc");
+        if (oldProc) {
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
+            RemovePropW(hwnd, L"FastTheme_BackdropOldProc");
+        }
     }
 
     SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
