@@ -249,11 +249,6 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/src/main/java/fasttheme/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
 | **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Formal OpenJDK JMH zero-allocation slot array access, dynamic lookups, and parser throughput benchmarks. |
 
-> [!IMPORTANT]
-> **Standardized File Naming**:
-> - The primary interactive demo file and class must **always** be named `Demo.java` (executed via `run-demo.bat`).
-> - The JMH microbenchmark harness file and class must **always** be named `Benchmark.java` (located under `examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java` and executed via `run-benchmark.bat`).
-
 ---
 
 ## Installation
