@@ -2,6 +2,15 @@
 
 ## Milestone Status
 
+### Modern Photos-Style Fluent Chrome & Dynamic Hit-Testing (v0.1.7)
+**Status:** Released
+- [x] Custom non-client title bar height configuration (`setTitleBarHeight`).
+- [x] Dynamic interactive control exclusion zones in title bar (`addTitleBarControlRect`, `clearTitleBarControlRects`).
+- [x] Native title bar button delegation/toggle (`setNativeTitleBarButtonsEnabled`).
+- [x] Non-client frame update trigger (`forceFrameUpdate`).
+- [x] Symmetrical `examples/Demo` and `examples/Benchmark` layout.
+- [x] Windows Photos-style Fluent chrome showcase (`Demo3.java` / `run-demo-fluent.bat`).
+
 ### Universal Color-Matrix & FastFileFormat (v0.1.3)
 **Status:** Released
 - [x] Contiguous primitive array in-memory storage (`ThemeData`).
@@ -19,7 +28,7 @@
 ### Mica & Acrylic Material Support (v0.1.0)
 **Status:** Released
 - [x] Implement `DWM_SYSTEMBACKDROP_TYPE` enumerations.
-- [x] Add support for `DWMSBT_MAINWINDOW` (Mica) and `DWMSBT_TRANSIENTWINDOW` (Acrylic).
+- [x] Add support for `DWMSBT_MAINWINDOW` (Mica), `DWMSBT_TRANSIENTWINDOW` (Acrylic), and `DWMSBT_TABBEDWINDOW` (Mica Alt).
 
 ### Premium Borderless Overlays (v0.1.0)
 **Status:** Released
@@ -35,6 +44,7 @@
 - [ ] Automatically toggle active `ThemeData` between default dark and light presets when Windows system mode switches.
 
 ### Extended Non-Client Area (NCA) Controls
-**Status:** Backlog
+**Status:** In Progress
+- [x] Custom titlebar height metrics and control exclusion hit-testing.
 - [ ] Native methods to hide/show the window icon.
-- [ ] Support for centering title text or custom titlebar metrics.
+- [ ] Support for centering title text in native non-client area.
