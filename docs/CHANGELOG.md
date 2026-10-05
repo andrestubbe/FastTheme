@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2026-10-05
+### Added
+- **Modern Windows 11 Photos-Style Chrome (Demo 3)**: Added full custom title bar support (`Demo3.java`) with high-DPI scaled interactive caption buttons (Minimize, Maximize/Restore, Close), native Mica backdrop, and drop shadow.
+- **Custom Interactive Title Bar Height**: Added `setTitleBarHeight(long hwnd, int height)` allowing dynamic window drag areas without losing native window resizing borders.
+- **Hit-Test Exclusion Control Rectangles**: Added `addTitleBarControlRect(long hwnd, int x, int y, int w, int h)` and `clearTitleBarControlRects(long hwnd)` enabling interactive Swing controls (buttons, tabs, search inputs) to receive clicks and hovers inside native drag caption zones.
+- **Native Caption Button Delegation**: Added `setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth)` allowing Windows DWM to manage caption buttons with customizable button widths.
+- **DWM Frame Re-evaluation**: Added `forceFrameUpdate(long hwnd)` to immediately trigger non-client frame recalculation on visible windows.
+
 ## [0.1.6] - 2026-09-27
 ### Fixed
 - **Mica & Acrylic Background Frame Refresh**: Resolved white window body flashes and maximized inset borders by introducing native `BackdropSubclassProc` that continuously clears update rectangles with a transparent/DWM-permeable brush across initial display, resizing, and window maximizing.

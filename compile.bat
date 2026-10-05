@@ -133,7 +133,7 @@ if %errorlevel% neq 0 (
 :: Success
 echo.
 echo =====================================================
-echo BUILD SUCCESSFUL! (v0.1.6)
+echo BUILD SUCCESSFUL! (v0.1.7)
 echo =====================================================
 echo.
 echo FastTheme JNI Bridge created with:
@@ -141,7 +141,7 @@ echo - Native Window Styling (Transparency, Colors)
 echo - Windows 11 Immersive Dark Mode support
 echo - Native HWND extraction via JAWT
 echo.
-echo Standard JAR: target/fasttheme-0.1.6.jar
+echo Standard JAR: target/FastTheme-0.1.7.jar
 echo Native DLL  : release/fasttheme.dll
 echo.
 pause

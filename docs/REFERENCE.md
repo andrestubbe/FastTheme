@@ -1,6 +1,6 @@
 # FastTheme API Reference
 
-This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.6).
+This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.7).
 
 ---
 
@@ -41,10 +41,15 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static boolean isNativeAvailable()`
 *   `public static native boolean setSystemBackdropType(long hwnd, int type)`
 *   `public static native boolean enableMica(long hwnd, boolean enabled)`
-
 *   `public static native boolean setCornerStyle(long hwnd, int style)`
 *   `public static native boolean setBorderlessShadow(long hwnd, boolean enabled)`
 *   `public static native boolean setOverlayDragHeight(long hwnd, int height)`
+*   `public static native boolean setTitleBarHeight(long hwnd, int height)`
+*   `public static native void addTitleBarControlRect(long hwnd, int x, int y, int w, int h)`
+*   `public static native void clearTitleBarControlRects(long hwnd)`
+*   `public static native boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth)`
+*   `public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled)`
+*   `public static native void forceFrameUpdate(long hwnd)`
 *   `public static native boolean isSystemDarkMode()`
 *   `public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize)`
 *   `public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop)`

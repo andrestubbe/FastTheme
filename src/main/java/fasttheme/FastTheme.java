@@ -202,6 +202,13 @@ public class FastTheme {
      */
     public static native boolean enableMica(long hwnd, boolean enabled);
 
+    /**
+     * Forces a complete DWM frame re-evaluation and redraw on a visible window.
+     *
+     * @param hwnd 64-bit native window handle.
+     */
+    public static native void forceFrameUpdate(long hwnd);
+
     // =========================================================================
     // GETTERS
     // =========================================================================
@@ -412,4 +419,55 @@ public class FastTheme {
      * @return True if operation succeeded.
      */
     public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop);
+
+    /**
+     * Sets the height of the interactive title bar zone.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param height Height in physical/client pixels (e.g. 94).
+     * @return True if operation succeeded.
+     */
+    public static native boolean setTitleBarHeight(long hwnd, int height);
+
+    /**
+     * Registers an interactive control rectangle within the title bar.
+     * Clicks inside this rectangle are dispatched to the client UI (HTCLIENT) instead of dragging (HTCAPTION).
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param x X-coordinate in client space (pixels).
+     * @param y Y-coordinate in client space (pixels).
+     * @param w Width in pixels.
+     * @param h Height in pixels.
+     */
+    public static native void addTitleBarControlRect(long hwnd, int x, int y, int w, int h);
+
+    /**
+     * Clears all registered title bar control rectangles for this window.
+     *
+     * @param hwnd 64-bit native window handle.
+     */
+    public static native void clearTitleBarControlRects(long hwnd);
+
+    /**
+     * Enables or disables delegation of top-right caption area to Windows native system buttons
+     * (Minimize = HTMINBUTTON, Maximize = HTMAXBUTTON, Close = HTCLOSE).
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param enabled True to let Windows handle system buttons.
+     * @param buttonWidth Width in pixels for each button (e.g. 96 for Windows 11 Photos-style).
+     * @return True if operation succeeded.
+     */
+    public static native boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth);
+
+    /**
+     * Enables or disables delegation of top-right caption area to Windows native system buttons
+     * with the default button width of 96px.
+     *
+     * @param hwnd 64-bit native window handle.
+     * @param enabled True to let Windows handle system buttons.
+     * @return True if operation succeeded.
+     */
+    public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled) {
+        return setNativeTitleBarButtonsEnabled(hwnd, enabled, 96);
+    }
 }

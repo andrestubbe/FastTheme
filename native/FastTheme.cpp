@@ -17,8 +17,12 @@
 
 #include <jni.h>
 #include <windows.h>
+#include <windowsx.h>
 #include <dwmapi.h>
 #include <jawt_md.h>
+#include <vector>
+#include <unordered_map>
+#include <mutex>
 
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "jawt.lib")
@@ -226,50 +230,6 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv*
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
-// Subclass window procedure specifically for windows using DWM system backdrops (Mica/Acrylic)
-static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_BackdropOldProc");
-    if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
-
-    switch (msg) {
-        case WM_ERASEBKGND:
-            return 1;
-
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-            if (hdc) {
-                HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
-                FillRect(hdc, &ps.rcPaint, blackBrush);
-            }
-            EndPaint(hwnd, &ps);
-            return 0;
-        }
-
-        case WM_SIZE: {
-            LRESULT res = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
-            // On size/maximize, immediately fill client rect with black brush so DWM Mica displays
-            HDC hdc = GetDC(hwnd);
-            if (hdc) {
-                RECT rc;
-                GetClientRect(hwnd, &rc);
-                HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
-                FillRect(hdc, &rc, blackBrush);
-                ReleaseDC(hwnd, hdc);
-            }
-            RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
-            return res;
-        }
-
-        case WM_NCDESTROY: {
-            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
-            RemovePropW(hwnd, L"FastTheme_BackdropOldProc");
-            break;
-        }
-    }
-    return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
-}
-
 /**
  * @brief Sets the system backdrop type on Windows 11 (Build 22621+).
  * 
@@ -303,33 +263,30 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setSystemBackdropType(JNIEnv
 
         // Reset any opaque GDI window class background brush to null/stock so Mica is not blocked
         SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(NULL_BRUSH));
-
-        // Subclass window to intercept WM_PAINT and continuously clear new areas (e.g. on maximize) with black brush
-        if (!GetPropW(hwnd, L"FastTheme_BackdropOldProc")) {
-            WNDPROC oldProc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)BackdropSubclassProc);
-            SetPropW(hwnd, L"FastTheme_BackdropOldProc", (HANDLE)oldProc);
-        }
-
-        // Invalidate and clear client rect immediately
-        HDC hdc = GetDC(hwnd);
-        if (hdc) {
-            RECT rc;
-            GetClientRect(hwnd, &rc);
-            HBRUSH blackBrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
-            FillRect(hdc, &rc, blackBrush);
-            ReleaseDC(hwnd, hdc);
-        }
-    } else if (type == DWMSBT_NONE) {
-        WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_BackdropOldProc");
-        if (oldProc) {
-            SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
-            RemovePropW(hwnd, L"FastTheme_BackdropOldProc");
-        }
     }
 
     SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    DwmFlush();
     RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
+}
+
+/**
+ * @brief Forces a complete DWM frame re-evaluation and redraw on a visible window.
+ */
+JNIEXPORT void JNICALL Java_fasttheme_FastTheme_forceFrameUpdate(JNIEnv* env, jclass clazz, jlong hwndLong) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return;
+
+    MARGINS margins = { -1, -1, -1, -1 };
+    DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+    SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+    DwmFlush();
+    RedrawWindow(hwnd, NULL, NULL,
+                 RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 /**
@@ -350,6 +307,17 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setCornerStyle(JNIEnv* env, 
     return SUCCEEDED(hr) ? JNI_TRUE : JNI_FALSE;
 }
 
+// Structure for TitleBar Hit-Test Layout
+struct TitleBarLayout {
+    int height = 6;
+    bool nativeButtonsEnabled = false;
+    int buttonWidth = 96;
+    std::vector<RECT> controlRects;
+};
+
+static std::unordered_map<HWND, TitleBarLayout> g_titleBarLayouts;
+static std::mutex g_titleBarMutex;
+
 /**
  * @brief Subclass procedure to handle premium overlay behavior.
  */
@@ -358,10 +326,23 @@ LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
     if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
 
     switch (msg) {
-        case WM_NCCALCSIZE:
-            // Returning 0 removes the standard window chrome (title bar) 
-            // and the 12px top margin while keeping the frame for the shadow.
+        case WM_NCCALCSIZE: {
+            if (wParam) {
+                // If maximized, adjust the client rect to avoid extending onto other monitors
+                if (IsZoomed(hwnd)) {
+                    LPNCCALCSIZE_PARAMS pParams = (LPNCCALCSIZE_PARAMS)lParam;
+                    HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+                    if (hMonitor) {
+                        MONITORINFO mi = { sizeof(mi) };
+                        if (GetMonitorInfo(hMonitor, &mi)) {
+                            pParams->rgrc[0] = mi.rcWork;
+                        }
+                    }
+                }
+                return 0;
+            }
             return 0;
+        }
 
         case WM_NCACTIVATE:
             // Prevents Windows from drawing the active/inactive title bar background
@@ -376,27 +357,87 @@ LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
             return 1;
 
         case WM_NCHITTEST: {
-            // Get the custom drag height (default to 6 if not set)
-            int dragHeight = (int)(INT_PTR)GetPropW(hwnd, L"FastTheme_DragHeight");
-            if (dragHeight == 0) dragHeight = 6; 
+            // 1. Calculate resize borders and corners manually if window is resizable and not zoomed
+            if (!IsZoomed(hwnd)) {
+                POINT ptScreen = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+                RECT rcWin;
+                GetWindowRect(hwnd, &rcWin);
 
-            POINT pt = { (short)LOWORD(lParam), (short)HIWORD(lParam) };
+                // Border thickness in screen pixels (standard Windows resize border: 8px)
+                int border = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+                if (border < 8) border = 8;
+
+                bool onLeft   = (ptScreen.x >= rcWin.left && ptScreen.x < rcWin.left + border);
+                bool onRight  = (ptScreen.x >= rcWin.right - border && ptScreen.x < rcWin.right);
+                bool onTop    = (ptScreen.y >= rcWin.top && ptScreen.y < rcWin.top + border);
+                bool onBottom = (ptScreen.y >= rcWin.bottom - border && ptScreen.y < rcWin.bottom);
+
+                if (onTop && onLeft)     return HTTOPLEFT;
+                if (onTop && onRight)    return HTTOPRIGHT;
+                if (onBottom && onLeft)  return HTBOTTOMLEFT;
+                if (onBottom && onRight) return HTBOTTOMRIGHT;
+                if (onLeft)              return HTLEFT;
+                if (onRight)             return HTRIGHT;
+                if (onTop)               return HTTOP;
+                if (onBottom)            return HTBOTTOM;
+            }
+
+            // 2. Client area / Caption handling in title bar zone
+            POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
             ScreenToClient(hwnd, &pt);
 
-            // Drag Zone: Adjustable height
-            if (pt.y >= 0 && pt.y < dragHeight) return HTCAPTION;
+            int titleBarHeight = (int)(INT_PTR)GetPropW(hwnd, L"FastTheme_DragHeight");
+            if (titleBarHeight <= 0) titleBarHeight = 6;
 
-            // Prevent all resizing by treating borders as client area
-            LRESULT hit = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
-            if (hit >= HTLEFT && hit <= HTBOTTOMRIGHT) return HTCLIENT;
-            
-            return hit;
+            std::lock_guard<std::mutex> lock(g_titleBarMutex);
+            auto it = g_titleBarLayouts.find(hwnd);
+            if (it != g_titleBarLayouts.end() && it->second.height > 0) {
+                titleBarHeight = it->second.height;
+            }
+
+            if (pt.y >= 0 && pt.y < titleBarHeight) {
+                // 2a. Native System Caption Buttons delegation (Top-Right):
+                // If nativeButtonsEnabled is set, delegate top-right areas to Windows:
+                // [Close: right - btnW to right], [Maximize: right - 2*btnW to right - btnW], [Minimize: right - 3*btnW to right - 2*btnW]
+                if (it != g_titleBarLayouts.end() && it->second.nativeButtonsEnabled) {
+                    RECT clientRc;
+                    GetClientRect(hwnd, &clientRc);
+                    int btnW = it->second.buttonWidth > 0 ? it->second.buttonWidth : 96;
+                    int right = clientRc.right;
+
+                    if (pt.x >= right - btnW && pt.x < right) {
+                        return HTCLOSE;
+                    } else if (pt.x >= right - 2 * btnW && pt.x < right - btnW) {
+                        return HTMAXBUTTON;
+                    } else if (pt.x >= right - 3 * btnW && pt.x < right - 2 * btnW) {
+                        return HTMINBUTTON;
+                    }
+                }
+
+                // 2b. Check if cursor is over any registered interactive control rect
+                if (it != g_titleBarLayouts.end()) {
+                    for (const auto& rc : it->second.controlRects) {
+                        if (pt.x >= rc.left && pt.x < rc.right &&
+                            pt.y >= rc.top && pt.y < rc.bottom) {
+                            return HTCLIENT; // Interactive UI element: dispatch clicks to app
+                        }
+                    }
+                }
+                // Free caption area: enable window dragging & snapping
+                return HTCAPTION;
+            }
+
+            return HTCLIENT;
         }
 
         case WM_NCDESTROY: {
             SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)oldProc);
             RemovePropW(hwnd, L"FastTheme_OldProc");
             RemovePropW(hwnd, L"FastTheme_DragHeight");
+            {
+                std::lock_guard<std::mutex> lock(g_titleBarMutex);
+                g_titleBarLayouts.erase(hwnd);
+            }
             HBRUSH hBrush = (HBRUSH)GetPropW(hwnd, L"FastTheme_CustomBgBrush");
             if (hBrush != NULL) {
                 DeleteObject(hBrush);
@@ -421,18 +462,16 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* 
         BOOL darkMode = TRUE;
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
 
-        // 1. Force Borderless: Remove ALL overlapped window chrome
+        // 1. Force Modern Borderless: Keep WS_THICKFRAME, WS_MINIMIZEBOX, WS_MAXIMIZEBOX
         LONG style = GetWindowLong(hwnd, GWL_STYLE);
-        style &= ~WS_OVERLAPPEDWINDOW; // Removes Caption, Menu, Border, Thickframe, etc.
-        style |= WS_POPUP | WS_THICKFRAME; // Restore only Popup and Thickframe (for shadow)
+        style &= ~WS_CAPTION;
+        style &= ~WS_SYSMENU;
+        style |= WS_POPUP | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
         SetWindowLong(hwnd, GWL_STYLE, style);
 
-        LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-        exStyle |= WS_EX_TOOLWINDOW; 
-        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
+        // Keep normal app window style (do NOT add WS_EX_TOOLWINDOW)
 
         // 2. Neutralize the Window Class Brush to prevent the white flash
-        // Using BLACK_BRUSH ensures that if there's a flicker, it's dark
         SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)GetStockObject(BLACK_BRUSH));
 
         // 3. Install Subclass for NCCALCSIZE, NCACTIVATE, NCPAINT, ERASEBKGND and NCHITTEST
@@ -441,7 +480,7 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* 
             SetPropW(hwnd, L"FastTheme_OldProc", (HANDLE)oldProc);
         }
 
-        // 3. Extend frame for shadow (-1 = full window glass/shadow)
+        // 4. Extend frame for shadow (-1 = full window glass/shadow)
         MARGINS margins = { -1, -1, -1, -1 };
         DwmExtendFrameIntoClientArea(hwnd, &margins);
     } else {
@@ -451,12 +490,8 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setBorderlessShadow(JNIEnv* 
             RemovePropW(hwnd, L"FastTheme_OldProc");
         }
         LONG style = GetWindowLong(hwnd, GWL_STYLE);
-        style |= WS_CAPTION | WS_SYSMENU;
+        style |= WS_CAPTION | WS_SYSMENU | WS_OVERLAPPEDWINDOW;
         SetWindowLong(hwnd, GWL_STYLE, style);
-
-        LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-        exStyle &= ~WS_EX_TOOLWINDOW;
-        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle);
     }
 
     SetWindowPos(hwnd, NULL, 0, 0, 0, 0, 
@@ -472,6 +507,60 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setOverlayDragHeight(JNIEnv*
     HWND hwnd = (HWND)hwndLong;
     if (!IsWindow(hwnd)) return JNI_FALSE;
     SetPropW(hwnd, L"FastTheme_DragHeight", (HANDLE)(INT_PTR)height);
+    {
+        std::lock_guard<std::mutex> lock(g_titleBarMutex);
+        g_titleBarLayouts[hwnd].height = height;
+    }
+    return JNI_TRUE;
+}
+
+/**
+ * @brief Sets the height of the interactive title bar zone.
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarHeight(JNIEnv* env, jclass clazz, jlong hwndLong, jint height) {
+    return Java_fasttheme_FastTheme_setOverlayDragHeight(env, clazz, hwndLong, height);
+}
+
+/**
+ * @brief Registers an exclusion rectangle for interactive UI controls in the title bar.
+ */
+JNIEXPORT void JNICALL Java_fasttheme_FastTheme_addTitleBarControlRect(JNIEnv* env, jclass clazz, jlong hwndLong, jint x, jint y, jint w, jint h) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return;
+    RECT rc = { x, y, x + w, y + h };
+    std::lock_guard<std::mutex> lock(g_titleBarMutex);
+    g_titleBarLayouts[hwnd].controlRects.push_back(rc);
+}
+
+/**
+ * @brief Clears all registered exclusion rectangles for a window.
+ */
+JNIEXPORT void JNICALL Java_fasttheme_FastTheme_clearTitleBarControlRects(JNIEnv* env, jclass clazz, jlong hwndLong) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return;
+    std::lock_guard<std::mutex> lock(g_titleBarMutex);
+    auto it = g_titleBarLayouts.find(hwnd);
+    if (it != g_titleBarLayouts.end()) {
+        it->second.controlRects.clear();
+    }
+}
+
+/**
+ * @brief Enables or disables delegation of top-right caption area to Windows native system buttons.
+ *
+ * @param hwnd 64-bit native window handle.
+ * @param enabled True to let Windows handle Minimize, Maximize, and Close.
+ * @param buttonWidth Width per button in pixels (e.g. 96 for modern Windows 11 Photos-style).
+ */
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setNativeTitleBarButtonsEnabled(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean enabled, jint buttonWidth) {
+    HWND hwnd = (HWND)hwndLong;
+    if (!IsWindow(hwnd)) return JNI_FALSE;
+    std::lock_guard<std::mutex> lock(g_titleBarMutex);
+    auto& layout = g_titleBarLayouts[hwnd];
+    layout.nativeButtonsEnabled = (enabled == JNI_TRUE);
+    if (buttonWidth > 0) {
+        layout.buttonWidth = buttonWidth;
+    }
     return JNI_TRUE;
 }
 

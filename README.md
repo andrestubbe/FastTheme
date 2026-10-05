@@ -1,6 +1,6 @@
-# FastTheme 0.1.6 [ALPHA-2026-09-27] — High-Performance Native Window Styling & Dynamic Theming for Java
+# FastTheme 0.1.7 [ALPHA-2026-10-05] — High-Performance Native Window Styling & Dynamic Theming for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.6-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.6)
+[![Status](https://img.shields.io/badge/status-0.1.7-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.7)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
@@ -221,6 +221,11 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.setCornerStyle(long hwnd, int style)` | `boolean` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | `boolean` | Removes native title bar while preserving native OS drop shadow (Raycast-style). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setOverlayDragHeight(long hwnd, int height)` | `boolean` | Defines top invisible grab area (in pixels) for draggable borderless windows. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarHeight(long hwnd, int height)` | `boolean` | Sets custom interactive title bar height (in pixels) for Photos-style modern chrome. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.addTitleBarControlRect(hwnd, x, y, w, h)` | `void` | Registers an interactive exclusion rect in the title bar (clicks route to UI instead of dragging). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.clearTitleBarControlRects(long hwnd)` | `void` | Clears all registered title bar control exclusion zones for the window. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setNativeTitleBarButtonsEnabled(hwnd, bool, width)` | `boolean` | Delegates top-right caption area to Windows native system buttons (Minimize, Maximize, Close). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.forceFrameUpdate(long hwnd)` | `void` | Forces immediate DWM non-client frame re-evaluation and redraw on visible windows. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | `boolean` | Toggles native minimize and maximize buttons in the window title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | `boolean` | Toggles native Win32 window topmost z-order. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 
@@ -244,6 +249,7 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 |:---|:---|:---|:---|
 | **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
 | **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
+| **Windows 11 Photos-Style Chrome** | [Demo3.java](examples/src/main/java/fasttheme/Demo3.java) | `run-demo3.bat` | 94px custom interactive title bar, full native resizing, hit-test exclusion zones, and Mica backdrop. |
 | **Windows 11 Mica Material** | [MicaDemo.java](examples/src/main/java/fasttheme/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
 | **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/src/main/java/fasttheme/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
 | **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/src/main/java/fasttheme/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
@@ -272,7 +278,7 @@ Add the JitPack repository and dependencies to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.6</version>
+        <version>0.1.7</version>
     </dependency>
     <!-- Required Native JNI loader -->
     <dependency>
@@ -303,7 +309,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.6'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.7'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
     implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
     implementation 'com.github.andrestubbe:FastBinary:0.1.1'
@@ -314,7 +320,7 @@ dependencies {
 
 Download the pre-built JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.6.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.6/FastTheme-0.1.6.jar)** (Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.7.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.7/FastTheme-0.1.7.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
 3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
 4. 📦 **[FastBinary-0.1.1.jar](https://github.com/andrestubbe/FastBinary/releases/download/0.1.1/FastBinary-0.1.1.jar)** (Binary Bit-Packing Engine)
