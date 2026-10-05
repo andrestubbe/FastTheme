@@ -1,4 +1,10 @@
-package fasttheme;
+package fasttheme.demo;
+
+import fasttheme.FastTheme;
+import fasttheme.ThemeKeys;
+import fasttheme.ThemeData;
+import fasttheme.ThemeParser;
+import fasttheme.ThemeColorUtil;
 
 import fastwindow.FastNativeWindow;
 import fastwindow.FastWindow;

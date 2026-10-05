@@ -247,12 +247,12 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 | Case | Java Example | Launcher | Description |
 |:---|:---|:---|:---|
-| **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/src/main/java/fasttheme/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
-| **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/src/main/java/fasttheme/Demo2.java) | `run-demo2.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
-| **Windows 11 Photos-Style Chrome** | [Demo3.java](examples/src/main/java/fasttheme/Demo3.java) | `run-demo3.bat` | 94px custom interactive title bar, full native resizing, hit-test exclusion zones, and Mica backdrop. |
-| **Windows 11 Mica Material** | [MicaDemo.java](examples/src/main/java/fasttheme/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
-| **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/src/main/java/fasttheme/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
-| **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/src/main/java/fasttheme/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
+| **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/Demo/src/main/java/fasttheme/demo/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
+| **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/Demo/src/main/java/fasttheme/demo/Demo2.java) | `run-demo-overlay.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
+| **Windows 11 Fluent Chrome** | [Demo3.java](examples/Demo/src/main/java/fasttheme/demo/Demo3.java) | `run-demo-fluent.bat` | 94px custom interactive title bar, full native resizing, hit-test exclusion zones, and Mica backdrop. |
+| **Windows 11 Mica Material** | [MicaDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
+| **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/Demo/src/main/java/fasttheme/demo/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
+| **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
 | **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Formal OpenJDK JMH zero-allocation slot array access, dynamic lookups, and parser throughput benchmarks. |
 
 ---

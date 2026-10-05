@@ -1,4 +1,10 @@
-package fasttheme;
+package fasttheme.demo;
+
+import fasttheme.FastTheme;
+import fasttheme.ThemeKeys;
+import fasttheme.ThemeData;
+import fasttheme.ThemeParser;
+import fasttheme.ThemeColorUtil;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
