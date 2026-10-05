@@ -255,6 +255,10 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
 | **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Formal OpenJDK JMH zero-allocation slot array access, dynamic lookups, and parser throughput benchmarks. |
 
+> [!NOTE]
+> **Desktop DPI Scaling (> 100%)**:
+> The showcase demos currently render at native 100% baseline pixel dimensions and do not yet include integrated automated scaling. If your Windows display scale is higher than 100% (e.g. 125%, 150%, 200% on 4K or Surface monitors), windows and UI elements will appear smaller than expected. Use **[FastDisplay](https://github.com/andrestubbe/FastDisplay)** to query the active monitor's exact DPI factor and scale window bounds accordingly.
+
 ---
 
 ## Installation
