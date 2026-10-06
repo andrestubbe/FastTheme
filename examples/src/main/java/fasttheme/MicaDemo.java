@@ -15,15 +15,15 @@ public class MicaDemo {
             long hwnd = window.getHWND();
             System.out.println("[MicaDemo] Window created successfully, HWND = " + hwnd);
 
-            // Display window first so DWM surface exists
-            window.setVisible(true);
-
             if (hwnd != 0) {
-                // Let Windows 11 Mica material flow across both titlebar and body
+                // Let Windows 11 Mica material flow across both titlebar and body before displaying
                 FastTheme.setTitleBarDarkMode(hwnd, true);
                 FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA);
             }
+
+            // Display window after DWM backdrop and styling are configured
+            window.setVisible(true);
 
             System.out.println("[MicaDemo] Window is now visible. Close window to exit.");
 
