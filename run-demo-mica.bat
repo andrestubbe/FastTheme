@@ -10,9 +10,6 @@ echo.
 echo Launching: Windows 11 Mica Material Demo (ESC to close)...
 echo.
 
-if not exist "build\fasttheme.dll" (
-    call build-dll.bat > nul 2>&1
-)
 
 cd examples\Demo
 call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.MicaDemo" -Djava.library.path="..\..\build"

@@ -19,15 +19,15 @@ public class MicaAltDemo {
             long hwnd = window.getHWND();
             System.out.println("[MicaAltDemo] Window created successfully, HWND = " + hwnd);
 
-            // Display window first so DWM surface exists
-            window.setVisible(true);
-
             if (hwnd != 0) {
                 // Let Windows 11 Mica Alt material flow across both titlebar and body
                 FastTheme.setTitleBarDarkMode(hwnd, true);
                 FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA_ALT);
             }
+
+            // Display window only after styling is applied to prevent initial white flash
+            window.setVisible(true);
 
             System.out.println("[MicaAltDemo] Window is now visible. Close window to exit.");
 

@@ -1,22 +1,27 @@
 LIBRARY FastTheme
 EXPORTS
-    Java_fasttheme_FastTheme_getWindowHandle
-    Java_fasttheme_FastTheme_getConsoleWindowHandle
-    Java_fasttheme_FastTheme_setWindowTransparency
-    Java_fasttheme_FastTheme_setWindowBackgroundColor
-    Java_fasttheme_FastTheme_setTitleBarColor
-    Java_fasttheme_FastTheme_setTitleBarTextColor
-    Java_fasttheme_FastTheme_setTitleBarDarkMode
-    Java_fasttheme_FastTheme_enableMica
-    Java_fasttheme_FastTheme_setSystemBackdropType
-    Java_fasttheme_FastTheme_setCornerStyle
-    Java_fasttheme_FastTheme_setBorderlessShadow
-    Java_fasttheme_FastTheme_setOverlayDragHeight
-    Java_fasttheme_FastTheme_isSystemDarkMode
-    Java_fasttheme_FastTheme_setWindowButtonsVisible
-    Java_fasttheme_FastTheme_setAlwaysOnTop
     Java_fasttheme_FastTheme_addTitleBarControlRect
     Java_fasttheme_FastTheme_clearTitleBarControlRects
-    Java_fasttheme_FastTheme_setTitleBarHeight
-    Java_fasttheme_FastTheme_setNativeTitleBarButtonsEnabled
+    Java_fasttheme_FastTheme_closeWindow
+    Java_fasttheme_FastTheme_enableMica
     Java_fasttheme_FastTheme_forceFrameUpdate
+    Java_fasttheme_FastTheme_maximizeWindow
+    Java_fasttheme_FastTheme_minimizeWindow
+    Java_fasttheme_FastTheme_restoreWindow
+    Java_fasttheme_FastTheme_sendSysCommand
+    Java_fasttheme_FastTheme_isSystemDarkMode
+    Java_fasttheme_FastTheme_getConsoleWindowHandle
+    Java_fasttheme_FastTheme_getWindowHandle
+    Java_fasttheme_FastTheme_setAlwaysOnTop
+    Java_fasttheme_FastTheme_setBorderlessShadow
+    Java_fasttheme_FastTheme_setCornerStyle
+    Java_fasttheme_FastTheme_setNativeTitleBarButtonsEnabled
+    Java_fasttheme_FastTheme_setOverlayDragHeight
+    Java_fasttheme_FastTheme_setSystemBackdropType
+    Java_fasttheme_FastTheme_setTitleBarColor
+    Java_fasttheme_FastTheme_setTitleBarDarkMode
+    Java_fasttheme_FastTheme_setTitleBarHeight
+    Java_fasttheme_FastTheme_setTitleBarTextColor
+    Java_fasttheme_FastTheme_setWindowBackgroundColor
+    Java_fasttheme_FastTheme_setWindowButtonsVisible
+    Java_fasttheme_FastTheme_setWindowTransparency

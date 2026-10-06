@@ -16,15 +16,8 @@ import java.util.Map;
  */
 public final class ThemeParser {
 
-    // =========================================================================
-    // CONSTRUCTOR
-    // =========================================================================
-
-    private ThemeParser() {}
-
-    // =========================================================================
-    // METHODS (Actions & Operations)
-    // =========================================================================
+    private ThemeParser() {
+    }
 
     /**
      * Parses a human-readable .theme formatted string into a ThemeData instance,
@@ -195,9 +188,9 @@ public final class ThemeParser {
         byte[] allBytes = Files.readAllBytes(path);
         if (allBytes.length >= 4) {
             int magic = ((allBytes[0] & 0xFF)) |
-                        ((allBytes[1] & 0xFF) << 8) |
-                        ((allBytes[2] & 0xFF) << 16) |
-                        ((allBytes[3] & 0xFF) << 24);
+                    ((allBytes[1] & 0xFF) << 8) |
+                    ((allBytes[2] & 0xFF) << 16) |
+                    ((allBytes[3] & 0xFF) << 24);
             if (magic == ThemeData.MAGIC) {
                 return parseBinary(allBytes);
             }

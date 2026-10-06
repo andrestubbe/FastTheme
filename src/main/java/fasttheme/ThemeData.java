@@ -24,15 +24,6 @@ public final class ThemeData {
     private final String name;
     private int[] values;
 
-    // =========================================================================
-    // CONSTRUCTORS
-    // =========================================================================
-
-    /**
-     * Constructs a ThemeData instance with the given theme name.
-     *
-     * @param name Name of the theme.
-     */
     public ThemeData(String name) {
         this(name, new int[ThemeKeys.count()]);
     }
@@ -40,7 +31,7 @@ public final class ThemeData {
     /**
      * Constructs a ThemeData instance with a specified initial capacity.
      *
-     * @param name Name of the theme.
+     * @param name            Name of the theme.
      * @param initialCapacity Minimum slot capacity to preallocate.
      */
     public ThemeData(String name, int initialCapacity) {
@@ -52,7 +43,7 @@ public final class ThemeData {
     /**
      * Constructs a ThemeData instance initialized with an array of ARGB values.
      *
-     * @param name Name of the theme.
+     * @param name   Name of the theme.
      * @param values Initial color array.
      */
     public ThemeData(String name, int[] values) {
@@ -66,10 +57,6 @@ public final class ThemeData {
             System.arraycopy(values, 0, this.values, 0, values.length);
         }
     }
-
-    // =========================================================================
-    // METHODS (Actions & Operations)
-    // =========================================================================
 
     private void ensureCapacity(int minCapacity) {
         if (minCapacity > values.length) {
@@ -163,10 +150,6 @@ public final class ThemeData {
         return new ThemeData(this.name, this.values);
     }
 
-    // =========================================================================
-    // GETTERS
-    // =========================================================================
-
     /**
      * Returns the name of this theme.
      *
@@ -217,15 +200,11 @@ public final class ThemeData {
         return values;
     }
 
-    // =========================================================================
-    // SETTERS
-    // =========================================================================
-
     /**
      * Sets the 32-bit ARGB color value for the given slot ID, expanding capacity if needed.
      *
      * @param slotIndex Integer slot index.
-     * @param argb Packed 32-bit ARGB color value.
+     * @param argb      Packed 32-bit ARGB color value.
      */
     public void set(int slotIndex, int argb) {
         if (slotIndex < 0) return;
@@ -237,7 +216,7 @@ public final class ThemeData {
      * Sets the 32-bit ARGB color value by string key name, auto-registering the key if custom.
      *
      * @param keyName String key name.
-     * @param argb Packed 32-bit ARGB color value.
+     * @param argb    Packed 32-bit ARGB color value.
      */
     public void set(String keyName, int argb) {
         int idx = ThemeKeys.getOrRegister(keyName);

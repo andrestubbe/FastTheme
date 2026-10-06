@@ -9,9 +9,10 @@
     <version>0.1.7</version>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.compilerArgs>--enable-preview</maven.compiler.compilerArgs>
     </properties>
 
     <repositories>
@@ -26,6 +27,12 @@
             <groupId>com.github.andrestubbe</groupId>
             <artifactId>FastTheme</artifactId>
             <version>0.1.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.andrestubbe</groupId>
+                    <artifactId>fastcore</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -48,19 +55,50 @@
 
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
-            <artifactId>fastcore</artifactId>
-            <version>0.1.0</version>
+            <artifactId>FastCore</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.andrestubbe</groupId>
+            <artifactId>FastDisplay</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fastdirectx</groupId>
+            <artifactId>fastdirectx</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>fastgraphics</groupId>
+            <artifactId>fastgraphics</artifactId>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
                     <mainClass>${exec.mainClass}</mainClass>
+                    <commandlineArgs>--enable-native-access=ALL-UNNAMED</commandlineArgs>
                 </configuration>
             </plugin>
         </plugins>

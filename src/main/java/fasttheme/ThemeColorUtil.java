@@ -8,15 +8,9 @@ import java.awt.Color;
  */
 public final class ThemeColorUtil {
 
-    // =========================================================================
-    // CONSTRUCTOR
-    // =========================================================================
+    private ThemeColorUtil() {
+    }
 
-    private ThemeColorUtil() {}
-
-    // =========================================================================
-    // METHODS (Actions & Operations)
-    // =========================================================================
 
     /**
      * Calculates the WCAG 2.1 relative luminance of a color.
@@ -139,8 +133,8 @@ public final class ThemeColorUtil {
             String[] parts = s.substring(4, s.length() - 1).split(",");
             if (parts.length == 3) {
                 return rgb(Integer.parseInt(parts[0].trim()),
-                           Integer.parseInt(parts[1].trim()),
-                           Integer.parseInt(parts[2].trim()));
+                        Integer.parseInt(parts[1].trim()),
+                        Integer.parseInt(parts[2].trim()));
             }
         }
         if (s.toLowerCase().startsWith("rgba(") && s.endsWith(")")) {
@@ -149,9 +143,9 @@ public final class ThemeColorUtil {
                 float aVal = Float.parseFloat(parts[3].trim());
                 int alpha = (aVal <= 1.0f) ? (int) (aVal * 255) : (int) aVal;
                 return argb(alpha,
-                            Integer.parseInt(parts[0].trim()),
-                            Integer.parseInt(parts[1].trim()),
-                            Integer.parseInt(parts[2].trim()));
+                        Integer.parseInt(parts[0].trim()),
+                        Integer.parseInt(parts[1].trim()),
+                        Integer.parseInt(parts[2].trim()));
             }
         }
 
@@ -160,15 +154,15 @@ public final class ThemeColorUtil {
             String[] parts = s.split(",");
             if (parts.length == 3) {
                 return rgb(Integer.parseInt(parts[0].trim()),
-                           Integer.parseInt(parts[1].trim()),
-                           Integer.parseInt(parts[2].trim()));
+                        Integer.parseInt(parts[1].trim()),
+                        Integer.parseInt(parts[2].trim()));
             } else if (parts.length == 4) {
                 float aVal = Float.parseFloat(parts[3].trim());
                 int alpha = (aVal <= 1.0f) ? (int) (aVal * 255) : (int) aVal;
                 return argb(alpha,
-                            Integer.parseInt(parts[0].trim()),
-                            Integer.parseInt(parts[1].trim()),
-                            Integer.parseInt(parts[2].trim()));
+                        Integer.parseInt(parts[0].trim()),
+                        Integer.parseInt(parts[1].trim()),
+                        Integer.parseInt(parts[2].trim()));
             }
         }
 
@@ -210,9 +204,6 @@ public final class ThemeColorUtil {
         return ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
 
-    // =========================================================================
-    // GETTERS
-    // =========================================================================
 
     /**
      * Extracts the alpha component (0..255) from a packed 32-bit ARGB integer.
