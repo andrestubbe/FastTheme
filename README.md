@@ -228,6 +228,8 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.forceFrameUpdate(long hwnd)` | `void` | Forces immediate DWM non-client frame re-evaluation and redraw on visible windows. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | `boolean` | Toggles native minimize and maximize buttons in the window title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | `boolean` | Toggles native Win32 window topmost z-order. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.applyFluentTitleBar(hwnd, height, btnW)` | `void` | One-liner: applies Dark Mode, Rounded Corners, Mica backdrop, height & native caption buttons. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarTheme(long hwnd, TitleBarTheme theme)` | `boolean` | Configures the full Fluent caption palette (active/inactive backgrounds, hover/pressed, glyphs). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 
 ### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
 
@@ -249,7 +251,7 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 |:---|:---|:---|:---|
 | **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/Demo/src/main/java/fasttheme/demo/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
 | **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/Demo/src/main/java/fasttheme/demo/Demo2.java) | `run-demo-overlay.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
-| **Windows 11 Fluent Chrome** | [Demo3.java](examples/Demo/src/main/java/fasttheme/demo/Demo3.java) | `run-demo-fluent.bat` | 94px custom interactive title bar, full native resizing, hit-test exclusion zones, and Mica backdrop. |
+| **Windows 11 Fluent Chrome** | [DemoFluentFastWindow.java](examples/Demo/src/main/java/fasttheme/demo/DemoFluentFastWindow.java) | `run-demo-fluent.bat` | 48px custom Fluent title bar with Mica backdrop, Segoe Fluent Icons caption buttons, hover/pressed states, and full DPI scaling. |
 | **Windows 11 Mica Material** | [MicaDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
 | **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/Demo/src/main/java/fasttheme/demo/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
 | **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |

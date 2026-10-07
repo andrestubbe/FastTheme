@@ -323,10 +323,10 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                     fflush(stderr);
                 }
 
-                // Notify DWM of activation state (lParam=-1: suppress legacy non-client frame repaint)
+                // Notify DWM of activation state (lParam=-1: no legacy frame repaint)
                 CallWindowProc(oldProc, hwnd, msg, wParam, (LPARAM)-1);
                 if (changed) {
-                    InvalidateRect(hwnd, NULL, FALSE);
+                    RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW);
                 }
                 return TRUE;
             }
@@ -357,8 +357,11 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                         changed = true;
                     }
                 }
+                if (active) {
+                    RefreshBackdrop(hwnd);
+                }
                 if (changed) {
-                    InvalidateRect(hwnd, NULL, FALSE);
+                    RedrawWindow(hwnd, NULL, NULL, RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW);
                 }
             }
             break;
@@ -411,33 +414,40 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                 RECT clientRc;
                 GetClientRect(hwnd, &clientRc);
 
-                // Always paint pure black across the window.
-                // On DWM-extended frame with alpha=0, black lets Mica shine through cleanly in active state,
-                // and DWM automatically applies its own subtle fallback/dimming when inactive!
-                FillRect(hdc, &clientRc, (HBRUSH)GetStockObject(BLACK_BRUSH));
-
-                // If window is inactive and we have a custom title bar layout, paint the entire title bar area in inactiveBg!
-                if (!isActive && hasLayout && layout.height > 0) {
-                    RECT rcTitleBar = { 0, 0, clientRc.right, layout.height };
+                if (isActive) {
+                    // Active (Mica): Pure black (alpha 0) allows Windows 11 DWM Mica to shine through cleanly
+                    FillRect(hdc, &clientRc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+                    if (hasLayout) {
+                        PaintNativeCaptionButtons(hwnd, hdc, clientRc, layout);
+                    }
+                } else {
+                    // Inactive (Defocus): Truly opaque neutral dark gray (alpha 255) using BufferedPaint!
+                    // This prevents DWM from blending/adding on top of Mica, yielding exact Snipping Tool color.
                     HDC hdcBuffered = NULL;
                     BP_PAINTPARAMS bpParams = { sizeof(bpParams) };
                     bpParams.dwFlags = BPPF_NOCLIP;
-                    HPAINTBUFFER hbp = BeginBufferedPaint(hdc, &rcTitleBar, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
+                    HPAINTBUFFER hbp = BeginBufferedPaint(hdc, &clientRc, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
                     if (hbp && hdcBuffered) {
                         HBRUSH inactiveBrush = CreateSolidBrush(layout.palette.inactiveBg);
-                        FillRect(hdcBuffered, &rcTitleBar, inactiveBrush);
+                        FillRect(hdcBuffered, &clientRc, inactiveBrush);
                         DeleteObject(inactiveBrush);
-                        BufferedPaintSetAlpha(hbp, &rcTitleBar, 255);
+
+                        if (hasLayout) {
+                            PaintNativeCaptionButtons(hwnd, hdcBuffered, clientRc, layout);
+                        }
+
+                        // Force alpha channel to 255 (100% opaque) across the entire client rect!
+                        BufferedPaintSetAlpha(hbp, &clientRc, 255);
                         EndBufferedPaint(hbp, TRUE);
                     } else {
+                        // Fallback if buffered paint fails
                         HBRUSH inactiveBrush = CreateSolidBrush(layout.palette.inactiveBg);
-                        FillRect(hdc, &rcTitleBar, inactiveBrush);
+                        FillRect(hdc, &clientRc, inactiveBrush);
                         DeleteObject(inactiveBrush);
+                        if (hasLayout) {
+                            PaintNativeCaptionButtons(hwnd, hdc, clientRc, layout);
+                        }
                     }
-                }
-
-                if (hasLayout) {
-                    PaintNativeCaptionButtons(hwnd, hdc, clientRc, layout);
                 }
             }
             EndPaint(hwnd, &ps);
@@ -448,7 +458,7 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
             LRESULT res = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
             if (wParam) { // Window is being shown (e.g. after desktop switch or unhide)
                 RefreshBackdrop(hwnd, true); // Force-flush on desktop switch/show
-                InvalidateRect(hwnd, NULL, FALSE);
+                RedrawWindow(hwnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
             }
             return res;
         }
@@ -758,7 +768,6 @@ LRESULT CALLBACK OverlaySubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
         }
 
         case WM_NCACTIVATE:
-            CallWindowProc(oldProc, hwnd, msg, wParam, (LPARAM)-1);
             return TRUE;
 
         case WM_NCPAINT:

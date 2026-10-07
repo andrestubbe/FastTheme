@@ -77,7 +77,7 @@ echo Compiling FastTheme JNI Bridge (C++)...
 echo =====================================================
 cl /LD /Fe:build\fasttheme.dll /Fo:build\ ^
     native\FastTheme.cpp ^
-    user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib jawt.lib ^
+    user32.lib gdi32.lib shcore.lib advapi32.lib dwmapi.lib jawt.lib uxtheme.lib ^
     /I"%JAVA_HOME%\include" ^
     /I"%JAVA_HOME%\include\win32" ^
     /EHsc /std:c++17 /O2 /W3 ^

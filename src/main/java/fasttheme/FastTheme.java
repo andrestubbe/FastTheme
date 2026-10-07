@@ -212,4 +212,40 @@ public class FastTheme {
     public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize);
 
     public static native boolean setWindowTransparency(long hwnd, int alpha);
+
+    public static native boolean setTitleBarThemeColors(long hwnd,
+            int inactiveBg, int activeBg,
+            int glyphActive, int glyphInactive, int glyphInactiveHover,
+            int inactiveBtnHover, int inactiveBtnPressed,
+            int activeBtnHover, int activeBtnPressed,
+            int closeHover, int closePressed, int closeHoverGlyph);
+
+    public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme) {
+        if (hwnd == 0 || theme == null) return false;
+        return setTitleBarThemeColors(hwnd,
+                theme.inactiveBackgroundColor, theme.activeBackgroundColor,
+                theme.glyphColorActive, theme.glyphColorInactive, theme.glyphColorInactiveHover,
+                theme.inactiveButtonHoverBg, theme.inactiveButtonPressedBg,
+                theme.activeButtonHoverBg, theme.activeButtonPressedBg,
+                theme.activeCloseHoverBg, theme.activeClosePressedBg, theme.closeHoverGlyphColor);
+    }
+
+    /**
+     * Applies full Fluent Mica TitleBar with native caption buttons, dark mode, and custom palette.
+     */
+    public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, TitleBarTheme theme) {
+        if (hwnd == 0) return;
+        setTitleBarDarkMode(hwnd, true);
+        setCornerStyle(hwnd, 2); // Rounded
+        setSystemBackdropType(hwnd, BACKDROP_MICA);
+        setTitleBarHeight(hwnd, titleBarHeight);
+        setNativeTitleBarButtonsEnabled(hwnd, true, buttonWidth);
+        if (theme != null) {
+            setTitleBarTheme(hwnd, theme);
+        }
+    }
+
+    public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth) {
+        applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth, TitleBarTheme.fluentDark());
+    }
 }

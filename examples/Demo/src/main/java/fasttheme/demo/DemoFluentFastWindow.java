@@ -35,27 +35,12 @@ public class DemoFluentFastWindow {
             System.out.println("[DemoFluent] HWND = " + hwnd);
 
             if (hwnd != 0) {
-                // 1. Dark Mode & Rounded Corners (Windows 11)
-                FastTheme.setTitleBarDarkMode(hwnd, true);
-                FastTheme.setCornerStyle(hwnd, 2);
-
-                // 2. Full Mica Material
-                FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA);
-
-                // 3. Extend client into title bar + set scaled 48px height
-                FastTheme.setBorderlessShadow(hwnd, true);
-                FastTheme.setTitleBarHeight(hwnd, titleBarHeight);
-
-                // 4. Enable native button hit-testing (Min, Max, Close + Snap Layouts)
-                FastTheme.setNativeTitleBarButtonsEnabled(hwnd, true, buttonWidth);
+                // One-liner: applies Dark Mode, Rounded Corners, Mica, TitleBar Height & Buttons with Fluent Palette
+                FastTheme.applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth);
             }
 
             // Make window visible once configured
             window.setVisible(true);
-
-            if (hwnd != 0) {
-                FastTheme.forceFrameUpdate(hwnd);
-            }
 
             System.out.println("[DemoFluent] Ready. Close window or press ESC to exit.");
 

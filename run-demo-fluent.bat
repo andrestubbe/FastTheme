@@ -1,27 +1,30 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 chcp 65001 > nul
 cd /d "%~dp0"
 
-echo ==========================================
-echo   FastTheme v0.1.7 - Fluent Chrome Demo
-echo ==========================================
+echo ==============================================================
+echo   FastTheme + FastWindow + FastDirectX - Fluent Mica Demo
+echo ==============================================================
 echo.
 
-if not exist "build\fasttheme.dll" (
-    echo [+] Compiling Native Bridge...
-    call build-dll.bat > nul 2>&1
+
+cd examples\Demo
+if not exist "cp.txt" (
+    echo [+] Generating classpath...
+    call mvn -q dependency:build-classpath -Dmdep.outputFile=cp.txt
 )
 
-echo [+] Compiling FastTheme...
-call mvn -q install -DskipTests > nul 2>&1
+set /p CP=<cp.txt
+set "FASTCORE_JAR=%USERPROFILE%\.m2\repository\com\github\andrestubbe\FastCore\0.1.1\FastCore-0.1.1.jar"
+set "FULL_CP=target\classes;!FASTCORE_JAR!;!CP!"
 
-echo [+] Launching Fluent Chrome Demo...
-cd examples\Demo
-call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.DemoFluent" -Djava.library.path="..\..\build"
+echo [+] Launching DemoFluentFastWindow...
+java --enable-preview --enable-native-access=ALL-UNNAMED "-Djava.library.path=..\..\build;..\..\dll;." -cp "!FULL_CP!" fasttheme.demo.DemoFluentFastWindow
+
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo [ERROR] Demo failed to launch.
+    echo [ERROR] Demo exited with error code %ERRORLEVEL%.
     pause
     exit /b %ERRORLEVEL%
 )
