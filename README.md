@@ -8,9 +8,9 @@
 
 ---
 
-**⚡ High-performance native Windows window styling, zero-allocation dynamic theming, and OS bridge for Java.**
+**⚡ High-performance native Windows styling, OS color & telemetry sensing, and zero-allocation dynamic theming for Java.**
 
-**FastTheme** brings **native Windows 10/11 styling and schema-free dynamic theming** to Java Swing, AWT, OpenGL, and CLI applications. It enables native dark mode title bars, Mica/Acrylic effects, and custom window decorations by bridging Java with the Desktop Window Manager (DWM) API, paired with an open, dynamically-allocated theme engine.
+**FastTheme** brings **native Windows 10/11 system integration, dynamic theming, and desktop styling** to Java Swing, AWT, OpenGL, and CLI applications. It bridges Java directly with the Windows Desktop Window Manager (DWM) to query native OS accent colors and system theme modes, unlock native Mica/Acrylic materials and dark mode title bars, and provide Photos-style Fluent custom window chrome with zero GC allocation overhead.
 
 [**Watch Styling Demo (YouTube)**](https://youtu.be/6FVXiFB1itw) | [**Watch Overlay Demo (YouTube)**](https://youtu.be/00bgKmWOEk8) | Watch JMH Benchmark (YouTube)
 
