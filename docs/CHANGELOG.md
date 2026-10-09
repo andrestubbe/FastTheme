@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] - 2026-10-09
+### Added
+- **Native OS Color & Theme State Detection**:
+  - `getAccentColor()`: Retrieves native Windows DWM accent/colorization color as packed 32-bit ARGB integer.
+  - `getSystemAccentColor()`: Returns Windows DWM accent color as `java.awt.Color`.
+  - `isAppDarkMode()`: Queries Windows personal application dark mode setting (`AppsUseLightTheme`).
+  - `isHighContrast()`: Detects whether Windows accessibility High Contrast mode is currently enabled.
+  - `isTransparencyEnabled()`: Queries system-wide transparency effects toggle from Windows personalization.
+  - `isColorizationOpaque()`: Checks whether DWM colorization is set to opaque.
+
 ## [0.1.7] - 2026-10-05
 ### Added
 - **Modern Windows 11 Photos-Style Chrome (Demo 3)**: Added full custom title bar support (`Demo3.java`) with high-DPI scaled interactive caption buttons (Minimize, Maximize/Restore, Close), native Mica backdrop, and drop shadow.

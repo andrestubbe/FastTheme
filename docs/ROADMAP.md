@@ -2,6 +2,14 @@
 
 ## Milestone Status
 
+### Native OS Color & Telemetry Query Bridge (v0.1.8)
+**Status:** Released
+- [x] Native Windows DWM accent/colorization color retrieval (`getAccentColor`, `getSystemAccentColor`).
+- [x] Application personal dark mode query (`isAppDarkMode`).
+- [x] Windows accessibility High Contrast detection (`isHighContrast`).
+- [x] Windows transparency effects toggle detection (`isTransparencyEnabled`).
+- [x] Colorization opacity query (`isColorizationOpaque`).
+
 ### Modern Photos-Style Fluent Chrome & Dynamic Hit-Testing (v0.1.7)
 **Status:** Released
 - [x] Custom non-client title bar height configuration (`setTitleBarHeight`).

@@ -23,6 +23,11 @@ JNIEXPORT void JNICALL Java_fasttheme_FastTheme_sendSysCommand(JNIEnv* env, jcla
 
 // Getters
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jclass clazz);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isAppDarkMode(JNIEnv* env, jclass clazz);
+JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getAccentColor(JNIEnv* env, jclass clazz);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isColorizationOpaque(JNIEnv* env, jclass clazz);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isHighContrast(JNIEnv* env, jclass clazz);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isTransparencyEnabled(JNIEnv* env, jclass clazz);
 JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getConsoleWindowHandle(JNIEnv* env, jclass clazz);
 JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getWindowHandle(JNIEnv* env, jclass clazz, jobject component);
 

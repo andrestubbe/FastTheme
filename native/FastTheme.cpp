@@ -1021,7 +1021,78 @@ JNIEXPORT void JNICALL Java_fasttheme_FastTheme_sendSysCommand(JNIEnv* env, jcla
 
 // Getters
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isSystemDarkMode(JNIEnv* env, jclass clazz) {
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD value = 1;
+        DWORD size = sizeof(value);
+        if (RegQueryValueExA(hKey, "SystemUsesLightTheme", NULL, NULL, (LPBYTE)&value, &size) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return (value == 0) ? JNI_TRUE : JNI_FALSE;
+        }
+        RegCloseKey(hKey);
+    }
     return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isAppDarkMode(JNIEnv* env, jclass clazz) {
+    return IsDarkModeEnabled() ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getAccentColor(JNIEnv* env, jclass clazz) {
+    DWORD color = 0;
+    BOOL opaque = FALSE;
+    // 1. Try native DwmGetColorizationColor
+    HRESULT hr = DwmGetColorizationColor(&color, &opaque);
+    if (SUCCEEDED(hr)) {
+        return (jint)color;
+    }
+
+    // 2. Fallback to DWM registry key
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\DWM", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD regColor = 0;
+        DWORD size = sizeof(regColor);
+        if (RegQueryValueExA(hKey, "ColorizationColor", NULL, NULL, (LPBYTE)&regColor, &size) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return (jint)regColor;
+        }
+        RegCloseKey(hKey);
+    }
+
+    return (jint)0xFF0078D7; // Default Windows Blue
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isColorizationOpaque(JNIEnv* env, jclass clazz) {
+    DWORD color = 0;
+    BOOL opaque = FALSE;
+    HRESULT hr = DwmGetColorizationColor(&color, &opaque);
+    if (SUCCEEDED(hr)) {
+        return opaque ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isHighContrast(JNIEnv* env, jclass clazz) {
+    HIGHCONTRASTA hc;
+    hc.cbSize = sizeof(HIGHCONTRASTA);
+    if (SystemParametersInfoA(SPI_GETHIGHCONTRAST, sizeof(HIGHCONTRASTA), &hc, 0)) {
+        return (hc.dwFlags & HCF_HIGHCONTRASTON) ? JNI_TRUE : JNI_FALSE;
+    }
+    return JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isTransparencyEnabled(JNIEnv* env, jclass clazz) {
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD value = 1;
+        DWORD size = sizeof(value);
+        if (RegQueryValueExA(hKey, "EnableTransparency", NULL, NULL, (LPBYTE)&value, &size) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return (value != 0) ? JNI_TRUE : JNI_FALSE;
+        }
+        RegCloseKey(hKey);
+    }
+    return JNI_TRUE;
 }
 
 JNIEXPORT jlong JNICALL Java_fasttheme_FastTheme_getConsoleWindowHandle(JNIEnv* env, jclass clazz) {

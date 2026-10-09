@@ -146,6 +146,30 @@ public class FastTheme {
 
     public static native boolean isSystemDarkMode();
 
+    public static native boolean isAppDarkMode();
+
+    /**
+     * Retrieves the native Windows DWM accent/colorization color as packed 32-bit ARGB.
+     *
+     * @return Packed 32-bit ARGB integer.
+     */
+    public static native int getAccentColor();
+
+    /**
+     * Retrieves the native Windows DWM accent color as a java.awt.Color.
+     *
+     * @return Color object representing the current Windows accent color.
+     */
+    public static Color getSystemAccentColor() {
+        return ThemeColorUtil.toAwtColor(getAccentColor());
+    }
+
+    public static native boolean isColorizationOpaque();
+
+    public static native boolean isHighContrast();
+
+    public static native boolean isTransparencyEnabled();
+
     public static ThemeData current() {
         return currentTheme;
     }

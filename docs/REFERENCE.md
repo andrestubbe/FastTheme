@@ -51,6 +51,12 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled)`
 *   `public static native void forceFrameUpdate(long hwnd)`
 *   `public static native boolean isSystemDarkMode()`
+*   `public static native boolean isAppDarkMode()`: Queries user personal application dark theme preference from Windows registry (`AppsUseLightTheme`).
+*   `public static native int getAccentColor()`: Retrieves current Windows DWM accent/colorization color as packed 32-bit ARGB int.
+*   `public static Color getSystemAccentColor()`: Returns Windows DWM accent color converted to `java.awt.Color`.
+*   `public static native boolean isColorizationOpaque()`: Checks if DWM colorization is opaque.
+*   `public static native boolean isHighContrast()`: Checks if system accessibility high contrast mode is active (`SPI_GETHIGHCONTRAST`).
+*   `public static native boolean isTransparencyEnabled()`: Queries if system-wide transparency effects are enabled by the user.
 *   `public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize)`
 *   `public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop)`
 

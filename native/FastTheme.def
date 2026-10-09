@@ -10,6 +10,11 @@ EXPORTS
     Java_fasttheme_FastTheme_restoreWindow
     Java_fasttheme_FastTheme_sendSysCommand
     Java_fasttheme_FastTheme_isSystemDarkMode
+    Java_fasttheme_FastTheme_isAppDarkMode
+    Java_fasttheme_FastTheme_getAccentColor
+    Java_fasttheme_FastTheme_isColorizationOpaque
+    Java_fasttheme_FastTheme_isHighContrast
+    Java_fasttheme_FastTheme_isTransparencyEnabled
     Java_fasttheme_FastTheme_getConsoleWindowHandle
     Java_fasttheme_FastTheme_getWindowHandle
     Java_fasttheme_FastTheme_setAlwaysOnTop

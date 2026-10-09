@@ -1,10 +1,10 @@
-# FastTheme 0.1.7 [ALPHA-2026-10-05] — High-Performance Native Window Styling & Dynamic Theming for Java
+# FastTheme 0.1.8 [ALPHA-2026-10-09] — High-Performance Native Window Styling & Dynamic Theming for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.7-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.7)
+[![Status](https://img.shields.io/badge/status-0.1.8-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.8)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
-[![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe/FastTheme)
+[![JitPack](https://img.shields.io/badge/JitPack-0.1.8-green.svg)](https://jitpack.io/#andrestubbe/FastTheme)
 
 ---
 
@@ -212,6 +212,11 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.getConsoleWindowHandle()` | `long` | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.isNativeAvailable()` | `boolean` | Checks whether the native Windows styling DLL is loaded and functional. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.isSystemDarkMode()` | `boolean` | Detects global Windows system dark mode setting. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isAppDarkMode()` | `boolean` | Detects user/app personal dark mode preference from Windows registry. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getAccentColor()` | `int` | Retrieves native Windows DWM accent/colorization color as packed 32-bit ARGB. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getSystemAccentColor()` | `Color` | Convenience method returning the native Windows accent color as a `java.awt.Color`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isHighContrast()` | `boolean` | Checks whether Windows High Contrast mode is currently enabled (`SPI_GETHIGHCONTRAST`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isTransparencyEnabled()` | `boolean` | Checks whether Windows system-wide transparency effects are enabled by the user. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | `boolean` | Toggles Windows 10/11 immersive dark mode for the native title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native caption background color on Windows 11. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native title bar text/foreground color on Windows 11. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
@@ -284,7 +289,7 @@ Add the JitPack repository and dependencies to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.7</version>
+        <version>0.1.8</version>
     </dependency>
     <!-- Required Native JNI loader -->
     <dependency>
@@ -315,7 +320,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.7'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.8'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
     implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
     implementation 'com.github.andrestubbe:FastBinary:0.1.1'
@@ -326,7 +331,7 @@ dependencies {
 
 Download the pre-built JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.7.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.7/FastTheme-0.1.7.jar)** (Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.8.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.8/FastTheme-0.1.8.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
 3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
 4. 📦 **[FastBinary-0.1.1.jar](https://github.com/andrestubbe/FastBinary/releases/download/0.1.1/FastBinary-0.1.1.jar)** (Binary Bit-Packing Engine)
