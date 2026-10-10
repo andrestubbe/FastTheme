@@ -26,8 +26,8 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo [+] Launching DemoFull...
-java --enable-preview --enable-native-access=ALL-UNNAMED "-Djava.library.path=..\..\build;..\..\dll;." -cp "!FULL_CP!" fasttheme.demo.DemoFull
+echo [+] Launching Full...
+java --enable-preview --enable-native-access=ALL-UNNAMED "-Djava.library.path=..\..\build;..\..\dll;." -cp "!FULL_CP!" fasttheme.demo.Full
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

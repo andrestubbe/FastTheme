@@ -32,7 +32,7 @@ import java.lang.invoke.MethodHandle;
  * </ul>
  * </p>
  */
-public class DemoFull {
+public class Full {
 
     private static final MethodHandle MH_GET_CURSOR_POS;
     private static final MethodHandle MH_SCREEN_TO_CLIENT;

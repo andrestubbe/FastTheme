@@ -12,7 +12,7 @@ echo.
 
 
 cd examples\Demo
-call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.MicaDemo" -Djava.library.path="..\..\build"
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.Mica" -Djava.library.path="..\..\build"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERROR] Demo failed to launch.
