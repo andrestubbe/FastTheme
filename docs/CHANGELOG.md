@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.9] - 2026-10-10
+### Added
+- **Native Window State Control Bridge**:
+  - `minimizeWindow(long hwnd)`: Native window minimize via `SW_MINIMIZE`.
+  - `maximizeWindow(long hwnd)`: Native window maximize via `SW_MAXIMIZE`.
+  - `restoreWindow(long hwnd)`: Native window restore via `SW_RESTORE`.
+  - `sendSysCommand(long hwnd, int cmd)`: Directly dispatches native `WM_SYSCOMMAND` calls (`SC_CLOSE`, etc.).
+- **Fluent TitleBar High-Level Facade**:
+  - `applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth)` / `applyFluentTitleBar(..., TitleBarTheme)`: One-line configuration for custom height, dark mode, rounded corners, Mica backdrop, and styled caption buttons.
+  - `setTitleBarTheme(long hwnd, TitleBarTheme theme)`: Configures custom active and inactive title bar background and button states.
+
+### Changed
+- **DWM Cloaked Transition Handling**: Enhanced `BackdropSubclassProc` to track virtual desktop switches and uncloaking events via `DWMWA_CLOAKED`, automatically kickstarting DWM materials when switching desktops.
+- **Defocus/Inactive Backdrop Dimming**: Custom buffered paint occludes Mica with opaque native Windows 11 grey (`#101010`) in inactive state, eliminating milky washed-out additive blends.
+- **Accent Color Accuracy**: Improved `getAccentColor()` fallback hierarchy by querying Windows DWM registry `AccentColor` (ABGR to ARGB) followed by `DwmGetColorizationColor` with visible alpha clamp.
+- **Demo Renaming**: Symmetrically standardized demos to `Overlay.java` (Raycast overlay) and `Fluent.java` (48px custom Fluent title bar).
+
 ## [0.1.8] - 2026-10-09
 ### Added
 - **Native OS Color & Theme State Detection**:

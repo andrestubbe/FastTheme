@@ -1,12 +1,12 @@
 package fasttheme;
 
 /**
- * TitleBarTheme - Configuration palette for native Fluent custom title bar & buttons.
+ * TitleBarTheme - Configuration palette for native Fluent custom title bar and buttons.
  */
 public class TitleBarTheme {
 
     // Backgrounds
-    public int inactiveBackgroundColor = 0x202020;
+    public int inactiveBackgroundColor = 0x101010;
     public int activeBackgroundColor   = 0x1b2223;
 
     // Glyphs

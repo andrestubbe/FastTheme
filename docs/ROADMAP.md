@@ -2,6 +2,15 @@
 
 ## Milestone Status
 
+### Fluent Material Optimization & Window State Bridge (0.1.9)
+**Status:** Released
+- [x] Native window state control bridge (`minimizeWindow`, `maximizeWindow`, `restoreWindow`, `sendSysCommand`).
+- [x] High-level Fluent title bar helper (`applyFluentTitleBar`, `setTitleBarTheme`).
+- [x] Virtual desktop uncloaking DWM recovery (`DWMWA_CLOAKED`).
+- [x] Inactive window buffered paint occlusion (`#101010` true opaque dimming).
+- [x] Multi-source accent color resolution (Windows DWM registry + `DwmGetColorizationColor`).
+- [x] Demo standardization (`Overlay.java`, `Fluent.java`).
+
 ### Native OS Color & Telemetry Query Bridge (0.1.8)
 **Status:** Released
 - [x] Native Windows DWM accent/colorization color retrieval (`getAccentColor`, `getSystemAccentColor`).

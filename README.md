@@ -1,10 +1,10 @@
-# FastTheme 0.1.8 [ALPHA-2026-10-09] — High-Performance Native Window Styling & Dynamic Theming for Java
+# FastTheme 0.1.9 [ALPHA-2026-10-10] — High-Performance Native Window Styling & Dynamic Theming for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.8-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.8)
+[![Status](https://img.shields.io/badge/status-0.1.9-brightgreen.svg)](https://github.com/andrestubbe/FastTheme/releases/tag/0.1.9)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
-[![JitPack](https://img.shields.io/badge/JitPack-0.1.8-green.svg)](https://jitpack.io/#andrestubbe/FastTheme)
+[![JitPack](https://img.shields.io/badge/JitPack-0.1.9-green.svg)](https://jitpack.io/#andrestubbe/FastTheme)
 
 ---
 
@@ -215,6 +215,7 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.isAppDarkMode()` | `boolean` | Detects user/app personal dark mode preference from Windows registry. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.getAccentColor()` | `int` | Retrieves native Windows DWM accent/colorization color as packed 32-bit ARGB. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.getSystemAccentColor()` | `Color` | Convenience method returning the native Windows accent color as a `java.awt.Color`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isColorizationOpaque()` | `boolean` | Checks whether Windows DWM frame colorization blend is opaque. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.isHighContrast()` | `boolean` | Checks whether Windows High Contrast mode is currently enabled (`SPI_GETHIGHCONTRAST`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.isTransparencyEnabled()` | `boolean` | Checks whether Windows system-wide transparency effects are enabled by the user. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | `boolean` | Toggles Windows 10/11 immersive dark mode for the native title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
@@ -235,6 +236,10 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | `boolean` | Toggles native Win32 window topmost z-order. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.applyFluentTitleBar(hwnd, height, btnW)` | `void` | One-liner: applies Dark Mode, Rounded Corners, Mica backdrop, height & native caption buttons. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 | `FastTheme.setTitleBarTheme(long hwnd, TitleBarTheme theme)` | `boolean` | Configures the full Fluent caption palette (active/inactive backgrounds, hover/pressed, glyphs). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.minimizeWindow(long hwnd)` | `void` | Minimizes the specified Win32 window natively via `SW_MINIMIZE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.maximizeWindow(long hwnd)` | `void` | Maximizes the specified Win32 window natively via `SW_MAXIMIZE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.restoreWindow(long hwnd)` | `void` | Restores the specified Win32 window natively via `SW_RESTORE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.sendSysCommand(long hwnd, int cmd)` | `void` | Sends a native `WM_SYSCOMMAND` message (e.g. `SC_CLOSE`, `SC_MINIMIZE`, `SC_MAXIMIZE`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 
 ### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
 
@@ -255,11 +260,12 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 | Case | Java Example | Launcher | Description |
 |:---|:---|:---|:---|
 | **[Window Styling & Transitions (YouTube)](https://youtu.be/6FVXiFB1itw)** | [Demo.java](examples/Demo/src/main/java/fasttheme/demo/Demo.java) | `run-demo.bat` | Native DWM title bar styling, dark mode detection, and live theme updates. |
-| **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Demo2.java](examples/Demo/src/main/java/fasttheme/demo/Demo2.java) | `run-demo-overlay.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
-| **Windows 11 Fluent Chrome** | [DemoFluentFastWindow.java](examples/Demo/src/main/java/fasttheme/demo/DemoFluentFastWindow.java) | `run-demo-fluent.bat` | 48px custom Fluent title bar with Mica backdrop, Segoe Fluent Icons caption buttons, hover/pressed states, and full DPI scaling. |
+| **[Premium Borderless Overlay (YouTube)](https://youtu.be/00bgKmWOEk8)** | [Overlay.java](examples/Demo/src/main/java/fasttheme/demo/Overlay.java) | `run-demo-overlay.bat` | Borderless Raycast-style overlay with native drop shadow, invisible drag area, and window transparency. |
+| **Windows 11 Fluent Chrome** | [Fluent.java](examples/Demo/src/main/java/fasttheme/demo/Fluent.java) | `run-demo-fluent.bat` | 48px custom Fluent title bar with Mica backdrop, Segoe Fluent Icons caption buttons, hover/pressed states, and full DPI scaling. |
 | **Windows 11 Mica Material** | [MicaDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaDemo.java) | `run-demo-mica.bat` | Standard Windows 11 Mica backdrop (`BACKDROP_MICA`) with transparent Swing viewport. |
 | **Windows 11 Acrylic Blur** | [AcrylicDemo.java](examples/Demo/src/main/java/fasttheme/demo/AcrylicDemo.java) | `run-demo-acrylic.bat` | Windows 11 Acrylic translucid blur backdrop (`BACKDROP_ACRYLIC`). |
 | **Windows 11 Mica Alt Material** | [MicaAltDemo.java](examples/Demo/src/main/java/fasttheme/demo/MicaAltDemo.java) | `run-demo-mica-alt.bat` | Windows 11 high-contrast Mica Alt tabbed container backdrop (`BACKDROP_MICA_ALT`). |
+| **Seamless Desktop Canvas Full Chrome** | [DemoFull.java](examples/Demo/src/main/java/fasttheme/demo/DemoFull.java) | `run-demo-full.bat` | Full-bleed hardware DirectX desktop canvas with floating 32px native caption buttons and dragging. |
 | **JMH Microbenchmark Suite** | [Benchmark.java](examples/Benchmark/src/main/java/fasttheme/benchmark/Benchmark.java) | `run-benchmark.bat` | Formal OpenJDK JMH zero-allocation slot array access, dynamic lookups, and parser throughput benchmarks. |
 
 > [!NOTE]
@@ -269,8 +275,6 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 ---
 
 ## Installation
-
-FastJava modules are published via JitPack and can be installed with standard build tools or direct download.
 
 ### Option 1: Maven (Recommended)
 
@@ -289,7 +293,7 @@ Add the JitPack repository and dependencies to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastTheme</artifactId>
-        <version>0.1.8</version>
+        <version>0.1.9</version>
     </dependency>
     <!-- Required Native JNI loader -->
     <dependency>
@@ -320,7 +324,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastTheme:0.1.8'
+    implementation 'com.github.andrestubbe:FastTheme:0.1.9'
     implementation 'com.github.andrestubbe:fastcore:0.1.0'
     implementation 'com.github.andrestubbe:FastFileFormat:0.1.1'
     implementation 'com.github.andrestubbe:FastBinary:0.1.1'
@@ -331,7 +335,7 @@ dependencies {
 
 Download the pre-built JARs directly to add them to your classpath:
 
-1. 📦 **[FastTheme-0.1.8.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.8/FastTheme-0.1.8.jar)** (Core Library & Native DLL)
+1. 📦 **[FastTheme-0.1.9.jar](https://github.com/andrestubbe/FastTheme/releases/download/0.1.9/FastTheme-0.1.9.jar)** (Core Library & Native DLL)
 2. 📦 **[FastCore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/FastCore-0.1.0.jar)** (Required Native JNI loader)
 3. 📦 **[FastFileFormat-0.1.1.jar](https://github.com/andrestubbe/FastFileFormat/releases/download/0.1.1/FastFileFormat-0.1.1.jar)** (Serialization & File Format Engine)
 4. 📦 **[FastBinary-0.1.1.jar](https://github.com/andrestubbe/FastBinary/releases/download/0.1.1/FastBinary-0.1.1.jar)** (Binary Bit-Packing Engine)

@@ -23,9 +23,9 @@ import java.awt.event.KeyEvent;
 import javax.swing.Timer;
 
 /**
- * FastTheme Demo 2 - Premium Overlay Showcase (Raycast-Style).
+ * FastTheme Overlay Showcase (Raycast-Style).
  */
-public class Demo2 {
+public class Overlay {
     
     // --- UI CONFIGURATION ---
     private static final int WINDOW_WIDTH      = 700;

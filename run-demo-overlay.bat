@@ -18,7 +18,7 @@ call mvn -q install -DskipTests > nul 2>&1
 
 echo [+] Launching Overlay Demo...
 cd examples\Demo
-call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.Demo2" -Djava.library.path="..\..\build"
+call mvn -q compile exec:java -Dexec.mainClass="fasttheme.demo.Overlay" -Djava.library.path="..\..\build"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERROR] Demo failed to launch.

@@ -46,6 +46,10 @@ static bool FastThemeDebug() {
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
 #endif
 
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
+
 #ifndef DWMWA_CAPTION_COLOR
 #define DWMWA_CAPTION_COLOR 35
 #endif
@@ -56,6 +60,10 @@ static bool FastThemeDebug() {
 
 #ifndef DWMWA_COLOR_NONE
 #define DWMWA_COLOR_NONE 0xFFFFFFFE
+#endif
+
+#ifndef DWMWA_CLOAKED
+#define DWMWA_CLOAKED 14
 #endif
 
 #ifndef DWMSBT_AUTO
@@ -81,7 +89,7 @@ bool IsDarkModeEnabled() {
 }
 
 struct TitleBarPalette {
-    COLORREF inactiveBg          = RGB(0x20, 0x20, 0x20);
+    COLORREF inactiveBg          = RGB(0x10, 0x10, 0x10);
     COLORREF activeBg            = RGB(0x1B, 0x22, 0x23);
     COLORREF glyphActive         = RGB(0xFF, 0xFF, 0xFF);
     COLORREF glyphInactive       = RGB(0x79, 0x79, 0x79);
@@ -102,6 +110,7 @@ struct TitleBarLayout {
     int hoveredButton = 0; // 0=none, 1=min, 2=max, 3=close
     int pressedButton = 0; // 0=none, 1=min, 2=max, 3=close
     bool isActive = true;
+    bool wasCloaked = false;
     TitleBarPalette palette;
     int backdropType = 2; // DWMSBT_MAINWINDOW
     std::vector<RECT> controlRects;
@@ -135,13 +144,12 @@ static void PaintNativeCaptionButtons(HWND hwnd, HDC hdc, const RECT& clientRc, 
     hbp = BeginBufferedPaint(hdc, &rcBtns, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
     if (hbp && hdcBuffered) {
         hdcPaint = hdcBuffered;
-        // Active: black (alpha 0) lets Mica through. Inactive: opaque inactive background.
         if (active) {
             FillRect(hdcPaint, &rcBtns, (HBRUSH)GetStockObject(BLACK_BRUSH));
         } else {
-            HBRUSH baseBrush = CreateSolidBrush(pal.inactiveBg);
-            FillRect(hdcPaint, &rcBtns, baseBrush);
-            DeleteObject(baseBrush);
+            HBRUSH hInactiveBrush = CreateSolidBrush(pal.inactiveBg);
+            FillRect(hdcPaint, &rcBtns, hInactiveBrush);
+            DeleteObject(hInactiveBrush);
         }
     }
 
@@ -218,18 +226,20 @@ static void PaintNativeCaptionButtons(HWND hwnd, HDC hdc, const RECT& clientRc, 
     DeleteObject(hFont);
 
     if (hbp) {
-        // Inactive: whole strip opaque. Active: only hovered/pressed buttons opaque.
         if (!active) {
+            // When inactive, ensure the entire caption button strip has Alpha 255 (true opaque over dark fallback)
             BufferedPaintSetAlpha(hbp, &rcBtns, 255);
-        }
-        if (layout.hoveredButton == 1 || layout.pressedButton == 1) {
-            BufferedPaintSetAlpha(hbp, &rcMin, 255);
-        }
-        if (layout.hoveredButton == 2 || layout.pressedButton == 2) {
-            BufferedPaintSetAlpha(hbp, &rcMax, 255);
-        }
-        if (layout.hoveredButton == 3 || layout.pressedButton == 3) {
-            BufferedPaintSetAlpha(hbp, &rcClose, 255);
+        } else {
+            // Only hovered/pressed buttons are drawn opaque over Mica
+            if (layout.hoveredButton == 1 || layout.pressedButton == 1) {
+                BufferedPaintSetAlpha(hbp, &rcMin, 255);
+            }
+            if (layout.hoveredButton == 2 || layout.pressedButton == 2) {
+                BufferedPaintSetAlpha(hbp, &rcMax, 255);
+            }
+            if (layout.hoveredButton == 3 || layout.pressedButton == 3) {
+                BufferedPaintSetAlpha(hbp, &rcClose, 255);
+            }
         }
         EndBufferedPaint(hbp, TRUE);
     }
@@ -246,20 +256,87 @@ static void RefreshBackdrop(HWND hwnd, bool forceReset = false) {
     }
 
     if (forceReset) {
-        // Full flush: toggle NONE to kick DWM compositor out of stale/cloaked state (e.g. desktop switch)
+        // Toggle NONE to kick DWM compositor into re-evaluating backdrop
         int none = DWMSBT_NONE;
         DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &none, sizeof(none));
     }
 
     DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop, sizeof(backdrop));
 
+    COLORREF noneCol = DWMWA_COLOR_NONE;
+    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &noneCol, sizeof(noneCol));
+    DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &noneCol, sizeof(noneCol));
+
     MARGINS margins = { -1, -1, -1, -1 };
     DwmExtendFrameIntoClientArea(hwnd, &margins);
+}
+
+
+
+static const char* GetMsgName(UINT msg) {
+    switch (msg) {
+        case WM_ACTIVATE: return "WM_ACTIVATE";
+        case WM_ACTIVATEAPP: return "WM_ACTIVATEAPP";
+        case WM_NCACTIVATE: return "WM_NCACTIVATE";
+        case WM_SETFOCUS: return "WM_SETFOCUS";
+        case WM_KILLFOCUS: return "WM_KILLFOCUS";
+        case WM_SHOWWINDOW: return "WM_SHOWWINDOW";
+        case WM_WINDOWPOSCHANGED: return "WM_WINDOWPOSCHANGED";
+        case WM_WINDOWPOSCHANGING: return "WM_WINDOWPOSCHANGING";
+        case WM_STYLECHANGED: return "WM_STYLECHANGED";
+        case WM_NCPAINT: return "WM_NCPAINT";
+        case WM_PAINT: return "WM_PAINT";
+        case WM_ERASEBKGND: return "WM_ERASEBKGND";
+        case WM_MOUSEACTIVATE: return "WM_MOUSEACTIVATE";
+        case WM_LBUTTONDOWN: return "WM_LBUTTONDOWN";
+        case WM_LBUTTONUP: return "WM_LBUTTONUP";
+        case WM_SIZE: return "WM_SIZE";
+        case WM_MOVE: return "WM_MOVE";
+        case WM_DWMCOMPOSITIONCHANGED: return "WM_DWMCOMPOSITIONCHANGED";
+        case WM_DWMCOLORIZATIONCOLORCHANGED: return "WM_DWMCOLORIZATIONCOLORCHANGED";
+        default: return NULL;
+    }
 }
 
 static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     WNDPROC oldProc = (WNDPROC)GetPropW(hwnd, L"FastTheme_BackdropOldProc");
     if (!oldProc) return DefWindowProc(hwnd, msg, wParam, lParam);
+
+    // Track Cloaking State changes cleanly
+    DWORD cloaked = 0;
+    DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &cloaked, sizeof(cloaked));
+    bool isCloaked = (cloaked != 0);
+    bool cloakChanged = false;
+    bool wasCloakedBefore = false;
+    {
+        std::lock_guard<std::mutex> lock(g_titleBarMutex);
+        auto it = g_titleBarLayouts.find(hwnd);
+        if (it != g_titleBarLayouts.end() && it->second.wasCloaked != isCloaked) {
+            wasCloakedBefore = it->second.wasCloaked;
+            it->second.wasCloaked = isCloaked;
+            cloakChanged = true;
+        }
+    }
+    if (cloakChanged) {
+        if (isCloaked) {
+            printf("\n>>> [EVENT: CLOAKED] (Desktop Switch weg | cloaked=%lu)\n", cloaked);
+        } else {
+            printf("\n>>> [EVENT: UNCLOAKED] (Desktop Switch zurueck | cloaked=0)\n");
+        }
+        fflush(stdout);
+    }
+
+    // Track Focus / Defocus cleanly
+    if (msg == WM_ACTIVATE) {
+        bool active = (LOWORD(wParam) != WA_INACTIVE);
+        HWND fg = GetForegroundWindow();
+        if (active) {
+            printf(">>> [EVENT: FOCUS] (WM_ACTIVATE state=%d | isFg=%d)\n", (int)LOWORD(wParam), fg == hwnd);
+        } else {
+            printf(">>> [EVENT: DEFOCUS] (WM_ACTIVATE state=%d | isFg=%d)\n", (int)LOWORD(wParam), fg == hwnd);
+        }
+        fflush(stdout);
+    }
 
     switch (msg) {
         case WM_NCCALCSIZE: {
@@ -314,22 +391,27 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                     }
                 }
 
-                if (FastThemeDebug()) {
-                    BOOL dark = FALSE; int bd = -1;
-                    DwmGetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark, sizeof(dark));
-                    DwmGetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, &bd, sizeof(bd));
-                    fprintf(stderr, "[FastTheme] WM_NCACTIVATE wParam=%d hwnd=%p darkMode=%d backdrop=%d\n",
-                            (int)wParam, (void*)hwnd, (int)dark, bd);
-                    fflush(stderr);
+                if (active) {
+                    // Activate: Let DefWindowProc handle it so Mica initializes properly
+                    CallWindowProc(oldProc, hwnd, msg, wParam, (LPARAM)-1);
+                    RefreshBackdrop(hwnd, false);
+                } else {
+                    // Deactivate: Do NOT call oldProc/DefWindowProc — it draws the classic white inactive border!
+                    LRESULT dwmResult = 0;
+                    DwmDefWindowProc(hwnd, msg, wParam, lParam, &dwmResult);
                 }
 
-                // Notify DWM of activation state (lParam=-1: suppress legacy non-client frame repaint)
-                CallWindowProc(oldProc, hwnd, msg, wParam, (LPARAM)-1);
                 if (changed) {
                     InvalidateRect(hwnd, NULL, FALSE);
                 }
                 return TRUE;
             }
+            break;
+        }
+
+        case WM_MOUSEACTIVATE: {
+            RefreshBackdrop(hwnd, false);
+            InvalidateRect(hwnd, NULL, FALSE);
             break;
         }
 
@@ -344,10 +426,7 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
             }
             if (customLayout) {
                 bool active = (LOWORD(wParam) != WA_INACTIVE);
-                if (FastThemeDebug()) {
-                    fprintf(stderr, "[FastTheme] WM_ACTIVATE state=%d hwnd=%p\n", (int)LOWORD(wParam), (void*)hwnd);
-                    fflush(stderr);
-                }
+
                 bool changed = false;
                 {
                     std::lock_guard<std::mutex> lock(g_titleBarMutex);
@@ -357,9 +436,17 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                         changed = true;
                     }
                 }
+
+                if (active) {
+                    RefreshBackdrop(hwnd, false);
+                }
+
+                CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
+
                 if (changed) {
                     InvalidateRect(hwnd, NULL, FALSE);
                 }
+                return 0;
             }
             break;
         }
@@ -379,9 +466,32 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
             break;
         }
 
+        // Window position changing: VERY FIRST event received when returning from another desktop!
+        case WM_WINDOWPOSCHANGING: {
+            DWORD cloaked = 0;
+            if (SUCCEEDED(DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &cloaked, sizeof(cloaked)))) {
+                bool isCloaked = (cloaked != 0);
+                bool wasCloaked = false;
+                {
+                    std::lock_guard<std::mutex> lock(g_titleBarMutex);
+                    auto it = g_titleBarLayouts.find(hwnd);
+                    if (it != g_titleBarLayouts.end()) {
+                        wasCloaked = it->second.wasCloaked;
+                        it->second.wasCloaked = isCloaked;
+                    }
+                }
+                // Transition STRICTLY from cloaked -> uncloaked! (No loop!)
+                if (wasCloaked && !isCloaked) {
+                    RefreshBackdrop(hwnd, true); // true: force reset via DWMSBT_NONE to kickstart DWM
+                    InvalidateRect(hwnd, NULL, FALSE);
+                }
+            }
+            break;
+        }
+
         // BASELINE: Always paint black. On an extended DWM frame GDI writes alpha=0,
-        // so DWM composites  result = backdrop + gdiColor. Black = pure backdrop.
-        // Any gray would be ADDED on top (= always lighter). Inactive look is left to DWM.
+        // so DWM composites result = backdrop + gdiColor. Black = pure backdrop.
+        // DWM natively handles its own subtle inactive backdrop dimming!
         case WM_ERASEBKGND: {
             // Background is completely handled in WM_PAINT
             return 1;
@@ -411,28 +521,27 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                 RECT clientRc;
                 GetClientRect(hwnd, &clientRc);
 
-                // Always paint pure black across the window.
-                // On DWM-extended frame with alpha=0, black lets Mica shine through cleanly in active state,
-                // and DWM automatically applies its own subtle fallback/dimming when inactive!
-                FillRect(hdc, &clientRc, (HBRUSH)GetStockObject(BLACK_BRUSH));
-
-                // If window is inactive and we have a custom title bar layout, paint the entire title bar area in inactiveBg!
-                if (!isActive && hasLayout && layout.height > 0) {
-                    RECT rcTitleBar = { 0, 0, clientRc.right, layout.height };
+                if (isActive) {
+                    // Active: Pure black (alpha 0 in DWM frame) lets vibrant Mica shine through!
+                    FillRect(hdc, &clientRc, (HBRUSH)GetStockObject(BLACK_BRUSH));
+                } else {
+                    // Defocused / Inactive: True opaque dark native Windows 11 grey (#101010) with Alpha 255
+                    // Using BufferedPaint with Alpha 255 completely occludes Mica so there is NO milky/washed-out additive blend!
                     HDC hdcBuffered = NULL;
                     BP_PAINTPARAMS bpParams = { sizeof(bpParams) };
                     bpParams.dwFlags = BPPF_NOCLIP;
-                    HPAINTBUFFER hbp = BeginBufferedPaint(hdc, &rcTitleBar, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
+                    HPAINTBUFFER hbp = BeginBufferedPaint(hdc, &clientRc, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
+                    COLORREF bgCol = hasLayout ? layout.palette.inactiveBg : RGB(0x10, 0x10, 0x10);
                     if (hbp && hdcBuffered) {
-                        HBRUSH inactiveBrush = CreateSolidBrush(layout.palette.inactiveBg);
-                        FillRect(hdcBuffered, &rcTitleBar, inactiveBrush);
-                        DeleteObject(inactiveBrush);
-                        BufferedPaintSetAlpha(hbp, &rcTitleBar, 255);
+                        HBRUSH hInactiveBrush = CreateSolidBrush(bgCol);
+                        FillRect(hdcBuffered, &clientRc, hInactiveBrush);
+                        DeleteObject(hInactiveBrush);
+                        BufferedPaintSetAlpha(hbp, &clientRc, 255);
                         EndBufferedPaint(hbp, TRUE);
                     } else {
-                        HBRUSH inactiveBrush = CreateSolidBrush(layout.palette.inactiveBg);
-                        FillRect(hdc, &rcTitleBar, inactiveBrush);
-                        DeleteObject(inactiveBrush);
+                        HBRUSH hInactiveBrush = CreateSolidBrush(bgCol);
+                        FillRect(hdc, &clientRc, hInactiveBrush);
+                        DeleteObject(hInactiveBrush);
                     }
                 }
 
@@ -456,6 +565,27 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
         case WM_WINDOWPOSCHANGED: {
             LRESULT res = CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
             WINDOWPOS* lpwp = (WINDOWPOS*)lParam;
+            
+            // Query DWM cloaked status directly:
+            DWORD cloaked = 0;
+            if (SUCCEEDED(DwmGetWindowAttribute(hwnd, DWMWA_CLOAKED, &cloaked, sizeof(cloaked)))) {
+                bool isCloaked = (cloaked != 0);
+                bool wasCloaked = false;
+                {
+                    std::lock_guard<std::mutex> lock(g_titleBarMutex);
+                    auto it = g_titleBarLayouts.find(hwnd);
+                    if (it != g_titleBarLayouts.end()) {
+                        wasCloaked = it->second.wasCloaked;
+                        it->second.wasCloaked = isCloaked;
+                    }
+                }
+                // Transition from cloaked -> uncloaked (Desktop switch back!)
+                if (wasCloaked && !isCloaked) {
+                    RefreshBackdrop(hwnd, true);
+                    InvalidateRect(hwnd, NULL, FALSE);
+                }
+            }
+
             if (lpwp && (lpwp->flags & SWP_SHOWWINDOW)) {
                 RefreshBackdrop(hwnd, true); // Un-cloaked/shown by shell
             }
@@ -1039,21 +1169,42 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_isAppDarkMode(JNIEnv* env, j
 }
 
 JNIEXPORT jint JNICALL Java_fasttheme_FastTheme_getAccentColor(JNIEnv* env, jclass clazz) {
+    // 1. Try Windows 10/11 DWM AccentColor (ABGR DWORD in registry)
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\DWM", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        DWORD accentColor = 0;
+        DWORD size = sizeof(accentColor);
+        if (RegQueryValueExA(hKey, "AccentColor", NULL, NULL, (LPBYTE)&accentColor, &size) == ERROR_SUCCESS && accentColor != 0) {
+            RegCloseKey(hKey);
+            // AccentColor is stored as 0xAABBGGRR. Convert to ARGB: 0xAARRGGBB
+            DWORD a = (accentColor >> 24) & 0xFF;
+            if (a == 0) a = 0xFF;
+            DWORD b = (accentColor >> 16) & 0xFF;
+            DWORD g = (accentColor >> 8) & 0xFF;
+            DWORD r = accentColor & 0xFF;
+            return (jint)((a << 24) | (r << 16) | (g << 8) | b);
+        }
+        RegCloseKey(hKey);
+    }
+
+    // 2. Try native DwmGetColorizationColor (returns ARGB)
     DWORD color = 0;
     BOOL opaque = FALSE;
-    // 1. Try native DwmGetColorizationColor
     HRESULT hr = DwmGetColorizationColor(&color, &opaque);
-    if (SUCCEEDED(hr)) {
+    if (SUCCEEDED(hr) && color != 0) {
+        // Ensure alpha channel is visible (DwmGetColorizationColor often returns 0x00RRGGBB or low alpha)
+        DWORD a = (color >> 24) & 0xFF;
+        if (a < 50) color |= 0xFF000000;
         return (jint)color;
     }
 
-    // 2. Fallback to DWM registry key
-    HKEY hKey;
+    // 3. Fallback to DWM ColorizationColor
     if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\DWM", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
         DWORD regColor = 0;
         DWORD size = sizeof(regColor);
-        if (RegQueryValueExA(hKey, "ColorizationColor", NULL, NULL, (LPBYTE)&regColor, &size) == ERROR_SUCCESS) {
+        if (RegQueryValueExA(hKey, "ColorizationColor", NULL, NULL, (LPBYTE)&regColor, &size) == ERROR_SUCCESS && regColor != 0) {
             RegCloseKey(hKey);
+            if (((regColor >> 24) & 0xFF) < 50) regColor |= 0xFF000000;
             return (jint)regColor;
         }
         RegCloseKey(hKey);
@@ -1285,6 +1436,7 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setSystemBackdropType(JNIEnv
     if (SUCCEEDED(hr) && type != DWMSBT_NONE) {
         COLORREF transparentColor = DWMWA_COLOR_NONE;
         DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &transparentColor, sizeof(transparentColor));
+        DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &transparentColor, sizeof(transparentColor));
 
         if (FastThemeDebug()) {
             BOOL dark = FALSE;

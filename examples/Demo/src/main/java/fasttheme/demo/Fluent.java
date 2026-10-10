@@ -8,7 +8,7 @@ import fastwindow.FastWindow;
 /**
  * FastTheme + FastWindow Fluent Mica Demo with 48px Scaled Title Bar.
  */
-public class DemoFluentFastWindow {
+public class Fluent {
     public static void main(String[] args) {
         int baseWidth = 900;
         int baseHeight = 560;
@@ -25,10 +25,9 @@ public class DemoFluentFastWindow {
 
         double scaleFactor = scale / 100.0;
         int titleBarHeight = (int) Math.round(48.0 * scaleFactor);
-        int buttonWidth    = (int) Math.round(46.0 * scaleFactor);
+        int buttonWidth = (int) Math.round(46.0 * scaleFactor);
 
-        System.out.println(String.format("[DemoFluent] DPI Scale: %d%% | TitleBar: %dpx | ButtonWidth: %dpx", 
-                scale, titleBarHeight, buttonWidth));
+        System.out.println(String.format("[DemoFluent] DPI Scale: %d%% | TitleBar: %dpx | ButtonWidth: %dpx", scale, titleBarHeight, buttonWidth));
 
         try (FastNativeWindow window = FastWindow.create("FastTheme — Fluent 48px TitleBar", baseWidth, baseHeight)) {
             long hwnd = window.getHWND();
@@ -47,7 +46,8 @@ public class DemoFluentFastWindow {
             while (window.pollEvents()) {
                 try {
                     Thread.sleep(16);
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
             }
         }
     }

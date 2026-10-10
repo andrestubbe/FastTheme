@@ -4,15 +4,14 @@ chcp 65001 > nul
 cd /d "%~dp0"
 
 echo ==============================================================
-echo   FastTheme + FastWindow + FastDirectX - Fluent Mica Demo
+echo   FastGraphics Full — Seamless Desktop Canvas Demo
 echo ==============================================================
 echo.
-
 
 cd examples\Demo
 if not exist "cp.txt" (
     echo [+] Generating classpath...
-    call mvn -q dependency:build-classpath -Dmdep.outputFile=cp.txt
+    call mvn -q dependency:build-classpath "-Dmdep.outputFile=cp.txt"
 )
 
 set /p CP=<cp.txt
@@ -27,8 +26,8 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo [+] Launching Fluent...
-java --enable-preview --enable-native-access=ALL-UNNAMED "-Djava.library.path=..\..\build;..\..\dll;." -cp "!FULL_CP!" fasttheme.demo.Fluent
+echo [+] Launching DemoFull...
+java --enable-preview --enable-native-access=ALL-UNNAMED "-Djava.library.path=..\..\build;..\..\dll;." -cp "!FULL_CP!" fasttheme.demo.DemoFull
 
 if %ERRORLEVEL% NEQ 0 (
     echo.

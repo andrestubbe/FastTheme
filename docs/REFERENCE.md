@@ -1,6 +1,6 @@
 # FastTheme API Reference
 
-This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.7).
+This document outlines the API contracts, data structures, and methods of the **FastTheme** engine (version 0.1.9).
 
 ---
 
@@ -50,6 +50,12 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static native boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth)`
 *   `public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled)`
 *   `public static native void forceFrameUpdate(long hwnd)`
+*   `public static native void minimizeWindow(long hwnd)`: Minimizes the native window via `SW_MINIMIZE`.
+*   `public static native void maximizeWindow(long hwnd)`: Maximizes the native window via `SW_MAXIMIZE`.
+*   `public static native void restoreWindow(long hwnd)`: Restores the native window via `SW_RESTORE`.
+*   `public static native void sendSysCommand(long hwnd, int cmd)`: Posts a `WM_SYSCOMMAND` (e.g. `SC_CLOSE`, `SC_MINIMIZE`, `SC_MAXIMIZE`).
+*   `public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, TitleBarTheme theme)`: Applies rounded corners, Mica backdrop, custom height, native caption buttons, and title bar theme palette.
+*   `public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme)`: Configures custom title bar active/inactive backgrounds and button hover/pressed palettes.
 *   `public static native boolean isSystemDarkMode()`
 *   `public static native boolean isAppDarkMode()`: Queries user personal application dark theme preference from Windows registry (`AppsUseLightTheme`).
 *   `public static native int getAccentColor()`: Retrieves current Windows DWM accent/colorization color as packed 32-bit ARGB int.

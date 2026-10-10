@@ -37,18 +37,14 @@ public class FastTheme {
         NATIVE_AVAILABLE = loaded;
     }
 
-    // Constructor
     public FastTheme() {
     }
 
-    // Methods
     public static void addListener(ThemeListener listener) {
         if (listener != null) {
             listeners.add(listener);
         }
     }
-
-    public static native void addTitleBarControlRect(long hwnd, int x, int y, int w, int h);
 
     public static void applyToWindow(long hwnd) {
         applyToWindow(hwnd, "TITLE_BAR_BACKGROUND", "TITLE_BAR_TEXT", "WINDOW_BACKGROUND");
@@ -99,6 +95,8 @@ public class FastTheme {
         }
     }
 
+    public static native void addTitleBarControlRect(long hwnd, int x, int y, int w, int h);
+
     public static native void clearTitleBarControlRects(long hwnd);
 
     public static native void closeWindow(long hwnd);
@@ -127,136 +125,14 @@ public class FastTheme {
         set(ThemeParser.loadFromFile(file));
     }
 
-    public static native void maximizeWindow(long hwnd);
-
-    public static native void minimizeWindow(long hwnd);
-
     public static void removeListener(ThemeListener listener) {
         listeners.remove(listener);
     }
-
-    public static native void restoreWindow(long hwnd);
-
-    public static native void sendSysCommand(long hwnd, int cmd);
-
-    // Getters
-    public static boolean isNativeAvailable() {
-        return NATIVE_AVAILABLE;
-    }
-
-    public static native boolean isSystemDarkMode();
-
-    public static native boolean isAppDarkMode();
-
-    /**
-     * Retrieves the native Windows DWM accent/colorization color as packed 32-bit ARGB.
-     *
-     * @return Packed 32-bit ARGB integer.
-     */
-    public static native int getAccentColor();
-
-    /**
-     * Retrieves the native Windows DWM accent color as a java.awt.Color.
-     *
-     * @return Color object representing the current Windows accent color.
-     */
-    public static Color getSystemAccentColor() {
-        return ThemeColorUtil.toAwtColor(getAccentColor());
-    }
-
-    public static native boolean isColorizationOpaque();
-
-    public static native boolean isHighContrast();
-
-    public static native boolean isTransparencyEnabled();
 
     public static ThemeData current() {
         return currentTheme;
     }
 
-    public static int get(int slotIndex) {
-        return currentTheme.get(slotIndex);
-    }
-
-    public static int get(String keyName) {
-        return currentTheme.get(keyName);
-    }
-
-    public static Color getColor(int slotIndex) {
-        return ThemeColorUtil.toAwtColor(get(slotIndex));
-    }
-
-    public static Color getColor(String keyName) {
-        return ThemeColorUtil.toAwtColor(get(keyName));
-    }
-
-    public static native long getConsoleWindowHandle();
-
-    public static native long getWindowHandle(Component component);
-
-    // Setters
-    public static void set(ThemeData theme) {
-        if (theme == null) return;
-        currentTheme = theme;
-        for (ThemeListener l : listeners) {
-            try {
-                l.onThemeChanged(theme);
-            } catch (Exception e) {
-                System.err.println("[FastTheme] Listener failed on theme change: " + e.getMessage());
-            }
-        }
-    }
-
-    public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop);
-
-    public static native boolean setBorderlessShadow(long hwnd, boolean enabled);
-
-    public static native boolean setCornerStyle(long hwnd, int style);
-
-    public static native boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth);
-
-    public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled) {
-        return setNativeTitleBarButtonsEnabled(hwnd, enabled, 96);
-    }
-
-    public static native boolean setOverlayDragHeight(long hwnd, int height);
-
-    public static native boolean setSystemBackdropType(long hwnd, int type);
-
-    public static native boolean setTitleBarColor(long hwnd, int r, int g, int b);
-
-    public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
-
-    public static native boolean setTitleBarHeight(long hwnd, int height);
-
-    public static native boolean setTitleBarTextColor(long hwnd, int r, int g, int b);
-
-    public static native boolean setWindowBackgroundColor(long hwnd, int r, int g, int b);
-
-    public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize);
-
-    public static native boolean setWindowTransparency(long hwnd, int alpha);
-
-    public static native boolean setTitleBarThemeColors(long hwnd,
-            int inactiveBg, int activeBg,
-            int glyphActive, int glyphInactive, int glyphInactiveHover,
-            int inactiveBtnHover, int inactiveBtnPressed,
-            int activeBtnHover, int activeBtnPressed,
-            int closeHover, int closePressed, int closeHoverGlyph);
-
-    public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme) {
-        if (hwnd == 0 || theme == null) return false;
-        return setTitleBarThemeColors(hwnd,
-                theme.inactiveBackgroundColor, theme.activeBackgroundColor,
-                theme.glyphColorActive, theme.glyphColorInactive, theme.glyphColorInactiveHover,
-                theme.inactiveButtonHoverBg, theme.inactiveButtonPressedBg,
-                theme.activeButtonHoverBg, theme.activeButtonPressedBg,
-                theme.activeCloseHoverBg, theme.activeClosePressedBg, theme.closeHoverGlyphColor);
-    }
-
-    /**
-     * Applies full Fluent Mica TitleBar with native caption buttons, dark mode, and custom palette.
-     */
     public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, TitleBarTheme theme) {
         if (hwnd == 0) return;
         setTitleBarDarkMode(hwnd, true);
@@ -272,4 +148,111 @@ public class FastTheme {
     public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth) {
         applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth, TitleBarTheme.fluentDark());
     }
+
+    public static boolean isNativeAvailable() {
+        return NATIVE_AVAILABLE;
+    }
+
+    public static int get(int slotIndex) {
+        return currentTheme.get(slotIndex);
+    }
+
+    public static int get(String keyName) {
+        return currentTheme.get(keyName);
+    }
+
+    public static Color getSystemAccentColor() {
+        return ThemeColorUtil.toAwtColor(getAccentColor());
+    }
+
+    public static Color getColor(int slotIndex) {
+        return ThemeColorUtil.toAwtColor(get(slotIndex));
+    }
+
+    public static Color getColor(String keyName) {
+        return ThemeColorUtil.toAwtColor(get(keyName));
+    }
+
+    public static void set(ThemeData theme) {
+        if (theme == null) return;
+        currentTheme = theme;
+        for (ThemeListener l : listeners) {
+            try {
+                l.onThemeChanged(theme);
+            } catch (Exception e) {
+                System.err.println("[FastTheme] Listener failed on theme change: " + e.getMessage());
+            }
+        }
+    }
+
+    public static boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled) {
+        return setNativeTitleBarButtonsEnabled(hwnd, enabled, 96);
+    }
+
+    public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme) {
+        if (hwnd == 0 || theme == null) return false;
+        return setTitleBarThemeColors(hwnd,
+                theme.inactiveBackgroundColor, theme.activeBackgroundColor,
+                theme.glyphColorActive, theme.glyphColorInactive, theme.glyphColorInactiveHover,
+                theme.inactiveButtonHoverBg, theme.inactiveButtonPressedBg,
+                theme.activeButtonHoverBg, theme.activeButtonPressedBg,
+                theme.activeCloseHoverBg, theme.activeClosePressedBg, theme.closeHoverGlyphColor);
+    }
+
+    public static native void maximizeWindow(long hwnd);
+
+    public static native void minimizeWindow(long hwnd);
+
+    public static native void restoreWindow(long hwnd);
+
+    public static native void sendSysCommand(long hwnd, int cmd);
+
+    public static native boolean isSystemDarkMode();
+
+    public static native boolean isAppDarkMode();
+
+    public static native boolean isColorizationOpaque();
+
+    public static native boolean isHighContrast();
+
+    public static native boolean isTransparencyEnabled();
+
+    public static native int getAccentColor();
+
+    public static native long getConsoleWindowHandle();
+
+    public static native long getWindowHandle(Component component);
+
+    public static native boolean setAlwaysOnTop(long hwnd, boolean alwaysOnTop);
+
+    public static native boolean setBorderlessShadow(long hwnd, boolean enabled);
+
+    public static native boolean setCornerStyle(long hwnd, int style);
+
+    public static native boolean setNativeTitleBarButtonsEnabled(long hwnd, boolean enabled, int buttonWidth);
+
+    public static native boolean setTitleBarColor(long hwnd, int r, int g, int b);
+
+    public static native boolean setTitleBarDarkMode(long hwnd, boolean enabled);
+
+    public static native boolean setTitleBarHeight(long hwnd, int height);
+
+    public static native boolean setTitleBarTextColor(long hwnd, int r, int g, int b);
+
+    public static native boolean setTitleBarThemeColors(long hwnd,
+                                                        int inactiveBg, int activeBg,
+                                                        int glyphActive, int glyphInactive, int glyphInactiveHover,
+                                                        int inactiveBtnHover, int inactiveBtnPressed,
+                                                        int activeBtnHover, int activeBtnPressed,
+                                                        int closeHover, int closePressed, int closeHoverGlyph);
+
+    public static native boolean setOverlayDragHeight(long hwnd, int height);
+
+    public static native boolean setSystemBackdropType(long hwnd, int type);
+
+    public static native boolean setWindowBackgroundColor(long hwnd, int r, int g, int b);
+
+    public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize);
+
+    public static native boolean setWindowTransparency(long hwnd, int alpha);
 }
