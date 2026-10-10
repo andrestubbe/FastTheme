@@ -1580,4 +1580,187 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv
     return res ? JNI_TRUE : JNI_FALSE;
 }
 
+// ============================================================================
+// SYSTEM THEME MONITORING (Event-driven via WM_SETTINGCHANGE & WM_THEMECHANGED)
+// ============================================================================
+
+static JavaVM* g_themeJvm = nullptr;
+static jclass g_fastThemeClass = nullptr;
+static jmethodID g_themeChangedMethod = nullptr;
+static std::atomic<HWND> g_themeHwnd(nullptr);
+static HANDLE g_themeThread = nullptr;
+static DWORD g_themeThreadId = 0;
+
+static void DispatchThemeChangedToJava() {
+    if (!g_themeJvm || !g_fastThemeClass || !g_themeChangedMethod) return;
+
+    JNIEnv* env = nullptr;
+    jint res = g_themeJvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+    bool didAttach = false;
+    if (res == JNI_EDETACHED) {
+        if (g_themeJvm->AttachCurrentThread((void**)&env, nullptr) == 0) {
+            didAttach = true;
+        } else {
+            return;
+        }
+    } else if (res != JNI_OK) {
+        return;
+    }
+
+    bool isDark = IsDarkModeEnabled();
+    jint accent = Java_fasttheme_FastTheme_getAccentColor(env, g_fastThemeClass);
+
+    env->CallStaticVoidMethod(g_fastThemeClass, g_themeChangedMethod, (jboolean)isDark, accent);
+
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+    }
+
+    if (didAttach) {
+        g_themeJvm->DetachCurrentThread();
+    }
+}
+
+static LRESULT CALLBACK ThemeMonitorWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg) {
+        case WM_SETTINGCHANGE: {
+            // Check if settings change involves ImmersiveColorSet, ColorizationColor or WindowMetrics
+            if (lParam != 0) {
+                LPCWSTR section = (LPCWSTR)lParam;
+                if (wcscmp(section, L"ImmersiveColorSet") == 0 ||
+                    wcscmp(section, L"ColorizationColor") == 0 ||
+                    wcscmp(section, L"WindowMetrics") == 0) {
+                    DispatchThemeChangedToJava();
+                }
+            } else {
+                DispatchThemeChangedToJava();
+            }
+            return 0;
+        }
+
+        case WM_THEMECHANGED: {
+            DispatchThemeChangedToJava();
+            return 0;
+        }
+
+        case WM_DWMCOLORIZATIONCOLORCHANGED: {
+            DispatchThemeChangedToJava();
+            return 0;
+        }
+
+        case WM_CLOSE: {
+            DestroyWindow(hwnd);
+            return 0;
+        }
+
+        case WM_DESTROY: {
+            PostQuitMessage(0);
+            return 0;
+        }
+    }
+    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+}
+
+static DWORD WINAPI ThemeMonitorThread(LPVOID lpParam) {
+    WNDCLASSW wc = {};
+    wc.lpfnWndProc = ThemeMonitorWindowProc;
+    wc.hInstance = GetModuleHandleW(nullptr);
+    wc.lpszClassName = L"FastThemeSystemMonitor";
+
+    RegisterClassW(&wc);
+
+    HWND hwnd = CreateWindowExW(
+        0,
+        L"FastThemeSystemMonitor",
+        L"FastTheme System Monitor",
+        WS_OVERLAPPEDWINDOW,
+        0, 0, 0, 0,
+        HWND_MESSAGE, // Message-only window (pure push events, no rendering)
+        NULL,
+        GetModuleHandleW(NULL),
+        NULL
+    );
+
+    if (!hwnd) {
+        // Fallback to top-level hidden window if HWND_MESSAGE is not receiving broadcasts
+        hwnd = CreateWindowExW(
+            0,
+            L"FastThemeSystemMonitor",
+            L"FastTheme System Monitor",
+            WS_POPUP,
+            0, 0, 0, 0,
+            NULL,
+            NULL,
+            GetModuleHandleW(NULL),
+            NULL
+        );
+    }
+
+    if (!hwnd) {
+        return 1;
+    }
+
+    g_themeHwnd.store(hwnd);
+
+    // Initial broadcast to sync state immediately upon registration
+    DispatchThemeChangedToJava();
+
+    MSG msg = {};
+    while (GetMessageW(&msg, nullptr, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+
+    g_themeHwnd.store(nullptr);
+    return 0;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startSystemThemeMonitoring(JNIEnv* env, jclass clazz) {
+    if (g_themeHwnd.load() != nullptr) {
+        return JNI_TRUE; // Already running
+    }
+
+    if (!g_themeJvm) {
+        env->GetJavaVM(&g_themeJvm);
+    }
+
+    if (!g_fastThemeClass) {
+        g_fastThemeClass = (jclass)env->NewGlobalRef(clazz);
+        g_themeChangedMethod = env->GetStaticMethodID(g_fastThemeClass, "onNativeSystemThemeChanged", "(ZI)V");
+        if (!g_themeChangedMethod) {
+            return JNI_FALSE;
+        }
+    }
+
+    HANDLE hThread = CreateThread(nullptr, 0, ThemeMonitorThread, nullptr, 0, &g_themeThreadId);
+    if (!hThread) {
+        return JNI_FALSE;
+    }
+    g_themeThread = hThread;
+
+    // Wait briefly for window handle initialization
+    int retries = 0;
+    while (g_themeHwnd.load() == nullptr && retries++ < 50) {
+        Sleep(10);
+    }
+
+    return (g_themeHwnd.load() != nullptr) ? JNI_TRUE : JNI_FALSE;
+}
+
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_stopSystemThemeMonitoring(JNIEnv* env, jclass clazz) {
+    HWND hwnd = g_themeHwnd.load();
+    if (hwnd != nullptr) {
+        PostMessageW(hwnd, WM_CLOSE, 0, 0);
+    }
+
+    if (g_themeThread) {
+        WaitForSingleObject(g_themeThread, 1000);
+        CloseHandle(g_themeThread);
+        g_themeThread = nullptr;
+    }
+
+    return JNI_TRUE;
+}
+
 } // extern "C"
+

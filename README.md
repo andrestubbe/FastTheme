@@ -191,67 +191,69 @@ FastTheme is rigorously profiled using **JMH** to guarantee zero-allocation sub-
 
 | Method / Signature | Return Type | Description | Docs |
 |:---|:---|:---|:---|
-| `FastTheme.load(String text)` | `void` | Parses and globally activates a `.theme` formatted text definition. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.load(byte[] binaryData)` | `void` | Deserializes and globally activates a `.themebin` binary payload. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.loadFile(String path)` / `(File file)` | `void` | Loads and activates `.theme` or `.themebin` directly from a file path. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.addListener(ThemeListener)` | `void` | Registers functional observers for live theme change events. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.removeListener(ThemeListener)` | `void` | Unregisters functional observers for live theme change events. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.current()` | `ThemeData` | Returns the currently active `ThemeData` instance. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.get(String key)` / `get(int slot)` | `int` | Retrieves packed 32-bit ARGB color integer ($O(1)$ zero-allocation array read for slot). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.getColor(String key)` / `(int slot)` | `Color` | Converts the resolved color to a standard Java AWT/Swing `Color` object. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.set(ThemeData theme)` | `void` | Activates a `ThemeData` instance globally and notifies all registered listeners. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.load(String text)` | `void` | Parses and globally activates a `.theme` formatted text definition. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.load(byte[] binaryData)` | `void` | Deserializes and globally activates a `.themebin` binary payload. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.loadFile(String path)` / `(File file)` | `void` | Loads and activates `.theme` or `.themebin` directly from a file path. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.addListener(ThemeListener)` | `void` | Registers functional observers for live theme change events. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.removeListener(ThemeListener)` | `void` | Unregisters functional observers for live theme change events. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.current()` | `ThemeData` | Returns the currently active `ThemeData` instance. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.get(String key)` / `get(int slot)` | `int` | Retrieves packed 32-bit ARGB color integer ($O(1)$ zero-allocation array read for slot). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getColor(String key)` / `(int slot)` | `Color` | Converts the resolved color to a standard Java AWT/Swing `Color` object. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.set(ThemeData theme)` | `void` | Activates a `ThemeData` instance globally and notifies all registered listeners. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 
 ### Native Win32 DWM Window Styling (`FastTheme`)
 
 | Method / Signature | Return Type | Description | Docs |
 |:---|:---|:---|:---|
-| `FastTheme.applyToWindow(long hwnd)` / `(Component comp)` | `void` | Automatically applies title bar background, text, and window colors from active theme. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.applyToWindow(hwnd, bgKey, fgKey, winKey)` | `void` | Applies specific user-defined theme keys to the native window DWM chrome. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.enableMica(long hwnd, boolean enabled)` | `boolean` | Enables Windows 11 native Mica backdrop material effect (with legacy fallback). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.getWindowHandle(Component comp)` | `long` | Extracts the native 64-bit `HWND` handle from an AWT/Swing component. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.getConsoleWindowHandle()` | `long` | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isNativeAvailable()` | `boolean` | Checks whether the native Windows styling DLL is loaded and functional. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isSystemDarkMode()` | `boolean` | Detects global Windows system dark mode setting. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isAppDarkMode()` | `boolean` | Detects user/app personal dark mode preference from Windows registry. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.getAccentColor()` | `int` | Retrieves native Windows DWM accent/colorization color as packed 32-bit ARGB. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.getSystemAccentColor()` | `Color` | Convenience method returning the native Windows accent color as a `java.awt.Color`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isColorizationOpaque()` | `boolean` | Checks whether Windows DWM frame colorization blend is opaque. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isHighContrast()` | `boolean` | Checks whether Windows High Contrast mode is currently enabled (`SPI_GETHIGHCONTRAST`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.isTransparencyEnabled()` | `boolean` | Checks whether Windows system-wide transparency effects are enabled by the user. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | `boolean` | Toggles Windows 10/11 immersive dark mode for the native title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native caption background color on Windows 11. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native title bar text/foreground color on Windows 11. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the Win32 window background fill color. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setWindowTransparency(long hwnd, int alpha)` | `boolean` | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setSystemBackdropType(long hwnd, int type)` | `boolean` | Sets native Windows 11 backdrop material (`BACKDROP_MICA`, `BACKDROP_ACRYLIC`, `BACKDROP_MICA_ALT`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setCornerStyle(long hwnd, int style)` | `boolean` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | `boolean` | Removes native title bar while preserving native OS drop shadow (Raycast-style). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setOverlayDragHeight(long hwnd, int height)` | `boolean` | Defines top invisible grab area (in pixels) for draggable borderless windows. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setTitleBarHeight(long hwnd, int height)` | `boolean` | Sets custom interactive title bar height (in pixels) for Photos-style modern chrome. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.addTitleBarControlRect(hwnd, x, y, w, h)` | `void` | Registers an interactive exclusion rect in the title bar (clicks route to UI instead of dragging). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.clearTitleBarControlRects(long hwnd)` | `void` | Clears all registered title bar control exclusion zones for the window. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setNativeTitleBarButtonsEnabled(hwnd, bool, width)` | `boolean` | Delegates top-right caption area to Windows native system buttons (Minimize, Maximize, Close). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.forceFrameUpdate(long hwnd)` | `void` | Forces immediate DWM non-client frame re-evaluation and redraw on visible windows. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | `boolean` | Toggles native minimize and maximize buttons in the window title bar. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | `boolean` | Toggles native Win32 window topmost z-order. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.applyFluentTitleBar(hwnd, height, btnW)` | `void` | One-liner: applies Dark Mode, Rounded Corners, Mica backdrop, height & native caption buttons. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.setTitleBarTheme(long hwnd, TitleBarTheme theme)` | `boolean` | Configures the full Fluent caption palette (active/inactive backgrounds, hover/pressed, glyphs). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.minimizeWindow(long hwnd)` | `void` | Minimizes the specified Win32 window natively via `SW_MINIMIZE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.maximizeWindow(long hwnd)` | `void` | Maximizes the specified Win32 window natively via `SW_MAXIMIZE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.restoreWindow(long hwnd)` | `void` | Restores the specified Win32 window natively via `SW_RESTORE`. | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
-| `FastTheme.sendSysCommand(long hwnd, int cmd)` | `void` | Sends a native `WM_SYSCOMMAND` message (e.g. `SC_CLOSE`, `SC_MINIMIZE`, `SC_MAXIMIZE`). | [Wiki](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.applyToWindow(long hwnd)` / `(Component comp)` | `void` | Automatically applies title bar background, text, and window colors from active theme. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.applyToWindow(hwnd, bgKey, fgKey, winKey)` | `void` | Applies specific user-defined theme keys to the native window DWM chrome. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.enableMica(long hwnd, boolean enabled)` | `boolean` | Enables Windows 11 native Mica backdrop material effect (with legacy fallback). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getWindowHandle(Component comp)` | `long` | Extracts the native 64-bit `HWND` handle from an AWT/Swing component. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getConsoleWindowHandle()` | `long` | Queries the native Win32 `HWND` of the active Windows console window (`cmd.exe`/ConHost). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isNativeAvailable()` | `boolean` | Checks whether the native Windows styling DLL is loaded and functional. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isSystemDarkMode()` | `boolean` | Detects global Windows system dark mode setting. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isAppDarkMode()` | `boolean` | Detects user/app personal dark mode preference from Windows registry. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getAccentColor()` | `int` | Retrieves native Windows DWM accent/colorization color as packed 32-bit ARGB. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.getSystemAccentColor()` | `Color` | Convenience method returning the native Windows accent color as a `java.awt.Color`. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isColorizationOpaque()` | `boolean` | Checks whether Windows DWM frame colorization blend is opaque. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isHighContrast()` | `boolean` | Checks whether Windows High Contrast mode is currently enabled (`SPI_GETHIGHCONTRAST`). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.isTransparencyEnabled()` | `boolean` | Checks whether Windows system-wide transparency effects are enabled by the user. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarDarkMode(long hwnd, boolean dark)` | `boolean` | Toggles Windows 10/11 immersive dark mode for the native title bar. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native caption background color on Windows 11. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarTextColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the native title bar text/foreground color on Windows 11. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setWindowBackgroundColor(long hwnd, int r, int g, int b)` | `boolean` | Sets the Win32 window background fill color. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setWindowTransparency(long hwnd, int alpha)` | `boolean` | Sets window alpha blending from `0` (transparent) to `255` (fully opaque). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setSystemBackdropType(long hwnd, int type)` | `boolean` | Sets native Windows 11 backdrop material (`BACKDROP_MICA`, `BACKDROP_ACRYLIC`, `BACKDROP_MICA_ALT`). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setCornerStyle(long hwnd, int style)` | `boolean` | Sets window corner preference on Windows 11 (`0`=Default, `1`=Square, `2`=Rounded, `3`=Small Rounded). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setBorderlessShadow(long hwnd, boolean enabled)` | `boolean` | Removes native title bar while preserving native OS drop shadow (Raycast-style). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setOverlayDragHeight(long hwnd, int height)` | `boolean` | Defines top invisible grab area (in pixels) for draggable borderless windows. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarHeight(long hwnd, int height)` | `boolean` | Sets custom interactive title bar height (in pixels) for Photos-style modern chrome. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.addTitleBarControlRect(hwnd, x, y, w, h)` | `void` | Registers an interactive exclusion rect in the title bar (clicks route to UI instead of dragging). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.clearTitleBarControlRects(long hwnd)` | `void` | Clears all registered title bar control exclusion zones for the window. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setNativeTitleBarButtonsEnabled(hwnd, bool, width)` | `boolean` | Delegates top-right caption area to Windows native system buttons (Minimize, Maximize, Close). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.forceFrameUpdate(long hwnd)` | `void` | Forces immediate DWM non-client frame re-evaluation and redraw on visible windows. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setWindowButtonsVisible(long hwnd, boolean min, boolean max)` | `boolean` | Toggles native minimize and maximize buttons in the window title bar. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setAlwaysOnTop(long hwnd, boolean alwaysOnTop)` | `boolean` | Toggles native Win32 window topmost z-order. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.applyFluentTitleBar(hwnd, height, btnW)` | `void` | One-liner: applies Dark Mode, Rounded Corners, Mica backdrop, height & native caption buttons. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.setTitleBarTheme(long hwnd, TitleBarTheme theme)` | `boolean` | Configures the full Fluent caption palette (active/inactive backgrounds, hover/pressed, glyphs). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.minimizeWindow(long hwnd)` | `void` | Minimizes the specified Win32 window natively via `SW_MINIMIZE`. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.maximizeWindow(long hwnd)` | `void` | Maximizes the specified Win32 window natively via `SW_MAXIMIZE`. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.restoreWindow(long hwnd)` | `void` | Restores the specified Win32 window natively via `SW_RESTORE`. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.sendSysCommand(long hwnd, int cmd)` | `void` | Sends a native `WM_SYSCOMMAND` message (e.g. `SC_CLOSE`, `SC_MINIMIZE`, `SC_MAXIMIZE`). | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.addSystemThemeListener(SystemThemeListener)` | `void` | Registers an event-driven listener for live Windows Dark/Light mode & accent changes. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
+| `FastTheme.removeSystemThemeListener(SystemThemeListener)` | `void` | Unregisters an OS theme listener and automatically shuts down background message thread. | [Reference](docs/REFERENCE.md#1-class-fastthemefasttheme) |
 
 ### Supporting Utilities (`ThemeKeys`, `ThemeParser`, `ThemeColorUtil`)
 
 | Method / Signature | Return Type | Description | Docs |
 |:---|:---|:---|:---|
-| `ThemeKeys.slot(String key)` | `int` | Retrieves existing slot ID or registers a dynamic slot index on demand. | [Wiki](docs/REFERENCE.md#2-class-fastthemethemekeys) |
-| `ThemeKeys.indexOf(String key)` / `nameOf(int slot)` | `int` / `String` | Bidirectional translation between dynamic string key names and slot indices. | [Wiki](docs/REFERENCE.md#2-class-fastthemethemekeys) |
-| `ThemeParser.parseText(String text)` | `ThemeData` | Deserializes human-readable `.theme` content with `@KEY` alias resolution. | [Wiki](docs/REFERENCE.md#4-class-fastthemethemeparser) |
-| `ThemeParser.parseBinary(byte[] bytes)` | `ThemeData` | Deserializes ultra-fast binary `.themebin` payload. | [Wiki](docs/REFERENCE.md#4-class-fastthemethemeparser) |
-| `ThemeColorUtil.getContrastForeground(int bg)` | `int` | Calculates optimal high-contrast foreground color based on WCAG 2.1 relative luminance. | [Wiki](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
-| `ThemeColorUtil.lighten(argb, amt)` / `darken(argb, amt)` | `int` | Pure mathematical tinting and shading for hover/pressed UI states. | [Wiki](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
-| `ThemeColorUtil.blend(c1, c2, float t)` | `int` | Linear color interpolation and channel alpha blending. | [Wiki](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
+| `ThemeKeys.slot(String key)` | `int` | Retrieves existing slot ID or registers a dynamic slot index on demand. | [Reference](docs/REFERENCE.md#2-class-fastthemethemekeys) |
+| `ThemeKeys.indexOf(String key)` / `nameOf(int slot)` | `int` / `String` | Bidirectional translation between dynamic string key names and slot indices. | [Reference](docs/REFERENCE.md#2-class-fastthemethemekeys) |
+| `ThemeParser.parseText(String text)` | `ThemeData` | Deserializes human-readable `.theme` content with `@KEY` alias resolution. | [Reference](docs/REFERENCE.md#4-class-fastthemethemeparser) |
+| `ThemeParser.parseBinary(byte[] bytes)` | `ThemeData` | Deserializes ultra-fast binary `.themebin` payload. | [Reference](docs/REFERENCE.md#4-class-fastthemethemeparser) |
+| `ThemeColorUtil.getContrastForeground(int bg)` | `int` | Calculates optimal high-contrast foreground color based on WCAG 2.1 relative luminance. | [Reference](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
+| `ThemeColorUtil.lighten(argb, amt)` / `darken(argb, amt)` | `int` | Pure mathematical tinting and shading for hover/pressed UI states. | [Reference](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
+| `ThemeColorUtil.blend(c1, c2, float t)` | `int` | Linear color interpolation and channel alpha blending. | [Reference](docs/REFERENCE.md#5-class-fastthemethemecolorutil) |
 
 ---
 

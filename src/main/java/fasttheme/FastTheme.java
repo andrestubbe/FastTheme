@@ -25,6 +25,8 @@ public class FastTheme {
     private static final boolean NATIVE_AVAILABLE;
     private static volatile ThemeData currentTheme = new ThemeData("Default");
     private static final List<ThemeListener> listeners = new CopyOnWriteArrayList<>();
+    private static final List<SystemThemeListener> systemThemeListeners = new CopyOnWriteArrayList<>();
+    private static volatile boolean systemMonitoringActive = false;
 
     static {
         boolean loaded = false;
@@ -43,6 +45,49 @@ public class FastTheme {
     public static void addListener(ThemeListener listener) {
         if (listener != null) {
             listeners.add(listener);
+        }
+    }
+
+    /**
+     * Subscribes a listener to OS-level Windows theme changes (Dark/Light mode switch or accent color).
+     * Automatically starts the native event-driven theme monitor thread if not already running.
+     *
+     * @param listener The callback to execute when the Windows theme changes.
+     */
+    public static synchronized void addSystemThemeListener(SystemThemeListener listener) {
+        if (listener == null) return;
+        systemThemeListeners.add(listener);
+        if (!systemMonitoringActive && isNativeAvailable()) {
+            if (startSystemThemeMonitoring()) {
+                systemMonitoringActive = true;
+            }
+        }
+    }
+
+    /**
+     * Unsubscribes an OS-level theme listener.
+     * If no listeners remain, stops the native background monitor thread.
+     *
+     * @param listener The listener to remove.
+     */
+    public static synchronized void removeSystemThemeListener(SystemThemeListener listener) {
+        systemThemeListeners.remove(listener);
+        if (systemThemeListeners.isEmpty() && systemMonitoringActive && isNativeAvailable()) {
+            stopSystemThemeMonitoring();
+            systemMonitoringActive = false;
+        }
+    }
+
+    /**
+     * Native callback invoked by the Win32 message loop upon WM_SETTINGCHANGE.
+     */
+    private static void onNativeSystemThemeChanged(boolean isDark, int accentColor) {
+        for (SystemThemeListener l : systemThemeListeners) {
+            try {
+                l.onThemeChanged(isDark, accentColor);
+            } catch (Throwable t) {
+                System.err.println("[FastTheme] SystemThemeListener error: " + t.getMessage());
+            }
         }
     }
 
@@ -255,4 +300,8 @@ public class FastTheme {
     public static native boolean setWindowButtonsVisible(long hwnd, boolean showMinimize, boolean showMaximize);
 
     public static native boolean setWindowTransparency(long hwnd, int alpha);
+
+    public static native boolean startSystemThemeMonitoring();
+
+    public static native boolean stopSystemThemeMonitoring();
 }

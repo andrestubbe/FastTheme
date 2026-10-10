@@ -45,6 +45,8 @@ JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setTitleBarTextColor(JNIEnv*
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowBackgroundColor(JNIEnv* env, jclass clazz, jlong hwndLong, jint r, jint g, jint b);
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowButtonsVisible(JNIEnv* env, jclass clazz, jlong hwndLong, jboolean showMinimize, jboolean showMaximize);
 JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_setWindowTransparency(JNIEnv* env, jclass clazz, jlong hwndLong, jint alpha);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_startSystemThemeMonitoring(JNIEnv* env, jclass clazz);
+JNIEXPORT jboolean JNICALL Java_fasttheme_FastTheme_stopSystemThemeMonitoring(JNIEnv* env, jclass clazz);
 
 #ifdef __cplusplus
 }
