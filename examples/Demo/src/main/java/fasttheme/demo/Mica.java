@@ -22,7 +22,7 @@ public class Mica {
             System.out.println("[MicaDemo] Window created successfully, HWND = " + hwnd);
 
             if (hwnd != 0) {
-                // Let Windows 11 Mica material flow across both titlebar and body
+                // Let Windows 11 Mica material flow across both titlebar and body before displaying
                 FastTheme.setTitleBarDarkMode(hwnd, true);
                 FastTheme.setCornerStyle(hwnd, 2); // Windows 11 Rounded corners
                 FastTheme.setSystemBackdropType(hwnd, FastTheme.BACKDROP_MICA);
