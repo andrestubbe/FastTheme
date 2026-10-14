@@ -54,8 +54,11 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 *   `public static native void maximizeWindow(long hwnd)`: Maximizes the native window via `SW_MAXIMIZE`.
 *   `public static native void restoreWindow(long hwnd)`: Restores the native window via `SW_RESTORE`.
 *   `public static native void sendSysCommand(long hwnd, int cmd)`: Posts a `WM_SYSCOMMAND` (e.g. `SC_CLOSE`, `SC_MINIMIZE`, `SC_MAXIMIZE`).
-*   `public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, TitleBarTheme theme)`: Applies rounded corners, Mica backdrop, custom height, native caption buttons, and title bar theme palette.
-*   `public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme)`: Configures custom title bar active/inactive backgrounds and button hover/pressed palettes.
+*   `public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth)`: One-line setup with automatic system light/dark detection via `isAppDarkMode()`.
+*   `public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, WindowFrameTheme theme)`: Applies rounded corners, Mica backdrop, custom height, native caption buttons, and title bar theme palette.
+*   `public static boolean setWindowFrameTheme(long hwnd, WindowFrameTheme theme)`: Configures custom title bar active/inactive backgrounds and button hover/pressed palettes.
+*   `public static boolean setTitleBarTheme(long hwnd, WindowFrameTheme theme)`: Backward-compatible alias for `setWindowFrameTheme`.
+*   `public static void enableAutoSystemTheme(long hwnd)`: Attaches a system theme listener that automatically synchronizes title bar dark mode and palette (`fluentDark()` / `fluentLight()`) with Windows OS preference.
 *   `public static native boolean isSystemDarkMode()`
 *   `public static native boolean isAppDarkMode()`: Queries user personal application dark theme preference from Windows registry (`AppsUseLightTheme`).
 *   `public static native int getAccentColor()`: Retrieves current Windows DWM accent/colorization color as packed 32-bit ARGB int.
@@ -68,7 +71,35 @@ Primary facade for both the Dynamic Theme State Engine and the native Windows DW
 
 ---
 
-## 2. Class: `fasttheme.ThemeKeys`
+## 2. Class: `fasttheme.WindowFrameTheme`
+
+Encapsulates complete color palettes and rendering parameters for custom native title bars and Fluent caption buttons (Minimize, Maximize, Close).
+
+### Factory Methods
+
+*   `public static WindowFrameTheme fluentDark()`: Authentic Windows 11 Fluent dark palette (`#202020` inactive background, `#1B2223` active background, white glyphs `#FFFFFF`, subtle white alpha hover/pressed states, and standard red close button).
+*   `public static WindowFrameTheme fluentLight()`: Authentic Windows 11 Fluent light palette (`#EAEAEA` inactive background, `#F3F3F3` active background, dark glyphs `#1A1A1A`, subtle black alpha hover/pressed states, and standard red close button).
+*   `public static WindowFrameTheme fromTheme(ThemeData data)`: Extracts a `WindowFrameTheme` dynamically from active or loaded `ThemeData`. Resolves keys like `titlebar.background`, `titlebar.background.inactive`, `titlebar.text`, `button.hover`, `button.pressed`, `button.close.hover`, and `button.close.pressed`.
+*   `public void updateFromTheme(ThemeData data)`: Updates the existing instance's palette fields dynamically from the provided `ThemeData`.
+
+### Fields & Properties
+
+*   `public int activeBackground`: 32-bit ARGB background color when the window has focus.
+*   `public int inactiveBackground`: 32-bit ARGB background color when the window is inactive / unfocused.
+*   `public int activeText`: 32-bit ARGB title text and default caption glyph color when active.
+*   `public int inactiveText`: 32-bit ARGB title text and default caption glyph color when inactive.
+*   `public int hoverBackground`: 32-bit ARGB hover background for standard caption buttons (Minimize, Maximize).
+*   `public int pressedBackground`: 32-bit ARGB pressed background for standard caption buttons.
+*   `public int hoverText`: 32-bit ARGB glyph color on hover for standard caption buttons.
+*   `public int pressedText`: 32-bit ARGB glyph color on pressed for standard caption buttons.
+*   `public int closeHoverBackground`: 32-bit ARGB hover background for the Close button (typically red, e.g. `#C42B1C`).
+*   `public int closePressedBackground`: 32-bit ARGB pressed background for the Close button (e.g. `#B32719`).
+*   `public int closeHoverText`: 32-bit ARGB glyph color on hover for Close button (typically `#FFFFFF`).
+*   `public int closePressedText`: 32-bit ARGB glyph color on pressed for Close button (typically `#FFFFFF`).
+
+---
+
+## 3. Class: `fasttheme.ThemeKeys`
 
 Open dynamic key registry managing slot allocations on-the-fly.
 
@@ -81,7 +112,7 @@ Open dynamic key registry managing slot allocations on-the-fly.
 
 ---
 
-## 3. Class: `fasttheme.ThemeData`
+## 4. Class: `fasttheme.ThemeData`
 
 Elastic in-memory primitive array storage for theme colors.
 
@@ -95,7 +126,7 @@ Elastic in-memory primitive array storage for theme colors.
 
 ---
 
-## 4. Class: `fasttheme.ThemeParser`
+## 5. Class: `fasttheme.ThemeParser`
 
 *   `public static ThemeData parseText(String textContent)`: Parses `.theme` text, auto-registering any custom keys, and resolving variable aliases (`@KEY`).
 *   `public static ThemeData parseBinary(byte[] bytes)`: Deserializes binary `.themebin` payload.
@@ -103,7 +134,7 @@ Elastic in-memory primitive array storage for theme colors.
 
 ---
 
-## 5. Class: `fasttheme.ThemeColorUtil`
+## 6. Class: `fasttheme.ThemeColorUtil`
 
 *   `public static int rgb(int r, int g, int b)` / `argb(int a, int r, int g, int b)`: Packs channels into ARGB int.
 *   `public static int alpha(int argb)` / `red(int argb)` / `green(int argb)` / `blue(int argb)`: Unpacks channels.

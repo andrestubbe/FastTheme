@@ -2,12 +2,17 @@
 
 ## Milestone Status
 
-### Fluent Material Optimization & Window State Bridge (0.1.9)
+### Fluent UI Substrate & WindowFrameTheme Integration (0.1.9)
 **Status:** Released
+- [x] Comprehensive `WindowFrameTheme` model with authentic `fluentDark()` and `fluentLight()` palettes.
+- [x] Dynamic `.theme` file binding (`WindowFrameTheme.fromTheme(data)` / `updateFromTheme(data)`).
+- [x] Automatic live OS theme tracking & adaptation (`enableAutoSystemTheme(hwnd)`).
+- [x] High-level Fluent title bar helper with auto dark/light detection (`applyFluentTitleBar`, `setWindowFrameTheme`).
+- [x] PARGB 32-bit alpha scan fix for razor-sharp caption glyphs over Mica/Acrylic transparent backdrops.
+- [x] Elimination of GDI `DrawCaption` ghosting and flashing on inactive window clicks (`WM_NCHITTEST` `HTCLIENT` fix).
 - [x] Native window state control bridge (`minimizeWindow`, `maximizeWindow`, `restoreWindow`, `sendSysCommand`).
-- [x] High-level Fluent title bar helper (`applyFluentTitleBar`, `setTitleBarTheme`).
 - [x] Virtual desktop uncloaking DWM recovery (`DWMWA_CLOAKED`).
-- [x] Inactive window buffered paint occlusion (`#101010` true opaque dimming).
+- [x] Inactive window buffered paint occlusion (`#202020` true opaque dimming).
 - [x] Multi-source accent color resolution (Windows DWM registry + `DwmGetColorizationColor`).
 - [x] Demo standardization (`Overlay.java`, `Fluent.java`).
 

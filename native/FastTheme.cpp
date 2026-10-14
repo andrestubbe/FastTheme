@@ -227,7 +227,7 @@ static void PaintNativeCaptionButtons(HWND hwnd, HDC hdc, const RECT& clientRc, 
 
     if (hbp) {
         if (!active) {
-            // When inactive, ensure the entire caption button strip has Alpha 255 (true opaque over dark fallback)
+            // When inactive, ensure the entire caption button strip has Alpha 255 (true opaque over dark/light fallback)
             BufferedPaintSetAlpha(hbp, &rcBtns, 255);
         } else {
             // Only hovered/pressed buttons are drawn opaque over Mica

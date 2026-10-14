@@ -2,22 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.9] - 2026-10-10
+## [0.1.9] - 2026-10-14
 ### Added
+- **WindowFrameTheme Architectural Substrate**:
+  - Renamed and evolved `TitleBarTheme` into `WindowFrameTheme` as the comprehensive palette model for native Fluent window chrome, title bars, and caption buttons.
+  - Added `WindowFrameTheme.fluentLight()` — authentic Windows 11 light mode palette with dark Segoe Fluent Icons glyphs (`#1A1A1A`) and matching hover/pressed states.
+  - Added `WindowFrameTheme.fluentDark()` — default Windows 11 dark mode palette (`#202020` inactive, `#1B2223` active).
+  - Added dynamic theme binding: `WindowFrameTheme.fromTheme(ThemeData)` and `updateFromTheme(ThemeData)` to extract title bar backgrounds, text colors, and button hover/pressed palettes directly from `.theme` files.
+- **Automatic OS Theme Synchronization**:
+  - `FastTheme.enableAutoSystemTheme(long hwnd)`: Automatically listens to Windows Light/Dark mode changes and applies the corresponding `WindowFrameTheme`, Mica backdrop, and titlebar dark mode in real-time.
 - **Native Window State Control Bridge**:
   - `minimizeWindow(long hwnd)`: Native window minimize via `SW_MINIMIZE`.
   - `maximizeWindow(long hwnd)`: Native window maximize via `SW_MAXIMIZE`.
   - `restoreWindow(long hwnd)`: Native window restore via `SW_RESTORE`.
   - `sendSysCommand(long hwnd, int cmd)`: Directly dispatches native `WM_SYSCOMMAND` calls (`SC_CLOSE`, etc.).
 - **Fluent TitleBar High-Level Facade**:
-  - `applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth)` / `applyFluentTitleBar(..., TitleBarTheme)`: One-line configuration for custom height, dark mode, rounded corners, Mica backdrop, and styled caption buttons.
-  - `setTitleBarTheme(long hwnd, TitleBarTheme theme)`: Configures custom active and inactive title bar background and button states.
+  - `applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth)`: One-line configuration with automatic dark/light detection via `isAppDarkMode()`.
+  - `applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, WindowFrameTheme theme)`: Supports custom `WindowFrameTheme` palettes.
+  - `setWindowFrameTheme(long hwnd, WindowFrameTheme theme)` / backward-compatible `setTitleBarTheme(long hwnd, WindowFrameTheme theme)`.
 
-### Changed
+### Fixed & Improved
+- **PARGB 32-Bit Alpha Fix for DWM Glyphs**: Fixed standard GDI `DrawTextW` leaving alpha channel at 0 on Mica backdrops; native renderer now scans the 32-bit buffered paint DIB and forces `Alpha = 255` on all painted glyph pixels, ensuring dark and light caption icons render with razor-sharp opacity.
+- **GDI Caption Ghosting Elimination (`WM_NCHITTEST`)**: Title bar returns `HTCLIENT` on click when the window is inactive, activating the window cleanly without triggering legacy GDI `DrawCaption` flashes, and seamlessly returns `HTCAPTION` once active for smooth dragging.
 - **DWM Cloaked Transition Handling**: Enhanced `BackdropSubclassProc` to track virtual desktop switches and uncloaking events via `DWMWA_CLOAKED`, automatically kickstarting DWM materials when switching desktops.
-- **Defocus/Inactive Backdrop Dimming**: Custom buffered paint occludes Mica with opaque native Windows 11 grey (`#101010`) in inactive state, eliminating milky washed-out additive blends.
-- **Accent Color Accuracy**: Improved `getAccentColor()` fallback hierarchy by querying Windows DWM registry `AccentColor` (ABGR to ARGB) followed by `DwmGetColorizationColor` with visible alpha clamp.
-- **Demo Renaming**: Symmetrically standardized demos to `Overlay.java` (Raycast overlay) and `Fluent.java` (48px custom Fluent title bar).
+- **Inactive Window Palette Tuning**: Standardized inactive title bar background to `#202020` matching native Windows 11 Fluent specs.
+- **Demo Standardization**: Symmetrically standardized demos to `Overlay.java` (Raycast overlay), `Fluent.java` (48px custom Fluent title bar), and material showcases (`Mica.java`, `Acrylic.java`, `MicaAlt.java`, `Full.java`).
 
 ## [0.1.8] - 2026-10-09
 ### Added
