@@ -178,20 +178,39 @@ public class FastTheme {
         return currentTheme;
     }
 
-    public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, TitleBarTheme theme) {
+    public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth, WindowFrameTheme theme) {
         if (hwnd == 0) return;
-        setTitleBarDarkMode(hwnd, true);
+        boolean isDark = (theme == null || theme.inactiveBackgroundColor <= 0x303030);
+        setTitleBarDarkMode(hwnd, isDark);
         setCornerStyle(hwnd, 2); // Rounded
         setSystemBackdropType(hwnd, BACKDROP_MICA);
         setTitleBarHeight(hwnd, titleBarHeight);
         setNativeTitleBarButtonsEnabled(hwnd, true, buttonWidth);
         if (theme != null) {
-            setTitleBarTheme(hwnd, theme);
+            setWindowFrameTheme(hwnd, theme);
         }
     }
 
     public static void applyFluentTitleBar(long hwnd, int titleBarHeight, int buttonWidth) {
-        applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth, TitleBarTheme.fluentDark());
+        boolean dark = isAppDarkMode();
+        WindowFrameTheme theme = dark ? WindowFrameTheme.fluentDark() : WindowFrameTheme.fluentLight();
+        applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth, theme);
+    }
+
+    /**
+     * Automatically listens to Windows OS Dark/Light theme changes and updates the
+     * window frame, Mica backdrop, titlebar mode, and WindowFrameTheme palette in real-time.
+     *
+     * @param hwnd The window handle to automatically keep in sync with the OS theme.
+     */
+    public static void enableAutoSystemTheme(long hwnd) {
+        if (hwnd == 0) return;
+        addSystemThemeListener((isDark, accentColor) -> {
+            WindowFrameTheme theme = isDark ? WindowFrameTheme.fluentDark() : WindowFrameTheme.fluentLight();
+            setTitleBarDarkMode(hwnd, isDark);
+            setWindowFrameTheme(hwnd, theme);
+            forceFrameUpdate(hwnd);
+        });
     }
 
     public static boolean isNativeAvailable() {
@@ -234,7 +253,7 @@ public class FastTheme {
         return setNativeTitleBarButtonsEnabled(hwnd, enabled, 96);
     }
 
-    public static boolean setTitleBarTheme(long hwnd, TitleBarTheme theme) {
+    public static boolean setWindowFrameTheme(long hwnd, WindowFrameTheme theme) {
         if (hwnd == 0 || theme == null) return false;
         return setTitleBarThemeColors(hwnd,
                 theme.inactiveBackgroundColor, theme.activeBackgroundColor,
@@ -242,6 +261,10 @@ public class FastTheme {
                 theme.inactiveButtonHoverBg, theme.inactiveButtonPressedBg,
                 theme.activeButtonHoverBg, theme.activeButtonPressedBg,
                 theme.activeCloseHoverBg, theme.activeClosePressedBg, theme.closeHoverGlyphColor);
+    }
+
+    public static boolean setTitleBarTheme(long hwnd, WindowFrameTheme theme) {
+        return setWindowFrameTheme(hwnd, theme);
     }
 
     public static native void maximizeWindow(long hwnd);

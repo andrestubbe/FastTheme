@@ -89,7 +89,7 @@ bool IsDarkModeEnabled() {
 }
 
 struct TitleBarPalette {
-    COLORREF inactiveBg          = RGB(0x10, 0x10, 0x10);
+    COLORREF inactiveBg          = RGB(0x20, 0x20, 0x20);
     COLORREF activeBg            = RGB(0x1B, 0x22, 0x23);
     COLORREF glyphActive         = RGB(0xFF, 0xFF, 0xFF);
     COLORREF glyphInactive       = RGB(0x79, 0x79, 0x79);
@@ -531,7 +531,7 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                     BP_PAINTPARAMS bpParams = { sizeof(bpParams) };
                     bpParams.dwFlags = BPPF_NOCLIP;
                     HPAINTBUFFER hbp = BeginBufferedPaint(hdc, &clientRc, BPBF_TOPDOWNDIB, &bpParams, &hdcBuffered);
-                    COLORREF bgCol = hasLayout ? layout.palette.inactiveBg : RGB(0x10, 0x10, 0x10);
+                    COLORREF bgCol = hasLayout ? layout.palette.inactiveBg : RGB(0x20, 0x20, 0x20);
                     if (hbp && hdcBuffered) {
                         HBRUSH hInactiveBrush = CreateSolidBrush(bgCol);
                         FillRect(hdcBuffered, &clientRc, hInactiveBrush);
@@ -669,8 +669,11 @@ static LRESULT CALLBACK BackdropSubclassProc(HWND hwnd, UINT msg, WPARAM wParam,
                     }
                 }
 
-                // Everywhere else in the title bar is draggable caption
-                return HTCAPTION;
+                // Everywhere else in the title bar is draggable caption when window is active.
+                // When inactive, returning HTCLIENT activates window cleanly without triggering legacy GDI DrawCaption!
+                HWND fg = GetForegroundWindow();
+                bool isActive = (fg == hwnd || IsChild(hwnd, fg));
+                return isActive ? HTCAPTION : HTCLIENT;
             }
 
             return HTCLIENT;

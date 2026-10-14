@@ -36,6 +36,9 @@ public class Fluent {
             if (hwnd != 0) {
                 // One-liner: applies Dark Mode, Rounded Corners, Mica, TitleBar Height & Buttons with Fluent Palette
                 FastTheme.applyFluentTitleBar(hwnd, titleBarHeight, buttonWidth);
+
+                // Auto-sync window frame and title bar buttons in real-time when Windows toggles Dark/Light mode!
+                FastTheme.enableAutoSystemTheme(hwnd);
             }
 
             // Make window visible once configured
