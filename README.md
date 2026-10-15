@@ -101,6 +101,32 @@ public class BorderlessDemo {
 }
 ```
 
+### 4. Modern Windows 11 Fluent Title Bar & Auto OS Theme Sync
+```java
+import fasttheme.FastTheme;
+import fasttheme.WindowFrameTheme;
+import javax.swing.JFrame;
+
+public class FluentDemo {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Fluent Chrome");
+        frame.setSize(800, 500);
+        frame.setLocationRelativeTo(null);
+        frame.addNotify(); // Realize native HWND peer
+
+        long hwnd = FastTheme.getWindowHandle(frame);
+        if (hwnd != 0) {
+            // One-liner: 48px custom height, 46px Fluent buttons, Mica backdrop, Windows 11 rounded corners
+            FastTheme.applyFluentTitleBar(hwnd, 48, 46);
+
+            // Automatically synchronizes palette (fluentDark / fluentLight) with Windows OS theme
+            FastTheme.enableAutoSystemTheme(hwnd);
+        }
+        frame.setVisible(true);
+    }
+}
+```
+
 ---
 
 ## Table of Contents
